@@ -17,52 +17,66 @@ export default {
   components: {CodeArea, ShaderWindow, NavBar},
   data() {
     return {
+      code: `    precision mediump float;
+    uniform float iTime;
+    uniform vec2 iResolution;
+    uniform vec3 iMouse;
 
-      code: `precision mediump float;
-uniform float iTime; // Время
-uniform vec2 iResolution; // Разрешение экрана
+    #define T (iTime * 5.0)
+    #define A(v) mat2(cos(m.v * 3.1416 + vec4(0.0, -1.5708, 1.5708, 0.0)))
+    #define H(v) (cos(((v) + 0.5) * 6.2832 + radians(vec3(60.0, 0.0, -60.0))) * 0.5 + 0.5)
+    #define L 50.0 // Loop count must be a constant in WebGL
 
-// Функция для генерации псевдо-случайного шума
-float random(vec2 st) {
-    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
+    float map(vec3 u) {
+        float t = T;
+        float w = 40.0;
+        float s = 0.4;
+        float f = 1e20;
 
-// Функция для генерации шума с помощью интерполяции
-float noise(vec2 st) {
-    vec2 i = floor(st);
-    vec2 f = fract(st);
+        u.yz = -u.zy;
+        u.xy = vec2(atan(u.x, u.y), length(u.xy));
+        u.x += t / 6.0;
 
-    // Четыре угла квадрата
-    float a = random(i);
-    float b = random(i + vec2(1.0, 0.0));
-    float c = random(i + vec2(0.0, 1.0));
-    float d = random(i + vec2(1.0, 1.0));
+        vec3 p;
+        for (float i = 0.0; i < L; i++) {
+            p = u;
+            float y = floor(max(p.y - i, 0.0) / L) * L + i;
+            p.x *= y;
+            p.x -= sqrt(y * t * t * 2.0);
+            p.x -= floor(p.x / 6.2832) * 6.2832;
+            p.y -= y;
+            p.z += sqrt(y / w) * w;
+            float z = cos(y * t / 50.0) * 0.5 + 0.5;
+            p.z += z * 2.0;
+            p = abs(p);
+            f = min(f, max(p.x, max(p.y, p.z)) - s * z);
+        }
+        return f;
+    }
 
-    // Интерполяция
-    vec2 u = f * f * (3.0 - 2.0 * f);
-    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
-}
+    void main() {
+        vec2 U = gl_FragCoord.xy;
+        float d = 0.0, s, r;
+        vec2 R = iResolution.xy;
+        vec2 m = iMouse.z > 0.0 ? (iMouse.xy - R / 2.0) / R.y : vec2(0.0, -0.17);
+        vec3 o = vec3(0.0, 20.0, -120.0);
+        vec3 u = normalize(vec3(U - R / 2.0, R.y));
+        vec3 c = vec3(0.0), p;
+        mat2 v = A(y), h = A(x);
 
-void main() {
-    vec2 uv = gl_FragCoord.xy / iResolution.xy; // Нормализация координат
-    uv *= 5.0; // Увеличиваем масштаб для более детального шума
-
-    // Добавляем время для анимации
-    uv += iTime * 0.1;
-
-    // Генерация шума
-    float n = noise(uv);
-
-    // Создаем цвет на основе шума
-    vec3 color = vec3(
-        sin(n * 10.0 + iTime) * 0.5 + 0.5, // Красный канал
-        cos(n * 8.0 + iTime * 1.5) * 0.5 + 0.5, // Зеленый канал
-        sin(n * 12.0 + iTime * 2.0) * 0.5 + 0.5 // Синий канал
-    );
-
-    // Устанавливаем цвет пикселя
-    gl_FragColor = vec4(color, 1.0);
-}`
+        for (float i = 0.0; i < L; i++) {
+            p = u * d + o;
+            p.yz *= v;
+            p.xz *= h;
+            s = map(p);
+            r = (cos(floor(length(p.xz)) * T / 50.0) * 0.7 - 1.8) / 2.0;
+            c += min(s, exp(-s / 0.07)) * H(r + 0.5) * (r + 2.4);
+            if (s < 1e-3 || d > 1e3) break;
+            d += s * 0.7;
+        }
+        gl_FragColor = vec4(exp(log(c) / 2.2), 1.0);
+    }
+`
     }
   },
 }

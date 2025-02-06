@@ -1,10 +1,17 @@
 <template>
-  <canvas ref="canvas"
-          @mousemove="handleMousemoveEvent"
-          @mousedown="handleMousedownEvent"
-          @mouseup="handleMouseupEvent"
-          class="shader-window">
-  </canvas>
+  <div class="shader-window">
+    <canvas ref="canvas"
+            @mousemove="handleMousemoveEvent"
+            @mousedown="handleMousedownEvent"
+            @mouseup="handleMouseupEvent"
+            >
+    </canvas>
+    <div class="btns">
+      <button class="btn" @click="updateShader">Обновить</button>
+      <button class="btn" >Остановить</button>
+    </div>
+  </div>
+
 </template>
 
 <script>
@@ -18,136 +25,101 @@ export default {
   },
   data() {
     return {
+      gl: null,
+      program: null,
       mouseX: 0,
       mouseY: 0,
       mouseDown: 0,
     }
   },
-  computed: {
-    width() {
-      console.log(this.$refs.canvas.width)
-      return this.$refs.canvas.width
-    },
-    height() {
-      console.log(this.$refs.canvas.height)
-      return this.$refs.canvas.height
-    }
-  },
-  watch: {
-    code(newShader) {
-      this.initWebGL();
-    }
-  },
+  // watch: {
+  //   code() {
+  //     this.updateFragmentShader();
+  //   }
+  // },
   mounted() {
     this.initWebGL();
   },
   methods: {
     handleMousemoveEvent(event) {
       this.mouseX = event.offsetX;
-      this.mouseY = event.offsetY; // Инвертируем, т.к. отсчет должен начинаться снизу
-      // console.log(`${this.mouseX}, ${this.mouseY}`); // TODO прокинуть mouse в shader
+      this.mouseY = this.$refs.canvas.height - event.offsetY;
     },
-    handleMousedownEvent(event) {
+    handleMousedownEvent() {
       this.mouseDown = 1;
     },
-    handleMouseupEvent(event){
+    handleMouseupEvent() {
       this.mouseDown = 0;
     },
     initWebGL() {
-      // Инициализация WEBGL
       const canvas = this.$refs.canvas;
-      const gl = canvas.getContext("webgl");
-      if (!gl) {
-        console.log("WebGL не поддерживается вашим браузером!");
-        // TODO сделать вывод ошибка на экран, а не в консоль
+      this.gl = canvas.getContext("webgl");
+      if (!this.gl) {
+        console.error("WebGL не поддерживается вашим браузером!");
         return;
       }
-
-      canvas.width = canvas.clientWidth * window.devicePixelRatio;
-      canvas.height = canvas.clientHeight * window.devicePixelRatio;
-      gl.viewport(0, 0, canvas.width, canvas.height);
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+      this.gl.viewport(0,0,canvas.width, canvas.height)
+      // Компиляция и привязка шейдерной программы
+      this.createProgram();
+    },
+    createProgram() {
+      const gl = this.gl;
 
       // Вершинный шейдер
       const vertexShaderSource = `
-    attribute vec2 a_position;
-
-    void main() {
-      gl_Position = vec4(a_position, 0.0, 1.0);
-    }
-  `;
-      // Фрагментный шейдер берется от клиента
-      const fragmentShaderSource = this.code;
-
-      // Компиляция шейдеров
+        attribute vec2 a_position;
+        void main() {
+          gl_Position = vec4(a_position, 0.0, 1.0);
+        }
+      `;
       const vertexShader = this.compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
-      const fragmentShader = this.compileShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+
+      // Фрагментный шейдер
+      const fragmentShader = this.compileShader(gl, this.code, gl.FRAGMENT_SHADER);
+      if (!fragmentShader) return;
 
       // Создание программы
-      const program = gl.createProgram();
-      gl.attachShader(program, vertexShader);
-      gl.attachShader(program, fragmentShader);
-      gl.linkProgram(program);
+      this.program = gl.createProgram();
+      gl.attachShader(this.program, vertexShader);
+      gl.attachShader(this.program, fragmentShader);
+      gl.linkProgram(this.program);
 
-      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        console.error("Ошибка линковки программы:", gl.getProgramInfoLog(program));
-        return; // Выход из функции
+      if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+        console.error("Ошибка линковки программы:", gl.getProgramInfoLog(this.program));
+        return;
       }
 
-      gl.useProgram(program);
-
-      // Определение вершин прямоугольника
-      const vertices = new Float32Array([
-        -1.0, 1.0,  // Верхний левый угол
-        1.0, 1.0,  // Верхний правый угол
-        -1.0, -1.0,  // Нижний левый угол
-        1.0, -1.0   // Нижний правый угол
-      ]);
-
-      // Индексы для рисования прямоугольника
-      const indices = new Uint16Array([
-        0, 1, 2,
-        1, 3, 2
-      ]);
-
-      // Создание буфера вершин
-      const vertexBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-      gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-
-      // Связывание атрибутов
-      const aPosition = gl.getAttribLocation(program, 'a_position');
-      gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 2 * Float32Array.BYTES_PER_ELEMENT, 0);
-      gl.enableVertexAttribArray(aPosition);
-
-      // Создание буфера индексов
-      const indexBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
-
-      // Получение uniform-переменной для времени
-      const iTimeLocation = gl.getUniformLocation(program, "iTime");
-      const iResolutionLocation = gl.getUniformLocation(program, "iResolution");
-      const iMouseLocation = gl.getUniformLocation(program, "iMouse");
-
-      // Установка цвета фона и очистка канваса
-      gl.clearColor(0.0, 0.0, 0.0, 1.0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-
-      // ===== Отрисовка =====
-      let location = {
-        "iTime": iTimeLocation,
-        "iResolution": iResolutionLocation,
-        "iMouse": iMouseLocation,
-      }
-      this.render(gl, location, indices);
-
+      gl.useProgram(this.program);
+      this.setupBuffers();
+      this.startRendering();
     },
-    // Функция компиляции шейдера
+    updateFragmentShader() {
+      if (!this.gl || !this.program) return;
+
+      const gl = this.gl;
+
+      // Компилируем новый фрагментный шейдер
+      const newFragmentShader = this.compileShader(gl, this.code, gl.FRAGMENT_SHADER);
+      if (!newFragmentShader) return;
+
+      // Удаляем старый шейдер, привязываем новый
+      gl.detachShader(this.program, gl.getAttachedShaders(this.program)[1]);
+      gl.attachShader(this.program, newFragmentShader);
+      gl.linkProgram(this.program);
+
+      if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+        console.error("Ошибка линковки обновленного шейдера:", gl.getProgramInfoLog(this.program));
+        return;
+      }
+
+      gl.useProgram(this.program);
+    },
     compileShader(gl, source, type) {
       const shader = gl.createShader(type);
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
-
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         console.error("Ошибка компиляции шейдера:", gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
@@ -155,22 +127,49 @@ export default {
       }
       return shader;
     },
-    render(gl, location, indices) {
-      const time = performance.now() / 1000; // Текущее время в секундах
+    setupBuffers() {
+      const gl = this.gl;
+      const vertices = new Float32Array([
+        -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0
+      ]);
+      const indices = new Uint16Array([0, 1, 2, 1, 3, 2]);
 
-      // Uniform-переменные
-      gl.uniform1f(location['iTime'], time);
-      gl.uniform2f(location['iResolution'], this.width, this.height);
-      gl.uniform3f(location['iMouse'], this.mouseX, this.mouseY, this.mouseDown);
+      const vertexBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-      // Отрисовка прямоугольника
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+      const indexBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
-      // Запускаем следующий кадр
-      requestAnimationFrame(() => {
-        this.render(gl, location, indices);
-      });
+      const aPosition = gl.getAttribLocation(this.program, 'a_position');
+      gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 2 * Float32Array.BYTES_PER_ELEMENT, 0);
+      gl.enableVertexAttribArray(aPosition);
+    },
+    startRendering() {
+      const gl = this.gl;
+      const location = {
+        iTime: gl.getUniformLocation(this.program, "iTime"),
+        iResolution: gl.getUniformLocation(this.program, "iResolution"),
+        iMouse: gl.getUniformLocation(this.program, "iMouse")
+      };
+
+      const render = () => {
+        const time = performance.now() / 1000;
+        gl.uniform1f(location.iTime, time);
+        gl.uniform2f(location.iResolution, this.$refs.canvas.width, this.$refs.canvas.height);
+        gl.uniform3f(location.iMouse, this.mouseX, this.mouseY, this.mouseDown);
+
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+
+        requestAnimationFrame(render);
+      };
+      render();
+    },
+    updateShader(){
+      this.updateFragmentShader();
+      this.startRendering()
     }
   },
 }
@@ -178,15 +177,26 @@ export default {
 
 <style scoped>
 .shader-window {
-  flex: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: flex-start;
-  width: 100%;
-  height: 40vh;
-  background-color: #f0f0f0;
   margin: 10px;
-  border-radius: 10px;
+  flex: 1;
+  height: 40vh;
 }
 
+canvas{
+  flex: 1;
+  width: 100%;
+  border-radius: 10px;
+}
+.btns{
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+}
+.btn{
+  padding: 10px;
+  margin: 10px 10px 0px 0px;
+}
 </style>
