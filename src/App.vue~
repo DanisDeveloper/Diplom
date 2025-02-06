@@ -1,0 +1,103 @@
+<template>
+  <div class="app">
+    <nav-bar></nav-bar>
+    <div class="main">
+      <shader-window :code></shader-window>
+      <code-area v-model="code"></code-area>
+    </div>
+  </div>
+</template>
+
+<script>
+import NavBar from "@/components/NavBar.vue";
+import ShaderWindow from "@/components/ShaderWindow.vue";
+import CodeArea from "@/components/CodeArea.vue";
+
+export default {
+  components: {CodeArea, ShaderWindow, NavBar},
+  data() {
+    return {
+
+      code: `precision mediump float;
+uniform float iTime; // Время
+uniform vec2 iResolution; // Разрешение экрана
+
+// Функция для генерации псевдо-случайного шума
+float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+// Функция для генерации шума с помощью интерполяции
+float noise(vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+
+    // Четыре угла квадрата
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+
+    // Интерполяция
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+}
+
+void main() {
+    vec2 uv = gl_FragCoord.xy / iResolution.xy; // Нормализация координат
+    uv *= 5.0; // Увеличиваем масштаб для более детального шума
+
+    // Добавляем время для анимации
+    uv += iTime * 0.1;
+
+    // Генерация шума
+    float n = noise(uv);
+
+    // Создаем цвет на основе шума
+    vec3 color = vec3(
+        sin(n * 10.0 + iTime) * 0.5 + 0.5, // Красный канал
+        cos(n * 8.0 + iTime * 1.5) * 0.5 + 0.5, // Зеленый канал
+        sin(n * 12.0 + iTime * 2.0) * 0.5 + 0.5 // Синий канал
+    );
+
+    // Устанавливаем цвет пикселя
+    gl_FragColor = vec4(color, 1.0);
+}`
+    }
+  },
+}
+</script>
+
+<style>
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Crect width='10' height='10' fill='%23f0f0f0'/%3E%3Cpath d='M0 0h10v10H0z' fill='none' stroke='%23dcdcdc' stroke-width='0.5'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: auto; /* Оригинальный размер */
+
+}
+
+.main {
+  display: flex;
+  justify-content: space-between;
+}
+
+
+table {
+  border-collapse: collapse;
+  border: 1px solid black;
+}
+
+th, tr, td {
+  padding: 10px;
+  border: 1px solid black;
+}
+</style>

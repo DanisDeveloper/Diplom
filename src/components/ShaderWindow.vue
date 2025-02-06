@@ -1,5 +1,9 @@
-<template xmlns="http://www.w3.org/1999/html">
-  <canvas ref="canvas" class="shader-window">
+<template>
+  <canvas ref="canvas"
+          @mousemove="handleMousemoveEvent"
+          @mousedown="handleMousedownEvent"
+          @mouseup="handleMouseupEvent"
+          class="shader-window">
   </canvas>
 </template>
 
@@ -13,13 +17,44 @@ export default {
     }
   },
   data() {
-    return {};
+    return {
+      mouseX: 0,
+      mouseY: 0,
+      mouseDown: 0,
+    }
+  },
+  computed: {
+    width() {
+      console.log(this.$refs.canvas.width)
+      return this.$refs.canvas.width
+    },
+    height() {
+      console.log(this.$refs.canvas.height)
+      return this.$refs.canvas.height
+    }
+  },
+  watch: {
+    code(newShader) {
+      this.initWebGL();
+    }
   },
   mounted() {
     this.initWebGL();
   },
   methods: {
+    handleMousemoveEvent(event) {
+      this.mouseX = event.offsetX;
+      this.mouseY = event.offsetY; // Инвертируем, т.к. отсчет должен начинаться снизу
+      // console.log(`${this.mouseX}, ${this.mouseY}`); // TODO прокинуть mouse в shader
+    },
+    handleMousedownEvent(event) {
+      this.mouseDown = 1;
+    },
+    handleMouseupEvent(event){
+      this.mouseDown = 0;
+    },
     initWebGL() {
+      // Инициализация WEBGL
       const canvas = this.$refs.canvas;
       const gl = canvas.getContext("webgl");
       if (!gl) {
@@ -27,31 +62,22 @@ export default {
         // TODO сделать вывод ошибка на экран, а не в консоль
         return;
       }
+
+      canvas.width = canvas.clientWidth * window.devicePixelRatio;
+      canvas.height = canvas.clientHeight * window.devicePixelRatio;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+
       // Вершинный шейдер
       const vertexShaderSource = `
     attribute vec2 a_position;
-    varying vec2 v_position;
 
     void main() {
       gl_Position = vec4(a_position, 0.0, 1.0);
-      v_position = a_position; // Передаем позицию во фрагментный шейдер
     }
   `;
+      // Фрагментный шейдер берется от клиента
+      const fragmentShaderSource = this.code;
 
-      // Фрагментный шейдер
-      const fragmentShaderSource = `
-    precision mediump float;
-    varying vec2 v_position;  // Получаем координаты пикселя
-
-    void main() {
-      vec2 uv = v_position * 0.5 + 0.5; // Преобразуем координаты в диапазон [0,1]
-
-      // Цвет зависит от координат (градиент)
-      vec3 color = vec3(uv.x, uv.y, 0.5); // Пример градиента от красного к зеленому
-
-      gl_FragColor = vec4(color, 1.0); // Устанавливаем финальный цвет
-    }
-  `;
       // Компиляция шейдеров
       const vertexShader = this.compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
       const fragmentShader = this.compileShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
@@ -98,13 +124,22 @@ export default {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
       gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
 
+      // Получение uniform-переменной для времени
+      const iTimeLocation = gl.getUniformLocation(program, "iTime");
+      const iResolutionLocation = gl.getUniformLocation(program, "iResolution");
+      const iMouseLocation = gl.getUniformLocation(program, "iMouse");
+
       // Установка цвета фона и очистка канваса
       gl.clearColor(0.0, 0.0, 0.0, 1.0);
       gl.clear(gl.COLOR_BUFFER_BIT);
 
-      // Отрисовка прямоугольника
-      gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-
+      // ===== Отрисовка =====
+      let location = {
+        "iTime": iTimeLocation,
+        "iResolution": iResolutionLocation,
+        "iMouse": iMouseLocation,
+      }
+      this.render(gl, location, indices);
 
     },
     // Функция компиляции шейдера
@@ -118,12 +153,27 @@ export default {
         gl.deleteShader(shader);
         return null;
       }
-
       return shader;
     },
+    render(gl, location, indices) {
+      const time = performance.now() / 1000; // Текущее время в секундах
+
+      // Uniform-переменные
+      gl.uniform1f(location['iTime'], time);
+      gl.uniform2f(location['iResolution'], this.width, this.height);
+      gl.uniform3f(location['iMouse'], this.mouseX, this.mouseY, this.mouseDown);
+
+      // Отрисовка прямоугольника
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+      // Запускаем следующий кадр
+      requestAnimationFrame(() => {
+        this.render(gl, location, indices);
+      });
+    }
   },
 }
-;
 </script>
 
 <style scoped>
@@ -135,6 +185,8 @@ export default {
   width: 100%;
   height: 40vh;
   background-color: #f0f0f0;
+  margin: 10px;
+  border-radius: 10px;
 }
 
 </style>
