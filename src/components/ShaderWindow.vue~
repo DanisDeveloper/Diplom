@@ -7,21 +7,15 @@
     >
     </canvas>
     <div class="under-canvas">
-      <div>
-        <div class="info">
-          Frame: {{ frame }}
-        </div>
-        <div class="info">
-          Time: {{ accumulatedTime.toFixed(2) }}
-        </div>
-        <div class="info">{{ }}</div>
+      <div class="info-wrapper">
+        <div class="info">Frame: {{ frame }}</div>
+        <div class="info">Time: {{ accumulatedTime.toFixed(2) }}</div>
+        <div class="info">Resolution: {{ canvasWidth }}x{{ canvasHeight }}</div>
       </div>
       <hr>
       <div class="btns">
         <button class="btn" @click="updateShader">Обновить</button>
-        <button class="btn" @click="togglePause">
-          {{ isPaused ? "Возобновить" : "Остановить" }}
-        </button>
+        <button class="btn" @click="togglePause">{{ isPaused ? "Возобновить" : "Остановить" }}</button>
         <button class="btn" @click="resetTime">Сброс</button>
       </div>
     </div>
@@ -37,11 +31,6 @@ export default {
       type: String,
       required: true,
       default: "",
-    }
-  },
-  watch:{
-    width(value){
-      return this.$refs.canvas.width
     }
   },
   data() {
@@ -63,6 +52,9 @@ export default {
       requestId: null,       // ID requestAnimationFrame
 
       frame: 0, // Количество кадров, прошедших с начала симуляции
+
+      canvasWidth: 0,
+      canvasHeight: 0,
     };
   },
   mounted() {
@@ -86,9 +78,12 @@ export default {
         console.error("WebGL не поддерживается вашим браузером!");
         return;
       }
+
+      this.canvasWidth = canvas.clientWidth;
+      this.canvasHeight = canvas.clientHeight;
+
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
-      console.log(`${canvas.width}x${canvas.height}`);
       this.gl.viewport(0, 0, canvas.width, canvas.height);
       this.createProgram();
     },
@@ -281,18 +276,18 @@ canvas {
   display: inline-block;
   margin-right: 10px;
   color: lightgray;
+}
 
+.info-wrapper {
+  display: flex;
+  justify-content: center;
 }
 
 .under-canvas {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
   margin-top: 10px;
   padding: 10px;
   width: 100%;
   background: #282C34;
-  border: 1px solid black;
   border-radius: 8px;
 }
 
