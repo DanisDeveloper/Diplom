@@ -1,12 +1,11 @@
 import NewShader from "@/pages/NewShader.vue";
 import {createRouter, createWebHistory} from "vue-router"
 import About from "@/pages/About.vue";
-import Main from "@/pages/Main.vue";
 
 const routes = [
     {
-        path: '/',
-        component: Main
+      path: '/',
+      component: Main
     },
     {
         path: '/new',

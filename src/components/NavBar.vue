@@ -1,8 +1,8 @@
 <template>
   <div class="nav-bar">
-    <button class="nav-bar__main-btn" @click="console.log('hello')">ShaderToy</button>
+    <button class="nav-bar__main-btn" @click="this.$router.push('/')">ShaderToy</button>
     <div class="nav-bar__items">
-      <button class="nav-bar__other-btn" @click="console.log('new')">New</button>
+      <button class="nav-bar__other-btn" @click="this.$router.push('/new')">New</button>
       <button class="nav-bar__other-btn" @click="console.log('log in')">Log in</button>
     </div>
   </div>

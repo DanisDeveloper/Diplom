@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import FooterInfo from "@/components/AppFooter.vue";
+import FooterInfo from "@/components/FooterInfo.vue";
 import NavBar from "@/components/NavBar.vue";
 
 export default {

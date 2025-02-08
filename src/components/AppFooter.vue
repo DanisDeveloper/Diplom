@@ -1,20 +1,15 @@
 <template>
   <div class="footer">
+
     <div class="info">
       <h3>Contacts</h3>
-      <table>
-        <tbody>
-        <tr>
-          <td>Email:</td>
-          <td>danis.ru2002@mail.ru</td>
-        </tr>
-        <tr>
-          <td>Telegram:</td>
-          <td><a class="link" href="https://t.me/Danis707">@Danis707</a></td>
-        </tr>
-        </tbody>
-      </table>
+      <ul>
+        <li class="info-element"><strong>Email:</strong> danis.ru2002@mail.ru</li>
+        <li class="info-element"><strong>Telegram:</strong> <a class="link" href="https://t.me/Danis707">@Danis707</a>
+        </li>
+      </ul>
     </div>
+
     <div class="info">
       <h3>Learn</h3>
       <ul>
@@ -23,6 +18,7 @@
         <li class="info-element"><a class="link" href="">Examples</a></li>
       </ul>
     </div>
+
     <div class="info">
       <h3>ShaderToy</h3>
       <ul>
@@ -31,6 +27,7 @@
         <li class="info-element"><a class="link" href="/about">About</a></li>
       </ul>
     </div>
+
   </div>
 </template>
 
