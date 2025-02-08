@@ -11,12 +11,15 @@
         {{ isPaused ? "Возобновить" : "Остановить" }}
       </button>
       <button class="btn" @click="resetTime">Сброс</button>
+      <div>Frame: {{ frame }}</div>
+      <div>Time: {{ accumulatedTime.toFixed(2) }}</div>
     </div>
   </div>
 </template>
 
 <script>
 import vertexShaderCode from "@/shaders/vertex.js";
+
 export default {
   props: {
     code: {
@@ -27,8 +30,11 @@ export default {
   },
   data() {
     return {
+      // Переменные WebGL
       gl: null,
       program: null,
+
+      // Переменные мыши
       mouseX: 0,
       mouseY: 0,
       mouseDown: 0,
@@ -39,6 +45,8 @@ export default {
       accumulatedTime: 0,    // Накопленное время в секундах (отсчёт, начиная с нуля)
 
       requestId: null,       // ID requestAnimationFrame
+
+      frame: 0,
     };
   },
   mounted() {
@@ -95,6 +103,7 @@ export default {
       // Инициализация таймерных переменных:
       this.accumulatedTime = 0;
       this.lastFrameTime = performance.now(); // миллисекунды
+      this.frame = 0;
       this.startRendering();
     },
     compileShader(gl, source, type) {
@@ -111,8 +120,8 @@ export default {
     setupBuffers() {
       const gl = this.gl;
       const vertices = new Float32Array([
-        -1.0,  1.0,
-        1.0,  1.0,
+        -1.0, 1.0,
+        1.0, 1.0,
         -1.0, -1.0,
         1.0, -1.0
       ]);
@@ -136,7 +145,8 @@ export default {
         iTime: gl.getUniformLocation(this.program, "iTime"),
         iResolution: gl.getUniformLocation(this.program, "iResolution"),
         iMouse: gl.getUniformLocation(this.program, "iMouse"),
-        deltaTime: gl.getUniformLocation(this.program, "deltaTime")
+        deltaTime: gl.getUniformLocation(this.program, "deltaTime"),
+        iFrame: gl.getUniformLocation(this.program, "iFrame")
       };
 
       const render = () => {
@@ -148,16 +158,18 @@ export default {
         if (!this.isPaused) {
           // Прибавляем deltaTime только если не на паузе
           this.accumulatedTime += deltaTime;
+          this.frame++;
         } else {
           // Если на паузе — обновляем lastFrameTime, чтобы не накопился большой deltaTime при возобновлении
           this.lastFrameTime = now;
         }
 
-        // Передаём в шейдер наше «время»
+        // Передаём в текущий кадр
         gl.uniform1f(location.iTime, this.accumulatedTime);
         gl.uniform2f(location.iResolution, this.$refs.canvas.width, this.$refs.canvas.height);
         gl.uniform3f(location.iMouse, this.mouseX, this.mouseY, this.mouseDown);
         gl.uniform1f(location.deltaTime, deltaTime);
+        gl.uniform1i(location.iFrame, this.frame);
 
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
@@ -183,6 +195,7 @@ export default {
     resetTime() {
       // Сброс времени: accumulatedTime обнуляется, и обновляется lastFrameTime.
       this.accumulatedTime = 0;
+      this.frame = 0;
       this.lastFrameTime = performance.now();
     },
     updateFragmentShader() {
