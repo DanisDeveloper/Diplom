@@ -3,16 +3,26 @@
     <canvas ref="canvas"
             @mousemove="handleMousemoveEvent"
             @mousedown="handleMousedownEvent"
-            @mouseup="handleMouseupEvent">
+            @mouseup="handleMouseupEvent"
+    >
     </canvas>
-    <div class="btns">
-      <button class="btn" @click="updateShader">Обновить</button>
-      <button class="btn" @click="togglePause">
-        {{ isPaused ? "Возобновить" : "Остановить" }}
-      </button>
-      <button class="btn" @click="resetTime">Сброс</button>
-      <div>Frame: {{ frame }}</div>
-      <div>Time: {{ accumulatedTime.toFixed(2) }}</div>
+    <div class="under-canvas">
+      <div>
+        <div class="info">
+          Frame: {{ frame }}
+        </div>
+        <div class="info">
+          Time: {{ accumulatedTime.toFixed(2) }}
+        </div>
+      </div>
+      <hr>
+      <div class="btns">
+        <button class="btn" @click="updateShader">Обновить</button>
+        <button class="btn" @click="togglePause">
+          {{ isPaused ? "Возобновить" : "Остановить" }}
+        </button>
+        <button class="btn" @click="resetTime">Сброс</button>
+      </div>
     </div>
   </div>
 </template>
@@ -46,7 +56,7 @@ export default {
 
       requestId: null,       // ID requestAnimationFrame
 
-      frame: 0,
+      frame: 0, // Количество кадров, прошедших с начала симуляции
     };
   },
   mounted() {
@@ -72,6 +82,7 @@ export default {
       }
       canvas.width = canvas.clientWidth;
       canvas.height = canvas.clientHeight;
+      console.log(`${canvas.width}x${canvas.height}`);
       this.gl.viewport(0, 0, canvas.width, canvas.height);
       this.createProgram();
     },
@@ -228,7 +239,7 @@ export default {
   align-items: flex-start;
   margin: 10px;
   flex: 1;
-  height: 40vh;
+  height: 60vh;
 }
 
 canvas {
@@ -241,10 +252,47 @@ canvas {
   display: flex;
   justify-content: flex-start;
   width: 100%;
+  margin-top: 10px;
 }
 
 .btn {
+  background: transparent;
+  border: 1px solid lightgray;
+  border-radius: 8px;
+  padding: 4px;
+  font-size: large;
+  color: lightgray;
+  cursor: pointer;
+  margin-right: 10px;
+
+}
+
+.btn:hover {
+  color: white;
+}
+
+.info {
+  display: inline-block;
+  margin-right: 10px;
+  color: lightgray;
+
+}
+
+.under-canvas {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 10px;
   padding: 10px;
-  margin: 10px 10px 0px 0px;
+  width: 100%;
+  background: #282C34;
+  border: 1px solid black;
+  border-radius: 8px;
+}
+
+hr {
+  margin-top: 10px;
+  width: 100%;
+  color: lightgray;
 }
 </style>
