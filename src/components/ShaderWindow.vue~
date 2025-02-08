@@ -6,8 +6,8 @@
             @mouseup="handleMouseupEvent"
     >
     </canvas>
-    <div class="under-canvas">
-      <div class="info-wrapper">
+    <div class="canvas-footer">
+      <div class="shader-info">
         <div class="info">Frame: {{ frame }}</div>
         <div class="info">Time: {{ accumulatedTime.toFixed(2) }}</div>
         <div class="info">Resolution: {{ canvasWidth }}x{{ canvasHeight }}</div>
@@ -16,7 +16,7 @@
       <div class="btns">
         <button class="btn" @click="updateShader">Update</button>
         <button class="btn" @click="togglePause">{{ isPaused ? "Continue" : "Stop" }}</button>
-        <button class="btn" @click="resetTime">Rest</button>
+        <button class="btn" @click="resetTime">Reset</button>
       </div>
     </div>
   </div>
@@ -278,12 +278,12 @@ canvas {
   color: lightgray;
 }
 
-.info-wrapper {
+.shader-info {
   display: flex;
   justify-content: flex-start;
 }
 
-.under-canvas {
+.canvas-footer {
   margin-top: 10px;
   padding: 10px;
   width: 100%;

@@ -6,11 +6,11 @@
             @mouseup="handleMouseupEvent"
     >
     </canvas>
-    <div class="under-canvas">
-      <div class="info-wrapper">
-        <div class="info">Frame: {{ frame }}</div>
-        <div class="info">Time: {{ accumulatedTime.toFixed(2) }}</div>
-        <div class="info">Resolution: {{ canvasWidth }}x{{ canvasHeight }}</div>
+    <div class="canvas-footer">
+      <div class="shader-info">
+        <div class="info"><strong>Frame:</strong> {{ frame }}</div>
+        <div class="info"><strong>Time:</strong> {{ accumulatedTime.toFixed(2) }}</div>
+        <div class="info"><strong>Resolution:</strong> {{ canvasWidth }}x{{ canvasHeight }}</div>
       </div>
       <hr>
       <div class="btns">
@@ -278,12 +278,12 @@ canvas {
   color: lightgray;
 }
 
-.info-wrapper {
+.shader-info {
   display: flex;
   justify-content: flex-start;
 }
 
-.under-canvas {
+.canvas-footer {
   margin-top: 10px;
   padding: 10px;
   width: 100%;

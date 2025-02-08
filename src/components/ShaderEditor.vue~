@@ -1,15 +1,21 @@
 <template>
-  <div class="editor-container" ref="editor"></div>
+  <div class="editor-wrapper">
+    <div class="btns">
+      <button>Update</button>
+      <button>Reset</button>
+    </div>
+    <div class="editor-container" ref="editor"></div>
+  </div>
 </template>
 
 <script>
-import { EditorState, Compartment } from "@codemirror/state";
-import { EditorView, keymap, lineNumbers, highlightActiveLine } from "@codemirror/view";
-import { oneDark } from "@codemirror/theme-one-dark";
-import { cpp } from "@codemirror/lang-cpp";
-import { bracketMatching } from "@codemirror/language";
-import { indentWithTab, defaultKeymap } from "@codemirror/commands";
-import { history, historyKeymap } from "@codemirror/history";
+import {EditorState, Compartment} from "@codemirror/state";
+import {EditorView, keymap, lineNumbers, highlightActiveLine} from "@codemirror/view";
+import {oneDark} from "@codemirror/theme-one-dark";
+import {cpp} from "@codemirror/lang-cpp";
+import {bracketMatching} from "@codemirror/language";
+import {indentWithTab, defaultKeymap} from "@codemirror/commands";
+import {history, historyKeymap} from "@codemirror/history";
 
 export default {
   name: "ShaderEditor",
@@ -63,7 +69,7 @@ export default {
     modelValue(newValue) {
       if (this.editor && newValue !== this.editor.state.doc.toString()) {
         this.editor.dispatch({
-          changes: { from: 0, to: this.editor.state.doc.length, insert: newValue },
+          changes: {from: 0, to: this.editor.state.doc.length, insert: newValue},
         });
       }
     },
@@ -81,8 +87,32 @@ export default {
   flex: 1;
   height: 100%;
   width: 100%;
-  border-radius: 8px;
   overflow: hidden;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+.editor-wrapper {
+  background: red;
+  border-radius: 8px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   margin: 10px;
+
+}
+.btns{
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px
+}
+
+button {
+  cursor: pointer;
+  background: transparent;
+  border: none;
 }
 </style>
