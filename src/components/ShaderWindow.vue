@@ -14,9 +14,9 @@
       </div>
       <hr>
       <div class="btns">
-        <button class="btn" @click="updateShader">Обновить</button>
-        <button class="btn" @click="togglePause">{{ isPaused ? "Возобновить" : "Остановить" }}</button>
-        <button class="btn" @click="resetTime">Сброс</button>
+        <button class="btn" @click="updateShader">Update</button>
+        <button class="btn" @click="togglePause">{{ isPaused ? "Continue" : "Stop" }}</button>
+        <button class="btn" @click="resetTime">Reset</button>
       </div>
     </div>
   </div>

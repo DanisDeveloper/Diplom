@@ -1,8 +1,10 @@
 export default `precision mediump float;
-uniform float iTime;
-uniform vec2 iResolution;
-uniform vec3 iMouse;
-uniform float deltaTime;
+
+uniform float iTime;      // Время в секундах с начала симуляции
+uniform vec2 iResolution; // Разрешение экрана (ширина, высота)
+uniform vec3 iMouse;      // Координаты мыши (x, y) + флаг нажатия
+uniform float deltaTime;  // Время между кадрами (в секундах)
+uniform int iFrame;       // Номер кадра симуляции
 
 #define OUTER_LOOP 50.0  // внешний цикл (raymarch)
 #define INNER_LOOP 5.0   // внутренний цикл (в функции map)

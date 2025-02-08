@@ -17,7 +17,7 @@ export default {
 <style scoped>
 .nav-bar{
   display: flex;
-  background: gray;
+  background: rgb(40, 44, 52);
   min-height: 50px;
 }
 .nav-bar__items{
@@ -26,21 +26,26 @@ export default {
 }
 .nav-bar__main-btn{
   background: transparent;
-  font-size: xxx-large;
+  font-size: xx-large;
   border: none;
-  padding: 5px
+  padding: 5px;
+  color: lightgray;
 }
 .nav-bar__main-btn:hover{
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.1);
   color: white;
 }
 .nav-bar__other-btn{
   padding: 10px;
   margin: 10px;
-  border: none;
+  border: 1px solid lightgray;
+  border-radius: 8px;
   background: transparent;
   font-size: large;
   cursor: pointer;
+  color: lightgray;
+}
+.nav-bar__other-btn:hover{
+  color: white;
 }
 </style>

@@ -1,26 +1,17 @@
 <template>
+  <nav-bar></nav-bar>
   <div class="app">
-    <nav-bar></nav-bar>
-    <div class="main">
-      <shader-window :code></shader-window>
-      <shader-editor v-model="code"></shader-editor>
-    </div>
+    <router-view></router-view>
   </div>
+  <footer-info></footer-info>
 </template>
 
 <script>
+import FooterInfo from "@/components/FooterInfo.vue";
 import NavBar from "@/components/NavBar.vue";
-import ShaderWindow from "@/components/ShaderWindow.vue";
-import ShaderEditor from "@/components/ShaderEditor.vue";
-import fragmentShader from "@/shaders/fragment.js";
 
 export default {
-  components: {ShaderEditor, ShaderWindow, NavBar},
-  data() {
-    return {
-      code: fragmentShader
-    }
-  },
+  components: {NavBar, FooterInfo}
 }
 </script>
 
@@ -41,9 +32,5 @@ export default {
   min-height: 100vh;
 }
 
-.main {
-  display: flex;
-  justify-content: space-between;
-}
 
 </style>
