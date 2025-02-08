@@ -12,7 +12,7 @@
 import NavBar from "@/components/NavBar.vue";
 import ShaderWindow from "@/components/ShaderWindow.vue";
 import ShaderEditor from "@/components/ShaderEditor.vue";
-import fragmentShader from "@/shaders/fragment.js";
+import fragmentShader from "@/shaders/cube.js";
 
 export default {
   components: {ShaderEditor, ShaderWindow, NavBar},
