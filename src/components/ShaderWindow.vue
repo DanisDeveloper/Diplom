@@ -15,16 +15,19 @@
       <hr>
       <div class="btns">
         <button class="action-btn" @click="uploadShader">
-          <img width="24" height="24" src="/public/icons/upload.svg" alt="Upload">
+          <img width="24" height="24" src="/public/icons/upload.svg" alt="Upload" title="Upload shader">
         </button>
         <button v-if="isPaused" class="action-btn" @click="togglePause">
-          <img width="24" height="24" src="/public/icons/play.svg" alt="Play">
+          <img width="24" height="24" src="/public/icons/play.svg" alt="Play" title="Play">
         </button>
         <button v-else class="action-btn" @click="togglePause">
-          <img width="24" height="24" src="/public/icons/pause.svg" alt="Pause">
+          <img width="24" height="24" src="/public/icons/pause.svg" alt="Pause" title="Pause">
         </button>
         <button class="action-btn" @click="resetTime">
-          <img width="24" height="24" src="/public/icons/reset.svg" alt="Reset">
+          <img width="24" height="24" src="/public/icons/restart.svg" alt="Restart" title="Restart">
+        </button>
+        <button class="action-btn" @click="expandScreen">
+          <img width="24" height="24" src="/public/icons/expand.svg" alt="Expand" title="Expand">
         </button>
       </div>
     </div>
@@ -68,11 +71,32 @@ export default {
   },
   mounted() {
     this.initWebGL();
+
+    document.addEventListener('fullscreenchange', this.exitFullScreen);
+  },
+  beforeUnmount() {
+    document.removeEventListener('fullscreenchange', this.exitFullScreen);
   },
   methods: {
+    expandScreen() {
+      const canvas = this.$refs.canvas;
+      canvas.requestFullscreen();
+      canvas.width = window.screen.width;
+      canvas.height = window.screen.height;
+      if (this.gl)
+        this.gl.viewport(0, 0, canvas.width, canvas.height);
+    },
+    exitFullScreen(){
+      if(document.fullscreenElement) return;
+      const canvas = this.$refs.canvas;
+      canvas.width = this.canvasWidth;
+      canvas.height = this.canvasHeight;
+      if (this.gl)
+        this.gl.viewport(0, 0, canvas.width, canvas.height);
+    },
     handleMousemoveEvent(event) {
       this.mouseX = event.offsetX;
-      this.mouseY = this.$refs.canvas.height - event.offsetY;
+      this.mouseY = this.$refs.canvas.height - event.offsetY; // Инвертируем, т.к. отсчет должен начинаться с левого нижнего угла
     },
     handleMousedownEvent() {
       this.mouseDown = 1;
@@ -82,17 +106,22 @@ export default {
     },
     initWebGL() {
       const canvas = this.$refs.canvas;
+      const dpr = window.devicePixelRatio || 1;
+
+      // Настройка реальных размеров для WebGL
+      canvas.width = canvas.clientWidth * dpr;
+      canvas.height = canvas.clientHeight * dpr;
+
+      this.canvasWidth = canvas.width;
+      this.canvasHeight = canvas.height;
+
+
       this.gl = canvas.getContext("webgl");
       if (!this.gl) {
         console.error("WebGL не поддерживается вашим браузером!");
         return;
       }
 
-      this.canvasWidth = canvas.clientWidth;
-      this.canvasHeight = canvas.clientHeight;
-
-      canvas.width = canvas.clientWidth;
-      canvas.height = canvas.clientHeight;
       this.gl.viewport(0, 0, canvas.width, canvas.height);
       this.createProgram();
     },
@@ -310,5 +339,7 @@ hr {
   color: lightgray;
 }
 
-
+canvas:fullscreen {
+  border-radius: 0;
+}
 </style>
