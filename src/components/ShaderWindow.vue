@@ -14,9 +14,18 @@
       </div>
       <hr>
       <div class="btns">
-        <button class="btn" @click="updateShader">Update</button>
-        <button class="btn" @click="togglePause">{{ isPaused ? "Continue" : "Stop" }}</button>
-        <button class="btn" @click="resetTime">Reset</button>
+        <button class="action-btn" @click="uploadShader">
+          <img width="24" height="24" src="/public/icons/upload.svg" alt="Upload">
+        </button>
+        <button v-if="isPaused" class="action-btn" @click="togglePause">
+          <img width="24" height="24" src="/public/icons/play.svg" alt="Play">
+        </button>
+        <button v-else class="action-btn" @click="togglePause">
+          <img width="24" height="24" src="/public/icons/pause.svg" alt="Pause">
+        </button>
+        <button class="action-btn" @click="resetTime">
+          <img width="24" height="24" src="/public/icons/reset.svg" alt="Reset">
+        </button>
       </div>
     </div>
   </div>
@@ -191,7 +200,7 @@ export default {
 
       this.requestId = requestAnimationFrame(render);
     },
-    updateShader() {
+    uploadShader() {
       this.updateFragmentShader();
       cancelAnimationFrame(this.requestId); // освобождение ресурсов
       this.startRendering();
@@ -256,20 +265,24 @@ canvas {
   margin-top: 10px;
 }
 
-.btn {
+.action-btn {
   background: transparent;
-  border: 1px solid lightgray;
   border-radius: 8px;
+  border: 1px solid #282C34;
   padding: 4px;
   font-size: large;
   color: lightgray;
   cursor: pointer;
   margin-right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
 }
 
-.btn:hover {
+.action-btn:hover {
   color: white;
+  border: 1px solid lightgray;
 }
 
 .info {
@@ -296,4 +309,6 @@ hr {
   width: 100%;
   color: lightgray;
 }
+
+
 </style>
