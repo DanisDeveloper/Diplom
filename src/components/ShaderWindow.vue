@@ -14,17 +14,17 @@
       </div>
       <hr>
       <div class="btns">
-        <button class="action-btn" @click="uploadShader">
-          <img width="24" height="24" src="/public/icons/upload.svg" alt="Upload" title="Upload shader">
+        <button class="action-btn" :class="{'btn-error': compileFailed}" @click="uploadShader">
+          <upload-icon :fill="compileFailed? 'red' : 'lightgrey'"></upload-icon>
         </button>
         <button v-if="isPaused" class="action-btn" @click="togglePause">
-          <img width="24" height="24" src="/public/icons/play.svg" alt="Play" title="Play">
+          <play-icon></play-icon>
         </button>
         <button v-else class="action-btn" @click="togglePause">
-          <img width="24" height="24" src="/public/icons/pause.svg" alt="Pause" title="Pause">
+          <pause-icon></pause-icon>
         </button>
         <button class="action-btn" @click="resetTime">
-          <img width="24" height="24" src="/public/icons/restart.svg" alt="Restart" title="Restart">
+          <restart-icon></restart-icon>
         </button>
         <button class="action-btn" @click="expandScreen">
           <img width="24" height="24" src="/public/icons/expand.svg" alt="Expand" title="Expand">
@@ -36,8 +36,14 @@
 
 <script>
 import vertexShaderCode from "@/shaders/vertex.js";
+import IconUpload from "@/components/UI/UploadIcon.vue";
+import UploadIcon from "@/components/UI/UploadIcon.vue";
+import PlayIcon from "@/components/UI/PlayIcon.vue";
+import RestartIcon from "@/components/UI/RestartIcon.vue";
+import PauseIcon from "@/components/UI/PauseIcon.vue";
 
 export default {
+  components: {PauseIcon, RestartIcon, PlayIcon, UploadIcon, IconUpload},
   props: {
     code: {
       type: String,
@@ -50,6 +56,8 @@ export default {
       // Переменные WebGL
       gl: null,
       program: null,
+      compileFailed: false,
+      timeoutId: null,
 
       // Переменные мыши
       mouseX: 0,
@@ -86,8 +94,8 @@ export default {
       if (this.gl)
         this.gl.viewport(0, 0, canvas.width, canvas.height);
     },
-    exitFullScreen(){
-      if(document.fullscreenElement) return;
+    exitFullScreen() {
+      if (document.fullscreenElement) return;
       const canvas = this.$refs.canvas;
       canvas.width = this.canvasWidth;
       canvas.height = this.canvasHeight;
@@ -154,14 +162,23 @@ export default {
       this.accumulatedTime = 0;
       this.lastFrameTime = performance.now(); // миллисекунды
       this.frame = 0;
+
       this.startRendering();
     },
     compileShader(gl, source, type) {
       const shader = gl.createShader(type);
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
+      // Обработка ошибок
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        console.error("Ошибка компиляции шейдера:", gl.getShaderInfoLog(shader));
+        console.error(gl.getShaderInfoLog(shader));
+        this.compileFailed = true
+        if (this.timeoutId) {
+          clearTimeout(this.timeoutId)
+        }
+        this.timeoutId = setTimeout(() => {
+          this.compileFailed = false;
+        }, 1000)
         gl.deleteShader(shader);
         return null;
       }
@@ -341,5 +358,9 @@ hr {
 
 canvas:fullscreen {
   border-radius: 0;
+}
+
+.btn-error {
+  border: 1px solid red !important;
 }
 </style>

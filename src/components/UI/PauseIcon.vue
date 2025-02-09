@@ -1,0 +1,19 @@
+<template>
+  <svg xmlns="http://www.w3.org/2000/svg" id="Bold" viewBox="0 0 24 24" width="24" height="24" :fill="color">
+    <path d="M7,0A4,4,0,0,0,3,4V20a4,4,0,0,0,8,0V4A4,4,0,0,0,7,0ZM8,20a1,1,0,0,1-2,0V4A1,1,0,0,1,8,4Z"/>
+    <path d="M17,0a4,4,0,0,0-4,4V20a4,4,0,0,0,8,0V4A4,4,0,0,0,17,0Zm1,20a1,1,0,0,1-2,0V4a1,1,0,0,1,2,0Z"/>
+  </svg>
+
+
+</template>
+
+<script>
+export default {
+  props: {
+    color: {
+      type: String,
+      default: "lightgrey"
+    }
+  }
+};
+</script>
