@@ -1,4 +1,5 @@
 export default `precision mediump float;
+
 uniform float iTime;      // Время в секундах с начала симуляции
 uniform vec2 iResolution; // Разрешение экрана (ширина, высота)
 uniform vec3 iMouse;      // Координаты мыши (x, y) + флаг нажатия
