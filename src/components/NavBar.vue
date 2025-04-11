@@ -1,22 +1,80 @@
 <template>
   <div class="nav-bar">
-    <button class="nav-bar__main-btn" @click="direct('/')">ShaderToy</button>
+    <button class="nav-bar__main-btn" @click="redirect('/')">ShaderToy</button>
     <div class="nav-bar__items">
-      <button class="nav-bar__other-btn" @click="direct('/new')">New</button>
-      <button class="nav-bar__other-btn" @click="direct('/login')">Log in</button>
+      <div v-show="isAuth" class="nav-bar__label" @click="redirect(`/profile/${user.id}`)">
+        {{ user.name }}
+      </div>
+      <button class="nav-bar__other-btn" @click="redirect('/new')">New</button>
+      <button class="nav-bar__other-btn" @click="authHandler()">{{ this.authText }}</button>
     </div>
   </div>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      isAuth: false,
+      user: "",
+    }
+  },
+  computed: {
+    authText() {
+      return this.isAuth ? 'Log out' : 'Log in';
+    }
+  },
   methods: {
-    direct(path) {
+    redirect(path) {
       if (this.$route.path === path)
         this.$router.go(0)
       else
         this.$router.push(path)
+    },
+    async checkAuth() {
+      try {
+        const response = await fetch('http://localhost:8000/auth/me', {
+          method: 'GET',
+          credentials: 'include'
+        });
+        const body = await response.json();
+        console.log(body)
+        const {isAuth, user} = body;
+        this.user = user
+        this.isAuth = isAuth;
+      } catch (error) {
+        console.error('Ошибка проверки авторизации:', error);
+        this.isAuth = false;
+      }
+    },
+    async authHandler() {
+      if (this.isAuth) {
+        try {
+          const response = await fetch('http://localhost:8000/auth/logout', {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                credentials: 'include'
+              }
+          )
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
+          this.isAuth = false
+          // this.redirect("/")
+        } catch (error) {
+          this.errorMessage = error.message;
+        }
+      } else {
+        this.$router.push('/login')
+      }
     }
+  },
+  watch: {
+    $route() {
+      this.checkAuth();
+    }
+  },
+  mounted() {
+    this.checkAuth();
   }
 }
 </script>
@@ -60,4 +118,16 @@ export default {
 .nav-bar__other-btn:hover {
   color: white;
 }
+
+.nav-bar__label {
+  padding: 10px;
+  margin: 10px;
+  color: lightgray;
+  cursor: pointer;
+}
+.nav-bar__label:hover {
+  cursor: pointer;
+  color: white;
+}
+
 </style>

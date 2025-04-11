@@ -1,0 +1,47 @@
+<template>
+  <div>
+    <h1>Профиль пользователя</h1>
+    <ul>
+      <li>{{ this.user.id }}</li>
+      <li>{{ this.user.name }}</li>
+      <li>{{ this.user.email }}</li>
+      <li>{{ this.user.biography }}</li>
+      <li>{{ this.user.avatar_url }}</li>
+      <li>{{ this.user.created_at }}</li>
+    </ul>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      user: {
+        name: "",
+      }
+    }
+  },
+  methods: {
+    async get_user_data() {
+      try {
+        const response = await fetch("http://localhost:8000/auth/profile", {
+          method: "GET",
+          headers: {"Content-Type": "application/json"},
+          credentials: 'include',
+        });
+        this.user = await response.json();
+        // TODO доделать
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  },
+  mounted() {
+    this.get_user_data()
+  }
+}
+</script>
+
+<style scoped>
+
+</style>

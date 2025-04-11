@@ -1,0 +1,18 @@
+<template>
+  <div>
+    <shader-window code=""></shader-window>
+  </div>
+</template>
+
+<script>
+import ShaderWindow from "@/components/ShaderWindow.vue";
+
+export default {
+  components: {ShaderWindow}
+
+}
+</script>
+
+<style scoped>
+
+</style>

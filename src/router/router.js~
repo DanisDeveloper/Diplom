@@ -3,7 +3,6 @@ import {createRouter, createWebHistory} from "vue-router"
 import About from "@/pages/About.vue";
 import Main from "@/pages/Main.vue";
 import Login from "@/pages/Login.vue";
-import Profile from "@/pages/Profile.vue";
 
 const routes = [
     {
@@ -23,8 +22,7 @@ const routes = [
         component: About
     },
     {
-        path: '/profile/:id',
-        component: Profile
+        path: '/profile'
     }
 ]
 
