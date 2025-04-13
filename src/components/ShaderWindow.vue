@@ -113,21 +113,19 @@ export default {
     initWebGL() {
       const canvas = this.$refs.canvas;
       const dpr = window.devicePixelRatio || 1;
-
+      //
       let width = Math.floor(canvas.clientWidth * dpr);
       let height = Math.floor(canvas.clientHeight * dpr);
 
       // Настройка реальных размеров для WebGL
       canvas.width = width;
       canvas.height = height;
-
-      this.canvasWidth = width;
-      this.canvasHeight = height;
-
+      //
+      this.canvasWidth = canvas.width;
+      this.canvasHeight = canvas.height;
 
       this.$emit('canvasWidthWatch', this.canvasWidth);
       this.$emit('canvasHeightWatch', this.canvasHeight);
-
 
       this.gl = canvas.getContext("webgl");
       if (!this.gl) {
@@ -178,7 +176,6 @@ export default {
       // Обработка ошибок
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         const err = gl.getShaderInfoLog(shader)
-        // this.errorLog = err.split('\n').map((line) => { return "Line " + line.substring(9)});
         this.errorLog = err.split('\n').map((line) => {
           const temp = line.split(':')
           return `<strong>Line ${temp[2]}:</strong> ${temp[3]} : ${temp[4]}`
@@ -304,5 +301,10 @@ export default {
 </script>
 
 <style scoped>
+canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
 
 </style>
