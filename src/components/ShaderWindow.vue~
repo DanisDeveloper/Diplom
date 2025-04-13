@@ -116,7 +116,8 @@ export default {
 
       let width = Math.floor(canvas.clientWidth * dpr);
       let height = Math.floor(canvas.clientHeight * dpr);
-
+      console.log(`width: ${width} = dpr: ${dpr} * clientWidth: ${canvas.clientWidth}`);
+      console.log(`height: ${height} = dpr: ${dpr} * clientHeight: ${canvas.clientHeight}`);
       // Настройка реальных размеров для WebGL
       canvas.width = width;
       canvas.height = height;

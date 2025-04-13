@@ -128,11 +128,9 @@ export default {
 .shader-window :deep(canvas) {
   border-radius: 10px;
 }
-
 .shader-window :deep(canvas:fullscreen) {
   border-radius: 0;
 }
-
 .btns {
   display: flex;
   justify-content: flex-start;
