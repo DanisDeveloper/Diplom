@@ -4,7 +4,12 @@
       <!-- Левая половина: сам шейдер -->
       <div class="half">
         <h2>Best shader</h2>
-        <shader-window :code="bestShader" @click="this.$router.push({ path: '/new', query: { code: code } })"/>
+        <shader-window
+            ref="bestShaderWindow"
+            @mouseenter="this.$refs.bestShaderWindow.togglePause()"
+            @mouseleave="this.$refs.bestShaderWindow.togglePause()"
+            :code="bestShader"
+            @click="this.$router.push({ path: '/new', query: { code: code } })"/>
       </div>
       <!-- Правая половина: текст -->
       <div class="half phrase">
@@ -16,11 +21,14 @@
       <h2>Featured shaders</h2>
       <div class="featured-shaders">
         <shader-window
+            ref="featureShaderWindows"
             v-for="n in 4"
             :key="n"
             :code="code"
             class="feature-shader"
             @click="this.$router.push('/new')"
+            @mouseenter="handleMouseEnter(n - 1)"
+            @mouseleave="handleMouseLeave(n - 1)"
         />
       </div>
     </div>
@@ -41,6 +49,20 @@ export default {
       code: fragmentShader,
 
     }
+  },
+  methods:{
+    handleMouseEnter(index) {
+      this.$refs.featureShaderWindows[index].togglePause();
+    },
+    handleMouseLeave(index){
+      this.$refs.featureShaderWindows[index].togglePause()
+    }
+  },
+  mounted() {
+    this.$refs.bestShaderWindow.togglePause();
+    this.$refs.featureShaderWindows.forEach(ref => {
+      ref.togglePause();
+    })
   }
 }
 </script>
