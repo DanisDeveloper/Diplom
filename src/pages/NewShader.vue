@@ -4,7 +4,7 @@
       <shader-window
           class="shader-window"
           ref="shaderWindow"
-          :code
+          :code="code"
           @frameWatch="frameWatch"
           @accumulatedTimeWatch="accumulatedTimeWatch"
           @canvasWidthWatch="canvasWidthWatch"
@@ -45,7 +45,8 @@
         </p>
       </div>
     </div>
-    <shader-editor v-model="code"></shader-editor>
+
+    <shader-editor v-model="code" class="shader-editor"></shader-editor>
   </div>
 </template>
 
@@ -65,7 +66,7 @@ export default {
   data() {
     return {
       // Переменные shader-window
-      code: fragmentShader,
+      code: this.$route.query.code || fragmentShader,
       isPaused: false,
       frame: 0,
       accumulatedTime: 0,
@@ -123,6 +124,11 @@ export default {
 .canvas-container {
   margin-top: 10px;
   margin-left: 10px;
+  flex: 1;
+}
+
+.shader-editor {
+  flex: 1;
 }
 
 .shader-window :deep(canvas) {

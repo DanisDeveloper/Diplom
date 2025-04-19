@@ -113,9 +113,11 @@ export default {
     initWebGL() {
       const canvas = this.$refs.canvas;
       const dpr = window.devicePixelRatio || 1;
-      //
-      let width = Math.floor(canvas.clientWidth * dpr);
-      let height = Math.floor(canvas.clientHeight * dpr);
+
+      // let width = Math.floor(canvas.clientWidth * dpr);
+      // let height = Math.floor(canvas.clientHeight * dpr);
+      let width = Math.floor(canvas.clientWidth);
+      let height = Math.floor(canvas.clientHeight);
 
       // Настройка реальных размеров для WebGL
       canvas.width = width;

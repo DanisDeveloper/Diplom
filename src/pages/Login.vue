@@ -3,12 +3,12 @@
 
     <div class="auth-container">
       <div class="tabs">
-        <button :class="{ active: isLogin }" @click="isLogin = true">Логин</button>
-        <button :class="{ active: !isLogin }" @click="isLogin = false">Регистрация</button>
+        <button :class="{ active: isLoginForm }" @click="isLoginForm = true">Login</button>
+        <button :class="{ active: !isLoginForm }" @click="isLoginForm = false">Registration</button>
       </div>
 
       <form @submit.prevent="handleSubmit">
-        <div v-if="!isLogin" class="input-group">
+        <div v-if="!isLoginForm" class="input-group">
           <label>Name</label>
           <input type="name" v-model="form.name" required/>
         </div>
@@ -19,16 +19,16 @@
         </div>
 
         <div class="input-group">
-          <label>Пароль</label>
+          <label>Password</label>
           <input type="password" v-model="form.password" required/>
         </div>
 
-        <div v-if="!isLogin" class="input-group">
-          <label>Подтвердите пароль</label>
+        <div v-if="!isLoginForm" class="input-group">
+          <label>Confirm password</label>
           <input type="password" v-model="form.confirmPassword" required/>
         </div>
 
-        <button type="submit">{{ isLogin ? "Войти" : "Зарегистрироваться" }}</button>
+        <button type="submit">{{ isLoginForm ? "Sign in" : "Sign up" }}</button>
       </form>
 
       <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -37,10 +37,12 @@
 </template>
 
 <script>
+import {checkAuth} from "@/auth/checkAuth.js";
+
 export default {
   data() {
     return {
-      isLogin: true, // Переключение между логином и регистрацией
+      isLoginForm: true, // Переключение между логином и регистрацией
       form: {
         name: "",
         email: "",
@@ -54,12 +56,12 @@ export default {
     async handleSubmit() {
       this.errorMessage = "";
 
-      if (!this.isLogin && this.form.password !== this.form.confirmPassword) {
-        this.errorMessage = "Пароли не совпадают";
+      if (!this.isLoginForm && this.form.password !== this.form.confirmPassword) {
+        this.errorMessage = "Passwords are different";
         return;
       }
 
-      const endpoint = this.isLogin ? "http://localhost:8000/auth/login" : "http://localhost:8000/auth/register";
+      const endpoint = this.isLoginForm ? "http://localhost:8000/auth/login" : "http://localhost:8000/auth/register";
       const payload = {
         name: this.form.name,
         email: this.form.email,
@@ -76,7 +78,7 @@ export default {
 
         const data = await response.json();
         if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
-
+        await checkAuth(this.$store);
         this.$router.push("/");
       } catch (error) {
         this.errorMessage = error.message;

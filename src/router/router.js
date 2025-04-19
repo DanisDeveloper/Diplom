@@ -11,8 +11,8 @@ const routes = [
         component: Main
     },
     {
-      path: '/login',
-      component: Login
+        path: '/login',
+        component: Login
     },
     {
         path: '/new',
@@ -32,5 +32,6 @@ const router = createRouter({
     routes,
     history: createWebHistory()
 })
+
 
 export default router;
