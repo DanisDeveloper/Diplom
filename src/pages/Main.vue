@@ -3,7 +3,7 @@
     <div class="best-shader">
       <!-- Левая половина: сам шейдер -->
       <div class="half">
-        <h2>Best shader</h2>
+        <h1>Best shader</h1>
         <shader-window
             ref="bestShaderWindow"
             @mouseenter="this.$refs.bestShaderWindow.togglePause()"
@@ -22,7 +22,7 @@
     </div>
 
     <div class="featured-shaders-wrapper">
-      <h2>Featured shaders</h2>
+      <h1>Featured shaders</h1>
       <div class="featured-shaders">
         <shader-window
             ref="featureShaderWindows"
@@ -89,7 +89,7 @@ export default {
 }
 
 .featured-shaders-wrapper {
-  margin: 10px;
+  margin: 50px 10px 10px;
 }
 
 .featured-shaders {
@@ -112,5 +112,9 @@ export default {
   font-size: 400%;
   color: rgb(40, 44, 52);
   align-self: center;
+}
+
+h1{
+  color: #282C34;
 }
 </style>

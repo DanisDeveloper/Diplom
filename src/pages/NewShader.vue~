@@ -44,11 +44,16 @@
             <button v-else class="action-btn" @click="isExpanded = !isExpanded">
               <up-icon></up-icon>
             </button>
-            <button class="action-btn" @click="">
+            <button v-if="this.$store.state.isAuth" class="action-btn" @click="">
               <save-icon></save-icon>
             </button>
           </div>
         </div>
+      </div>
+
+      <div v-if="isExpanded" class="description-area">
+        <input class="shader-title" placeholder="Title">
+        <textarea rows="5" class="shader-description" placeholder="Description"></textarea>
       </div>
 
       <div v-if="this.errorLog.length > 0" class="error-area" :class="{'error-area-border-error': compileFailed}">
@@ -198,7 +203,7 @@ export default {
 
 .right-btns{
   display: flex;
-  justify-content: flex-end;
+  margin-left: auto;
 }
 
 .shader-info__component {
@@ -231,7 +236,7 @@ export default {
 .error-area {
   width: 100%;
   background: #282C34;
-  margin-top: 10px;
+  margin: 10px 0зч;
   border-radius: 8px;
   border: 2px solid transparent;
   padding: 10px;
@@ -252,4 +257,28 @@ hr {
   color: lightgray;
 }
 
+.description-area{
+  width: 100%;
+  background: #282C34;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  padding: 10px;
+  color: lightgray;
+  display: flex;
+  flex-direction: column;
+}
+input, textarea{
+  padding: 10px;
+  margin: 10px;
+  border: 1px solid lightgray;
+  border-radius: 8px;
+  background: transparent;
+  font-size: large;
+  cursor: pointer;
+  color: lightgray;
+}
+textarea{
+  resize: none;
+}
 </style>
