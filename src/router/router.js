@@ -4,6 +4,7 @@ import About from "@/pages/About.vue";
 import Main from "@/pages/Main.vue";
 import Login from "@/pages/Login.vue";
 import Profile from "@/pages/Profile.vue";
+import Browse from "@/pages/Browse.vue";
 
 const routes = [
     {
@@ -13,6 +14,10 @@ const routes = [
     {
         path: '/login',
         component: Login
+    },
+    {
+        path: '/browse',
+        component: Browse
     },
     {
         path: '/new',

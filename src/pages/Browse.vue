@@ -1,12 +1,11 @@
+<template>
+
+</template>
+
 <script>
-export default {
-name: "Browse"
-}
+export default {}
 </script>
 
-<template>
-  $END$
-</template>
 
 <style scoped>
 

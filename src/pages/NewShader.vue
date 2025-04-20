@@ -54,7 +54,7 @@
 import NavBar from "@/components/NavBar.vue";
 import ShaderWindow from "@/components/ShaderWindow.vue";
 import ShaderEditor from "@/components/ShaderEditor.vue";
-import fragmentShader from "@/shaders/fragment.js";
+import exampleShader from "@/shaders/example.js";
 import FooterInfo from "@/components/AppFooter.vue";
 import UploadIcon from "@/components/UI/UploadIcon.vue";
 import RestartIcon from "@/components/UI/RestartIcon.vue";
@@ -66,7 +66,7 @@ export default {
   data() {
     return {
       // Переменные shader-window
-      code: this.$route.query.code || fragmentShader,
+      code: this.$route.query.code || exampleShader,
       isPaused: false,
       frame: 0,
       accumulatedTime: 0,

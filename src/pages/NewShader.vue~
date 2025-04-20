@@ -101,6 +101,7 @@ export default {
       this.$refs.shaderWindow.uploadShader();
     },
     togglePause() {
+      this.isPaused = !this.isPaused;
       this.$refs.shaderWindow.togglePause();
     },
     resetTime() {

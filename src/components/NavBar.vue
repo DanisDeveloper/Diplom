@@ -2,12 +2,14 @@
   <div class="nav-bar">
     <button class="nav-bar__main-btn" @click="this.$router.push('/')">ShaderToy</button>
     <div class="nav-bar__items">
-      <div v-show="this.$store.state.isAuth"
-           class="nav-bar__label"
-           @click="this.$router.push(`/profile/${this.$store.state.user.id}`)"
+      <div
+          v-show="this.$store.state.isAuth"
+          class="nav-bar__label"
+          @click="this.$router.push(`/profile/${this.$store.state.user.id}`)"
       >
         {{ this.$store.state.user.name }}
       </div>
+      <button class="nav-bar__other-btn" @click="this.$router.push('/browse')">Browse</button>
       <button class="nav-bar__other-btn" @click="this.$router.push('/new')">New</button>
       <button class="nav-bar__other-btn" @click="authHandler()">{{ this.authText }}</button>
     </div>
@@ -18,9 +20,6 @@
 import {checkAuth} from "@/auth/checkAuth.js";
 
 export default {
-  data() {
-    return {}
-  },
   computed: {
     authText() {
       return this.$store.state.isAuth ? 'Log out' : 'Log in';

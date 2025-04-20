@@ -48,6 +48,7 @@ import ShaderWindow from "@/components/ShaderWindow.vue";
 import funnel from "@/shaders/fragment.js";
 import mandelbrot from "@/shaders/mandelbrot.js"
 import tonnel from "@/shaders/tonnel.js"
+import rainbow from "@/shaders/rainbow.js"
 import voronoi from "@/shaders/voronoi.js"
 import fractal from "@/shaders/fractal.js"
 
