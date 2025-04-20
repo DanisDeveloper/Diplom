@@ -1,0 +1,24 @@
+<template>
+  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 20 12" id="down" :fill="color">
+    <g id="Page-1" fill-rule="evenodd" stroke="none" stroke-width="1">
+      <g id="Asset-1" fill-rule="nonzero" transform="translate(-9 -11)">
+        <g id="Lager_16" transform="translate(9 11)">
+          <path id="Shape"
+                d="M9.319 6.091c.223.14.472.235.732.278.253-.004.496-.103.679-.278L16.462.574a2.116 2.116 0 0 1 2.887-.01l.03.028a1.959 1.959 0 0 1 .008 2.854l-8.613 8.267a1.08 1.08 0 0 1-.723.287 2.124 2.124 0 0 1-.775-.287L.611 3.446A1.959 1.959 0 0 1 .623.592L.659.564a2.133 2.133 0 0 1 2.9.01l5.76 5.517z"></path>
+        </g>
+      </g>
+    </g>
+  </svg>
+
+</template>
+
+<script>
+export default {
+  props: {
+    color: {
+      type: String,
+      default: "lightgrey"
+    }
+  }
+};
+</script>

@@ -22,7 +22,7 @@
         <hr>
         <div class="btns">
           <button class="action-btn" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
-            <upload-icon :fill="compileFailed? 'red' : 'lightgrey'"></upload-icon>
+            <upload-icon :color="compileFailed? 'red' : 'lightgrey'"></upload-icon>
           </button>
           <button v-if="isPaused" class="action-btn" @click="togglePause">
             <play-icon></play-icon>
@@ -34,10 +34,20 @@
             <restart-icon></restart-icon>
           </button>
           <button class="action-btn" @click="expandScreen">
-            <img width="24" height="24" src="/public/icons/expand.svg" alt="Expand" title="Expand">
+            <expand-icon></expand-icon>
+          </button>
+          <button v-if="!isExpanded" class="action-btn" @click="isExpanded = !isExpanded">
+            <down-icon></down-icon>
+          </button>
+          <button v-else class="action-btn" @click="isExpanded = !isExpanded">
+            <up-icon></up-icon>
+          </button>
+          <button class="action-btn" @click="">
+            <save-icon></save-icon>
           </button>
         </div>
       </div>
+
       <div v-if="this.errorLog.length > 0" class="error-area" :class="{'error-area-border-error': compileFailed}">
         <h2 class="error-log-title">Error log</h2>
         <p class="error-line" v-for="error in this.errorLog">
@@ -60,9 +70,26 @@ import UploadIcon from "@/components/UI/UploadIcon.vue";
 import RestartIcon from "@/components/UI/RestartIcon.vue";
 import PlayIcon from "@/components/UI/PlayIcon.vue";
 import PauseIcon from "@/components/UI/PauseIcon.vue";
+import ExpandIcon from "@/components/UI/ExpandIcon.vue";
+import DownIcon from "@/components/UI/DownIcon.vue";
+import SaveIcon from "@/components/UI/SaveIcon.vue";
+import UpIcon from "@/components/UI/UpIcon.vue";
 
 export default {
-  components: {PauseIcon, PlayIcon, RestartIcon, UploadIcon, FooterInfo, ShaderEditor, ShaderWindow, NavBar},
+  components: {
+    UpIcon,
+    SaveIcon,
+    DownIcon,
+    ExpandIcon,
+    PauseIcon,
+    PlayIcon,
+    RestartIcon,
+    UploadIcon,
+    FooterInfo,
+    ShaderEditor,
+    ShaderWindow,
+    NavBar
+  },
   data() {
     return {
       // Переменные shader-window
@@ -74,7 +101,7 @@ export default {
       canvasHeight: 0,
       compileFailed: false,
       errorLog: [],
-
+      isExpanded: false,
     }
   },
   methods: {
