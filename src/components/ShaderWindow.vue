@@ -1,9 +1,9 @@
 <template>
   <div class="shader-window">
     <canvas ref="canvas"
-            @mousemove="!disableMouseMoveEvent && handleMousemoveEvent"
-            @mousedown="!disableMouseDownEvent && handleMousedownEvent"
-            @mouseup="!disableMouseUpEvent && handleMouseupEvent"
+            @mousemove="handleMousemoveEvent"
+            @mousedown="handleMousedownEvent"
+            @mouseup="handleMouseupEvent"
     >
     </canvas>
 
@@ -113,13 +113,16 @@ export default {
         this.gl.viewport(0, 0, canvas.width, canvas.height);
     },
     handleMousemoveEvent(event) {
+      if(this.disableMouseMoveEvent) return;
       this.mouseX = event.offsetX;
       this.mouseY = this.$refs.canvas.height - event.offsetY; // Инвертируем, т.к. отсчет должен начинаться с левого нижнего угла
     },
     handleMousedownEvent() {
+      if(this.disableMouseDownEvent) return;
       this.mouseDown = 1;
     },
     handleMouseupEvent() {
+      if(this.disableMouseUpEvent) return;
       this.mouseDown = 0;
     },
     initWebGL() {
