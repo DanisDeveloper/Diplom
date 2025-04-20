@@ -1,0 +1,16 @@
+export async function checkAuth() {
+    try {
+        const response = await fetch('http://localhost:8000/auth/me', {
+            method: 'GET',
+            credentials: 'include'
+        });
+        const body = await response.json();
+        console.log(body)
+        const {isAuth, user} = body;
+        this.user = user
+        this.isAuth = isAuth;
+    } catch (error) {
+        console.error('Ошибка проверки авторизации:', error);
+        this.isAuth = false;
+    }
+}

@@ -9,7 +9,11 @@
             @mouseenter="this.$refs.bestShaderWindow.togglePause()"
             @mouseleave="this.$refs.bestShaderWindow.togglePause()"
             :code="bestShader"
-            @click="this.$router.push({ path: '/new', query: { code: code } })"/>
+            @click="this.$router.push({ path: '/new', query: { code: code } })"
+            :disable-mouse-down-event="true"
+            :disable-mouse-up-event="true"
+            :disable-mouse-move-event="true"
+        />
       </div>
       <!-- Правая половина: текст -->
       <div class="half phrase">
@@ -29,6 +33,9 @@
             @click="this.$router.push('/new')"
             @mouseenter="handleMouseEnter(n - 1)"
             @mouseleave="handleMouseLeave(n - 1)"
+            :disable-mouse-down-event="true"
+            :disable-mouse-up-event="true"
+            :disable-mouse-move-event="true"
         />
       </div>
     </div>
@@ -50,11 +57,11 @@ export default {
 
     }
   },
-  methods:{
+  methods: {
     handleMouseEnter(index) {
       this.$refs.featureShaderWindows[index].togglePause();
     },
-    handleMouseLeave(index){
+    handleMouseLeave(index) {
       this.$refs.featureShaderWindows[index].togglePause()
     }
   },

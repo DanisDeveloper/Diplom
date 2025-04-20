@@ -1,9 +1,9 @@
 <template>
   <div class="shader-window">
     <canvas ref="canvas"
-            @mousemove="handleMousemoveEvent"
-            @mousedown="handleMousedownEvent"
-            @mouseup="handleMouseupEvent"
+            @mousemove="!disableMouseMoveEvent && handleMousemoveEvent"
+            @mousedown="!disableMouseDownEvent && handleMousedownEvent"
+            @mouseup="!disableMouseUpEvent && handleMouseupEvent"
     >
     </canvas>
 
@@ -25,6 +25,18 @@ export default {
       type: String,
       required: true,
       default: "",
+    },
+    disableMouseMoveEvent:{
+      type: Boolean,
+      default: false
+    },
+    disableMouseUpEvent: {
+      type: Boolean,
+      default: false
+    },
+    disableMouseDownEvent: {
+      type: Boolean,
+      default: false
     },
   },
   data() {

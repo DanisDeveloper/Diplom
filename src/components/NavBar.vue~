@@ -1,54 +1,34 @@
 <template>
   <div class="nav-bar">
-    <button class="nav-bar__main-btn" @click="redirect('/')">ShaderToy</button>
+    <button class="nav-bar__main-btn" @click="this.$router.push('/')">ShaderToy</button>
     <div class="nav-bar__items">
-      <div v-show="isAuth" class="nav-bar__label" @click="redirect(`/profile/${user.id}`)">
-        {{ user.name }}
+      <div v-show="this.$store.state.isAuth"
+           class="nav-bar__label"
+           @click="this.$router.push(`/profile/${this.$store.state.user.id}`)"
+      >
+        {{ this.$store.state.user.name }}
       </div>
-      <button class="nav-bar__other-btn" @click="redirect('/new')">New</button>
+      <button class="nav-bar__other-btn" @click="this.$router.push('/new')">New</button>
       <button class="nav-bar__other-btn" @click="authHandler()">{{ this.authText }}</button>
     </div>
   </div>
 </template>
 
 <script>
+import {checkAuth} from "@/auth/checkAuth.js";
+
 export default {
   data() {
-    return {
-      isAuth: false,
-      user: "",
-    }
+    return {}
   },
   computed: {
     authText() {
-      return this.isAuth ? 'Log out' : 'Log in';
+      return this.$store.state.isAuth ? 'Log out' : 'Log in';
     }
   },
   methods: {
-    redirect(path) {
-      if (this.$route.path === path)
-        this.$router.go(0)
-      else
-        this.$router.push(path)
-    },
-    async checkAuth() {
-      try {
-        const response = await fetch('http://localhost:8000/auth/me', {
-          method: 'GET',
-          credentials: 'include'
-        });
-        const body = await response.json();
-        console.log(body)
-        const {isAuth, user} = body;
-        this.user = user
-        this.isAuth = isAuth;
-      } catch (error) {
-        console.error('Ошибка проверки авторизации:', error);
-        this.isAuth = false;
-      }
-    },
     async authHandler() {
-      if (this.isAuth) {
+      if (this.$store.state.isAuth) {
         try {
           const response = await fetch('http://localhost:8000/auth/logout', {
                 method: "POST",
@@ -57,9 +37,9 @@ export default {
               }
           )
           const data = await response.json();
-          if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
-          this.isAuth = false
-          // this.redirect("/")
+          if (!response.ok) throw new Error(data.detail || "Server error!");
+          this.$store.commit('logout');
+          checkAuth(this.$store);
         } catch (error) {
           this.errorMessage = error.message;
         }
@@ -68,13 +48,8 @@ export default {
       }
     }
   },
-  watch: {
-    $route() {
-      this.checkAuth();
-    }
-  },
   mounted() {
-    this.checkAuth();
+    checkAuth(this.$store)
   }
 }
 </script>
@@ -125,4 +100,10 @@ export default {
   color: lightgray;
   cursor: pointer;
 }
+
+.nav-bar__label:hover {
+  cursor: pointer;
+  color: white;
+}
+
 </style>
