@@ -38,13 +38,13 @@
           </button>
 
           <div class="right-btns">
-            <button v-if="!isExpanded" class="action-btn" @click="isExpanded = !isExpanded">
-              <down-icon></down-icon>
+            <button v-if="!isExpanded" :class="{'btn-border-error': !isExpanded && titleEmpty}" class="action-btn" @click="isExpanded = !isExpanded">
+              <down-icon :fill="!isExpanded && titleEmpty ? 'red' : 'lightgrey'"></down-icon>
             </button>
             <button v-else class="action-btn" @click="isExpanded = !isExpanded">
               <up-icon></up-icon>
             </button>
-            <button v-if="this.$store.state.isAuth" class="action-btn" @click="">
+            <button v-if="this.$store.state.isAuth" class="action-btn" @click="handleSaveButtonClick">
               <save-icon></save-icon>
             </button>
           </div>
@@ -52,8 +52,8 @@
       </div>
 
       <div v-if="isExpanded" class="description-area">
-        <input class="shader-title" placeholder="Title">
-        <textarea rows="5" class="shader-description" placeholder="Description"></textarea>
+        <input :class="{'empty-title-error': titleEmpty}" class="shader-title" placeholder="Title" v-model.trim="title">
+        <textarea rows="5" class="shader-description" placeholder="Description" v-model.trim="description"></textarea>
       </div>
 
       <div v-if="this.errorLog.length > 0" class="error-area" :class="{'error-area-border-error': compileFailed}">
@@ -110,6 +110,10 @@ export default {
       compileFailed: false,
       errorLog: [],
       isExpanded: false,
+
+      title: "",
+      description: "",
+      titleEmpty: false,
     }
   },
   methods: {
@@ -144,6 +148,17 @@ export default {
     },
     expandScreen() {
       this.$refs.shaderWindow.expandScreen();
+    },
+    async handleSaveButtonClick() {
+      if (this.title.length === 0) {
+        this.titleEmpty = true;
+        clearTimeout(this.timeoutId)
+        this.timeoutId = setTimeout(() => {
+          this.titleEmpty = false;
+        }, 1000);
+        return;
+      }
+      
     }
   }
 }
@@ -201,7 +216,7 @@ export default {
   border: 1px solid lightgray;
 }
 
-.right-btns{
+.right-btns {
   display: flex;
   margin-left: auto;
 }
@@ -218,7 +233,7 @@ export default {
 }
 
 .canvas-footer {
-  margin-top: 10px;
+  margin: 10px 0;
   padding: 10px;
   width: 100%;
   background: #282C34;
@@ -236,7 +251,7 @@ export default {
 .error-area {
   width: 100%;
   background: #282C34;
-  margin: 10px 0зч;
+  margin: 10px 0;
   border-radius: 8px;
   border: 2px solid transparent;
   padding: 10px;
@@ -257,10 +272,10 @@ hr {
   color: lightgray;
 }
 
-.description-area{
+.description-area {
   width: 100%;
   background: #282C34;
-  margin-top: 10px;
+  margin: 10px 0;
   border-radius: 8px;
   border: 2px solid transparent;
   padding: 10px;
@@ -268,7 +283,8 @@ hr {
   display: flex;
   flex-direction: column;
 }
-input, textarea{
+
+input, textarea {
   padding: 10px;
   margin: 10px;
   border: 1px solid lightgray;
@@ -278,7 +294,12 @@ input, textarea{
   cursor: pointer;
   color: lightgray;
 }
-textarea{
+
+textarea {
   resize: none;
+}
+
+.empty-title-error {
+  border: 2px solid red !important;
 }
 </style>
