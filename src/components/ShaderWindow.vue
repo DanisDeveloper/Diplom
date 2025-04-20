@@ -127,7 +127,7 @@ export default {
     },
     initWebGL() {
       const canvas = this.$refs.canvas;
-      const dpr = window.devicePixelRatio || 1;
+      // const dpr = window.devicePixelRatio || 1;
 
       // let width = Math.floor(canvas.clientWidth * dpr);
       // let height = Math.floor(canvas.clientHeight * dpr);
@@ -151,7 +151,9 @@ export default {
       }
 
       this.gl.viewport(0, 0, canvas.width, canvas.height);
+      this.gl.getExtension("OES_standard_derivatives");
       this.createProgram();
+
     },
     createProgram() {
       const gl = this.gl;

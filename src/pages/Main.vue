@@ -9,7 +9,7 @@
             @mouseenter="this.$refs.bestShaderWindow.togglePause()"
             @mouseleave="this.$refs.bestShaderWindow.togglePause()"
             :code="bestShader"
-            @click="this.$router.push({ path: '/new', query: { code: code } })"
+            @click="this.$router.push({ path: '/new', query: { code: bestShader } })"
             :disable-mouse-down-event="true"
             :disable-mouse-up-event="true"
             :disable-mouse-move-event="true"
@@ -28,9 +28,9 @@
             ref="featureShaderWindows"
             v-for="n in 4"
             :key="n"
-            :code="code"
+            :code="featuredShaders[n - 1]"
             class="feature-shader"
-            @click="this.$router.push('/new')"
+            @click="this.$router.push({ path: '/new', query: { code: featuredShaders[n - 1] } })"
             @mouseenter="handleMouseEnter(n - 1)"
             @mouseleave="handleMouseLeave(n - 1)"
             :disable-mouse-down-event="true"
@@ -45,15 +45,18 @@
 
 <script>
 import ShaderWindow from "@/components/ShaderWindow.vue";
-import fragmentShader from "@/shaders/fragment.js";
-import rayMarchingShader from "@/shaders/rayMarching.js"
+import funnel from "@/shaders/fragment.js";
+import mandelbrot from "@/shaders/mandelbrot.js"
+import tonnel from "@/shaders/tonnel.js"
+import fractal from "@/shaders/fractal.js"
+import voronoi from "@/shaders/voronoi.js"
 
 export default {
   components: {ShaderWindow},
   data() {
     return {
-      bestShader: rayMarchingShader,
-      code: fragmentShader,
+      bestShader: mandelbrot,
+      featuredShaders: [funnel, voronoi, tonnel, fractal],
 
     }
   },
