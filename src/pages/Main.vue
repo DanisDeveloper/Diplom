@@ -26,7 +26,7 @@
       <div class="featured-shaders">
         <shader-window
             ref="featureShaderWindows"
-            v-for="n in 4"
+            v-for="n in featuredShaders.length"
             :key="n"
             :code="featuredShaders[n - 1]"
             class="feature-shader"
@@ -48,8 +48,9 @@ import ShaderWindow from "@/components/ShaderWindow.vue";
 import funnel from "@/shaders/fragment.js";
 import mandelbrot from "@/shaders/mandelbrot.js"
 import tonnel from "@/shaders/tonnel.js"
-import fractal from "@/shaders/fractal.js"
+import rainbow from "@/shaders/rainbow.js"
 import voronoi from "@/shaders/voronoi.js"
+import fractal from "@/shaders/fractal.js"
 
 export default {
   components: {ShaderWindow},
