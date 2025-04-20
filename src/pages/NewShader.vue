@@ -36,15 +36,18 @@
           <button class="action-btn" @click="expandScreen">
             <expand-icon></expand-icon>
           </button>
-          <button v-if="!isExpanded" class="action-btn" @click="isExpanded = !isExpanded">
-            <down-icon></down-icon>
-          </button>
-          <button v-else class="action-btn" @click="isExpanded = !isExpanded">
-            <up-icon></up-icon>
-          </button>
-          <button class="action-btn" @click="">
-            <save-icon></save-icon>
-          </button>
+
+          <div class="right-btns">
+            <button v-if="!isExpanded" class="action-btn" @click="isExpanded = !isExpanded">
+              <down-icon></down-icon>
+            </button>
+            <button v-else class="action-btn" @click="isExpanded = !isExpanded">
+              <up-icon></up-icon>
+            </button>
+            <button class="action-btn" @click="">
+              <save-icon></save-icon>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -191,6 +194,11 @@ export default {
 .action-btn:hover {
   color: white;
   border: 1px solid lightgray;
+}
+
+.right-btns{
+  display: flex;
+  margin-left: auto;
 }
 
 .shader-info__component {
