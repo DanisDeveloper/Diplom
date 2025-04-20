@@ -1,9 +1,9 @@
 <template>
   <div class="shader-window">
     <canvas ref="canvas"
-            @mousemove="!disableMouseMoveEvent && handleMousemoveEvent"
-            @mousedown="!disableMouseDownEvent && handleMousedownEvent"
-            @mouseup="!disableMouseUpEvent && handleMouseupEvent"
+            @mousemove="handleMousemoveEvent"
+            @mousedown="handleMousedownEvent"
+            @mouseup="handleMouseupEvent"
     >
     </canvas>
 
@@ -113,43 +113,58 @@ export default {
         this.gl.viewport(0, 0, canvas.width, canvas.height);
     },
     handleMousemoveEvent(event) {
+      if(this.disableMouseMoveEvent) return;
       this.mouseX = event.offsetX;
       this.mouseY = this.$refs.canvas.height - event.offsetY; // Инвертируем, т.к. отсчет должен начинаться с левого нижнего угла
     },
     handleMousedownEvent() {
+      if(this.disableMouseDownEvent) return;
       this.mouseDown = 1;
     },
     handleMouseupEvent() {
+      if(this.disableMouseUpEvent) return;
       this.mouseDown = 0;
     },
     initWebGL() {
       const canvas = this.$refs.canvas;
       const dpr = window.devicePixelRatio || 1;
 
-      // let width = Math.floor(canvas.clientWidth * dpr);
-      // let height = Math.floor(canvas.clientHeight * dpr);
-      let width = Math.floor(canvas.clientWidth);
-      let height = Math.floor(canvas.clientHeight);
+      // 1) Берём «логические» CSS‑пиксели:
+      const cssWidth  = canvas.clientWidth;
+      const cssHeight = canvas.clientHeight;
 
-      // Настройка реальных размеров для WebGL
-      canvas.width = width;
+      // 2) Рендерим в физические пиксели:
+      const width  = Math.floor(cssWidth  * dpr);
+      const height = Math.floor(cssHeight * dpr);
+
+      // 3) Назначаем физический размер буфера:
+      canvas.width  = width;
       canvas.height = height;
-      //
-      this.canvasWidth = canvas.width;
-      this.canvasHeight = canvas.height;
 
-      this.$emit('canvasWidthWatch', this.canvasWidth);
-      this.$emit('canvasHeightWatch', this.canvasHeight);
+      // 4) Параллельно «фиксируем» CSS‑размер через style,
+      //    чтобы <canvas> на странице всё ещё занимал нужные нам «логические» пиксели:
+      canvas.style.width  = cssWidth  + 'px';
+      canvas.style.height = cssHeight + 'px';
 
-      this.gl = canvas.getContext("webgl");
+      // 5) Обновляем вьюпорт WebGL:
+      this.gl = canvas.getContext("webgl", { antialias: true });
       if (!this.gl) {
         console.error("WebGL не поддерживается вашим браузером!");
         return;
       }
+      this.gl.viewport(0, 0, width, height);
 
-      this.gl.viewport(0, 0, canvas.width, canvas.height);
+      // 6) Обновляем униформу iResolution в draw‑цикле
+      //    — она теперь будет получать истинное (width, height).
+
+      this.canvasWidth  = width;
+      this.canvasHeight = height;
+      this.$emit('canvasWidthWatch',  this.canvasWidth);
+      this.$emit('canvasHeightWatch', this.canvasHeight);
+
       this.createProgram();
     },
+
     createProgram() {
       const gl = this.gl;
 

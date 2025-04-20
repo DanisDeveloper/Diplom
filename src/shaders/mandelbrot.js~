@@ -1,0 +1,68 @@
+export default `precision mediump float;
+
+uniform float iTime;
+uniform vec2 iResolution;
+
+#define MAX_ITERS 50
+
+// Raymarching к Мандельбульбу
+float mandelbulb(vec3 p) {
+    vec3 z = p;
+    float dr = 1.0;
+    float r = 0.0;
+    for (int i = 0; i < MAX_ITERS; i++) {
+        r = length(z);
+        if (r > 2.0) break;
+        // преобразование в сферические координаты
+        float theta = acos(z.z / r);
+        float phi = atan(z.y, z.x);
+        float power = 8.0;
+        // вычисление производной
+        dr =  pow(r, power - 1.0) * power * dr + 1.0;
+        // возведение в степень
+        float zr = pow(r, power);
+        theta *= power;
+        phi   *= power;
+        z = zr * vec3(sin(theta)*cos(phi), sin(phi)*sin(theta), cos(theta)) + p;
+    }
+    return 0.5 * log(r) * r / dr;
+}
+
+vec3 getNormal(vec3 p) {
+    float eps = 0.001;
+    return normalize(vec3(
+        mandelbulb(p + vec3(eps,0,0)) - mandelbulb(p - vec3(eps,0,0)),
+        mandelbulb(p + vec3(0,eps,0)) - mandelbulb(p - vec3(0,eps,0)),
+        mandelbulb(p + vec3(0,0,eps)) - mandelbulb(p - vec3(0,0,eps))
+    ));
+}
+
+void main(){
+    vec2 uv = (gl_FragCoord.xy - 0.5*iResolution.xy) / iResolution.y;
+    // камера вращается вокруг фрактала
+    vec3 camPos = vec3(3.0 * sin(iTime*0.2), 2.0, 3.0 * cos(iTime*0.2));
+    vec3 target = vec3(0.0);
+    vec3 forward = normalize(target - camPos);
+    vec3 right = normalize(cross(vec3(0.0,1.0,0.0), forward));
+    vec3 up = cross(forward, right);
+    vec3 rd = normalize(uv.x*right + uv.y*up + 1.5*forward);
+
+    // raymarch
+    float t = 0.0;
+    for(int i=0; i<100; i++){
+        vec3 p = camPos + rd * t;
+        float d = mandelbulb(p);
+        if(d < 0.001 || t > 10.0) break;
+        t += d;
+    }
+
+    vec3 col = vec3(0.0);
+    if (t < 10.0) {
+        vec3 pos = camPos + rd * t;
+        vec3 n = getNormal(pos);
+        float diff = clamp(dot(n, normalize(vec3(0.5,0.8,-0.6))), 0.0, 1.0);
+        col = mix(vec3(0.1,0.2,0.3), vec3(0.8,0.9,1.0), diff);
+    }
+    gl_FragColor = vec4(col,1.0);
+}
+`
