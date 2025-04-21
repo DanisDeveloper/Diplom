@@ -38,7 +38,8 @@
           </button>
 
           <div class="right-btns">
-            <button v-if="!isExpanded" :class="{'btn-border-error': !isExpanded && titleEmpty}" class="action-btn" @click="isExpanded = !isExpanded">
+            <button v-if="!isExpanded" :class="{'btn-border-error': !isExpanded && titleEmpty}" class="action-btn"
+                    @click="isExpanded = !isExpanded">
               <down-icon :fill="!isExpanded && titleEmpty ? 'red' : 'lightgrey'"></down-icon>
             </button>
             <button v-else class="action-btn" @click="isExpanded = !isExpanded">
@@ -53,7 +54,18 @@
 
       <div v-if="isExpanded" class="description-area">
         <input :class="{'empty-title-error': titleEmpty}" class="shader-title" placeholder="Title" v-model.trim="title">
-        <textarea rows="5" class="shader-description" placeholder="Description" v-model.trim="description"></textarea>
+        <textarea
+            oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+            class="shader-description"
+            placeholder="Description"
+            v-model.trim="description"></textarea>
+        <label class="shader-visibility">
+          Visibility:
+          <select v-model="visibility" class="visibility-select">
+            <option :value="true">Public</option>
+            <option :value="false">Private</option>
+          </select>
+        </label>
       </div>
 
       <div v-if="this.errorLog.length > 0" class="error-area" :class="{'error-area-border-error': compileFailed}">
@@ -114,6 +126,7 @@ export default {
       title: "",
       description: "",
       titleEmpty: false,
+      visibility: true,
     }
   },
   methods: {
@@ -158,7 +171,19 @@ export default {
         }, 1000);
         return;
       }
-
+      const response = await fetch('http://localhost:8000/shaders', {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        credentials: 'include',
+        body: JSON.stringify({
+          title: this.title,
+          description: this.description,
+          code: this.code,
+          visibility: this.visibility
+        })
+      })
+      const body = await response.json()
+      console.log(body)
     }
   }
 }
@@ -208,7 +233,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-
+  transition: border 0.2s ease, color 0.2s ease;
 }
 
 .action-btn:hover {
@@ -284,7 +309,7 @@ hr {
   flex-direction: column;
 }
 
-input, textarea {
+.shader-title, .shader-description {
   padding: 10px;
   margin: 10px;
   border: 1px solid lightgray;
@@ -295,8 +320,43 @@ input, textarea {
   color: lightgray;
 }
 
-textarea {
+
+.shader-description {
   resize: none;
+  overflow: hidden;
+
+}
+
+.visibility-select {
+  margin-left: 10px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #282C34;
+  background: transparent;
+  color: lightgray;
+  font-size: large;
+  cursor: pointer;
+  appearance: none; /* убираем дефолтные стрелки */
+  transition: border 0.2s ease, color 0.2s ease;
+}
+
+.visibility-select:hover {
+  border-color: lightgray;
+  color: white;
+}
+
+.shader-visibility {
+  padding: 10px;
+  color: lightgray;
+  font-size: large;
+  display: flex;
+  align-items: center;
+  width: fit-content;
+}
+
+.visibility-select option {
+  background-color: #1e1e1e;
+  color: lightgray;
 }
 
 .empty-title-error {
