@@ -127,7 +127,7 @@ export default {
     },
     initWebGL() {
       const canvas = this.$refs.canvas;
-      const dpr = window.devicePixelRatio || 1;
+      // const dpr = window.devicePixelRatio || 1;
 
       // let width = Math.floor(canvas.clientWidth * dpr);
       // let height = Math.floor(canvas.clientHeight * dpr);
@@ -278,6 +278,7 @@ export default {
       this.requestId = requestAnimationFrame(render);
     },
     uploadShader() {
+      console.log("uploadShader");
       this.updateFragmentShader();
       cancelAnimationFrame(this.requestId); // освобождение ресурсов
       this.startRendering();

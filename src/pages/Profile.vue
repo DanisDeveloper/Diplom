@@ -2,12 +2,12 @@
   <div>
     <h1>Профиль пользователя</h1>
     <ul>
-      <li>{{ this.user.id }}</li>
-      <li>{{ this.user.name }}</li>
-      <li>{{ this.user.email }}</li>
-      <li>{{ this.user.biography }}</li>
-      <li>{{ this.user.avatar_url }}</li>
-      <li>{{ this.user.created_at }}</li>
+      <li>ID: {{ this.user.id }}</li>
+      <li>Username: {{ this.user.name }}</li>
+      <li>Email: {{ this.user.email }}</li>
+      <li>Biography: {{ this.user.biography }}</li>
+      <li>Avatar: {{ this.user.avatar_url }}</li>
+      <li>Created at: {{ this.user.created_at }}</li>
     </ul>
   </div>
 </template>
@@ -16,15 +16,13 @@
 export default {
   data() {
     return {
-      user: {
-        name: "",
-      }
+      user: {}
     }
   },
   methods: {
     async get_user_data() {
       try {
-        const response = await fetch("http://localhost:8000/auth/profile", {
+        const response = await fetch(`http://localhost:8000/auth/profile/${this.$route.params.id}`, {
           method: "GET",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',

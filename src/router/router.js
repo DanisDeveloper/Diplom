@@ -24,6 +24,10 @@ const routes = [
         component: NewShader
     },
     {
+        path: '/new/:id',
+        component: NewShader
+    },
+    {
         path: '/about',
         component: About
     },

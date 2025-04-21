@@ -1,13 +1,5 @@
 <template>
-  <div v-if="this.isLoading">
-    <h1>Loading...</h1>
-    <!--  TODO  Сделать спиннер-->
-  </div>
-  <div v-else-if="this.isForbidden">
-    <h1>Forbidden</h1>
-<!-- TODO Сделать картинку о запрете -->
-  </div>
-  <div v-else class="main">
+  <div class="main">
     <div class="canvas-container">
       <shader-window
           class="shader-window"
@@ -53,30 +45,20 @@
             <button v-else class="action-btn" @click="isExpanded = !isExpanded">
               <up-icon></up-icon>
             </button>
-            <button v-if="isSaving" class="action-btn btn-saving" disabled>
-              <div class="spinner"></div>
-            </button>
-            <button v-else v-if="this.$store.state.isAuth" class="action-btn" @click="handleSaveButtonClick">
-              <save-icon></save-icon>
+            <button v-if="this.$store.state.isAuth" class="action-btn" @click="handleForkButtonClick">
+              <fork-icon></fork-icon>
             </button>
           </div>
         </div>
       </div>
 
       <div v-if="isExpanded" class="description-area">
-        <input :class="{'empty-title-error': titleEmpty}" class="shader-title" placeholder="Title" v-model.trim="title">
-        <textarea
+        <label class="shader-title">{{ title ? title : 'Untitled' }}</label>
+        <label
+            v-if="description"
             oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
             class="shader-description"
-            placeholder="Description"
-            v-model.trim="description"></textarea>
-        <label class="shader-visibility">
-          Visibility:
-          <select v-model="visibility" class="visibility-select">
-            <option :value="true">Public</option>
-            <option :value="false">Private</option>
-          </select>
-        </label>
+        >{{ description }}</label>
       </div>
 
       <div v-if="this.errorLog.length > 0" class="error-area" :class="{'error-area-border-error': compileFailed}">
@@ -105,9 +87,11 @@ import ExpandIcon from "@/components/UI/ExpandIcon.vue";
 import DownIcon from "@/components/UI/DownIcon.vue";
 import SaveIcon from "@/components/UI/SaveIcon.vue";
 import UpIcon from "@/components/UI/UpIcon.vue";
+import ForkIcon from "@/components/UI/ForkIcon.vue";
 
 export default {
   components: {
+    ForkIcon,
     UpIcon,
     SaveIcon,
     DownIcon,
@@ -134,18 +118,10 @@ export default {
       errorLog: [],
       isExpanded: false,
 
-      id: null,
       title: "",
       description: "",
       titleEmpty: false,
       visibility: true,
-      created_at: null,
-      updated_at: null,
-      user_id: null,
-
-      isSaving: false,
-      isLoading: false,
-      isForbidden: false,
     }
   },
   methods: {
@@ -181,84 +157,30 @@ export default {
     expandScreen() {
       this.$refs.shaderWindow.expandScreen();
     },
-    async handleSaveButtonClick() {
-      if (this.title.length === 0) {
-        this.titleEmpty = true;
-        clearTimeout(this.timeoutId)
-        this.timeoutId = setTimeout(() => {
-          this.titleEmpty = false;
-        }, 1000);
-        return;
-      }
-
-      this.isSaving = true;
-      try {
-        const response = await fetch('http://localhost:8000/shaders', {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          credentials: 'include',
-          body: JSON.stringify({
-            id: this.id,
-            title: this.title,
-            description: this.description,
-            code: this.code,
-            visibility: this.visibility,
-          })
-        });
-        // TODO убрать паузу
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        const body = await response.json();
-        this.id = body.id;
-        this.title = body.title;
-        this.description = body.description;
-        this.code = body.code;
-        this.visibility = body.visibility;
-        this.created_at = body.created_at;
-        this.updated_at = body.updated_at;
-        this.user_id = body.user_id;
-        this.$router.push(`/new/${body.id}`); // просто, чтобы было
-        // console.log(body);
-      } catch (error) {
-        // TODO сделать вывод ошибки на экран
-
-        console.log(error);
-      } finally {
-        this.isSaving = false;
-      }
+    async handleForkButtonClick() {
+      // if (this.title.length === 0) {
+      //   this.titleEmpty = true;
+      //   clearTimeout(this.timeoutId)
+      //   this.timeoutId = setTimeout(() => {
+      //     this.titleEmpty = false;
+      //   }, 1000);
+      //   return;
+      // }
+      // const response = await fetch('http://localhost:8000/shaders', {
+      //   method: "POST",
+      //   headers: {"Content-Type": "application/json"},
+      //   credentials: 'include',
+      //   body: JSON.stringify({
+      //     title: this.title,
+      //     description: this.description,
+      //     code: this.code,
+      //     visibility: this.visibility,
+      //   })
+      // })
+      // const body = await response.json()
+      // console.log(body)
     }
-  },
-  async mounted() {
-    if (this.$route.params.id === undefined) return;
-    this.isLoading = true
-    try {
-      const response = await fetch(`http://localhost:8000/shaders/${this.$route.params.id}`, {
-        method: "GET",
-        headers: {"Content-Type": "application/json"},
-        credentials: 'include',
-      });
-      if (response.status === 403) {
-        this.isForbidden = true;
-        return;
-      }
-      const body = await response.json();
-      await new Promise(resolve => setTimeout(resolve, 1000)); // TODO убрать
-      this.id          = body.id;
-      this.title       = body.title;
-      this.description = body.description;
-      this.code        = body.code;
-      this.visibility  = body.visibility;
-      this.created_at  = body.created_at;
-      this.updated_at  = body.updated_at;
-      this.user_id     = body.user_id;
-      // ждём, пока Vue применит все изменения, и только потом обновляем шейдер
-      this.uploadShader();
-    } catch (error) {
-      // TODO сделать обработку ошибок
-      console.log(error)
-    } finally {
-      this.isLoading = false
-    }
-  },
+  }
 }
 </script>
 
@@ -307,8 +229,6 @@ export default {
   align-items: center;
   justify-content: center;
   transition: border 0.2s ease, color 0.2s ease;
-  width: 36px; /* подберите под свой SaveIcon + паддинги */
-  height: 36px; /* чтоб и по высоте не прыгало */
 }
 
 .action-btn:hover {
@@ -437,32 +357,4 @@ hr {
 .empty-title-error {
   border: 2px solid red !important;
 }
-
-
-.btn-saving {
-  /* можно переопределить цвета, если нужно */
-  color: lightgray;
-  border-color: #282C34;
-  cursor: default;
-  position: relative;
-}
-
-/* Сам спиннер внутри кнопки */
-.btn-saving .spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  /* центрируем внутри кнопки */
-  margin: 0 auto;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 </style>

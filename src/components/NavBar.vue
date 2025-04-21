@@ -39,6 +39,7 @@ export default {
           if (!response.ok) throw new Error(data.detail || "Server error!");
           this.$store.commit('logout');
           await checkAuth(this.$store);
+          this.$router.push('/');
         } catch (error) {
           this.errorMessage = error.message;
         }

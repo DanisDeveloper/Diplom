@@ -105,7 +105,6 @@ export default {
   transition: border 0.2s ease, color 0.2s ease;
   border: 1px solid transparent;
   border-radius: 8px;
-
 }
 
 .nav-bar__label:hover {
