@@ -1,15 +1,19 @@
 <template>
   <loader v-if="this.isLoading"></loader>
+  <!-- TODO сделать обработку удаленных пользователей -->
   <div>
     <h1>Профиль пользователя</h1>
-    <div class="avatar-wrapper">
+    <div class="avatar-wrapper" :class="{'cursor-pointer': this.isStoreUser}">
       <img
           :src="`http://localhost:8000/public/${this.user.avatar_url || 'avatars/avatar.png'}`"
           alt="avatar"
-          width="200"
+          width="224"
+          height="224"
           @click="triggerAvatarInput"
       />
+
       <input
+          v-if="this.isStoreUser"
           type="file"
           ref="avatarInput"
           accept="image/*"
@@ -43,7 +47,7 @@ export default {
   data() {
     return {
       user: {},
-      isLoading: false
+      isLoading: false,
     }
   },
   methods: {
@@ -77,7 +81,11 @@ export default {
         console.error('Ошибка при загрузке:', error);
         // TODO тут можно добавить всплывающее сообщение или визуальное уведомление
       }
-
+    }
+  },
+  computed: {
+    isStoreUser() {
+      return this.user.id === this.$store.state.user.id
     }
   },
   async mounted() {
@@ -103,9 +111,12 @@ export default {
 </script>
 
 <style scoped>
-.avatar-wrapper{
-  cursor: pointer;
+.avatar-wrapper {
   display: flex;
   width: fit-content;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>
