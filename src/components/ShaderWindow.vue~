@@ -94,6 +94,10 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener('fullscreenchange', this.exitFullScreen);
+    if(this.gl) {
+      this.gl.
+      this.gl = null;
+    }
   },
   methods: {
     expandScreen() {
@@ -278,7 +282,6 @@ export default {
       this.requestId = requestAnimationFrame(render);
     },
     uploadShader() {
-      console.log("uploadShader");
       this.updateFragmentShader();
       cancelAnimationFrame(this.requestId); // освобождение ресурсов
       this.startRendering();

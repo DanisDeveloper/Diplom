@@ -56,20 +56,41 @@ export default {
     async handleSubmit() {
       this.errorMessage = "";
 
-      if (!this.isLoginForm && this.form.password !== this.form.confirmPassword) {
-        this.errorMessage = "Passwords are different";
-        return;
+      // Registration
+      if (!this.isLoginForm) {
+        if (this.form.password !== this.form.confirmPassword) {
+          this.errorMessage = "Passwords are different";
+          return;
+        }
+
+        const payload = {
+          name: this.form.name,
+          email: this.form.email,
+          password: this.form.password,
+        };
+        try {
+          const response = await fetch("http://localhost:8000/auth/register", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload),
+            credentials: "include", // Для работы с куками
+          });
+
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
+          this.$router.push("/");
+        } catch (error) {
+          this.errorMessage = error.message;
+        }
       }
 
-      const endpoint = this.isLoginForm ? "http://localhost:8000/auth/login" : "http://localhost:8000/auth/register";
-      const payload = {
-        name: this.form.name,
-        email: this.form.email,
-        password: this.form.password,
-      };
-
+      // Login
       try {
-        const response = await fetch(endpoint, {
+        const payload = {
+          email: this.form.email,
+          password: this.form.password,
+        };
+        const response = await fetch("http://localhost:8000/auth/login", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify(payload),

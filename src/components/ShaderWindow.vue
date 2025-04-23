@@ -94,6 +94,10 @@ export default {
   },
   beforeUnmount() {
     document.removeEventListener('fullscreenchange', this.exitFullScreen);
+    if(this.gl) {
+      this.gl.getExtension('WEBGL_lose_context')?.loseContext()
+      this.gl = null;
+    }
   },
   methods: {
     expandScreen() {
