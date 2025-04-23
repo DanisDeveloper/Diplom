@@ -1,11 +1,15 @@
 <template>
-  <div v-if="this.isLoading">
-    <h1>Loading...</h1>
-    <!--  TODO  Сделать спиннер-->
-  </div>
-  <div v-else-if="this.isForbidden">
-    <h1>Forbidden</h1>
-<!-- TODO Сделать картинку о запрете -->
+<!--  <div v-if="this.isLoading" class="loader-wrapper">-->
+<!--    <div class="smartglass-loader">-->
+<!--      <div class="arc arc1"></div>-->
+<!--      <div class="arc arc2"></div>-->
+<!--      <div class="arc arc3"></div>-->
+<!--    </div>-->
+<!--  </div>-->
+  <loader v-if="this.isLoading"></loader>
+  <div v-else-if="this.isForbidden" class="forbidden-block">
+    <forbidden-icon></forbidden-icon>
+    <h1>You are not allowed to access this page</h1>
   </div>
   <div v-else class="main">
     <div class="canvas-container">
@@ -70,7 +74,10 @@
             class="shader-description"
             placeholder="Description"
             v-model.trim="description"></textarea>
-        <label class="shader-visibility">
+<!--    TODO сделать join, чтобы получить имя пользователя, который создал шейдер    <label>created by </label>-->
+<!--      TODO также добавить поле с датой туда типа created <username> in <date>  -->
+<!--        TODO также добавить количество лайков-->
+        <label v-if="this.$store.state.isAuth" class="shader-visibility">
           Visibility:
           <select v-model="visibility" class="visibility-select">
             <option :value="true">Public</option>
@@ -105,9 +112,13 @@ import ExpandIcon from "@/components/UI/ExpandIcon.vue";
 import DownIcon from "@/components/UI/DownIcon.vue";
 import SaveIcon from "@/components/UI/SaveIcon.vue";
 import UpIcon from "@/components/UI/UpIcon.vue";
+import ForbiddenIcon from "@/components/UI/ForbiddenIcon.vue";
+import Loader from "@/components/UI/Loader.vue";
 
 export default {
   components: {
+    Loader,
+    ForbiddenIcon,
     UpIcon,
     SaveIcon,
     DownIcon,
@@ -236,20 +247,20 @@ export default {
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
       });
-      if (response.status === 403) {
+      if ([401, 403].includes(response.status)) {
         this.isForbidden = true;
         return;
       }
       const body = await response.json();
       await new Promise(resolve => setTimeout(resolve, 1000)); // TODO убрать
-      this.id          = body.id;
-      this.title       = body.title;
+      this.id = body.id;
+      this.title = body.title;
       this.description = body.description;
-      this.code        = body.code;
-      this.visibility  = body.visibility;
-      this.created_at  = body.created_at;
-      this.updated_at  = body.updated_at;
-      this.user_id     = body.user_id;
+      this.code = body.code;
+      this.visibility = body.visibility;
+      this.created_at = body.created_at;
+      this.updated_at = body.updated_at;
+      this.user_id = body.user_id;
       // ждём, пока Vue применит все изменения, и только потом обновляем шейдер
       this.uploadShader();
     } catch (error) {
@@ -464,5 +475,17 @@ hr {
     transform: rotate(360deg);
   }
 }
+
+
+.forbidden-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  margin-top: 100px;
+}
+
+
 
 </style>

@@ -1,4 +1,5 @@
 <template>
+  <loader v-if="this.isLoading"></loader>
   <div>
     <h1>Профиль пользователя</h1>
     <ul>
@@ -9,33 +10,46 @@
       <li>Avatar: {{ this.user.avatar_url }}</li>
       <li>Created at: {{ this.user.created_at }}</li>
     </ul>
+    <h1>Список шейдеров</h1>
+    <ol>
+      <li v-for="shader in user.shaders" :key="shader.id">
+        <router-link :to="`/new/${shader.id}`">{{ shader.id }} - {{ shader.title }} - {{shader.visibility}}</router-link>
+      </li>
+    </ol>
   </div>
 </template>
 
 <script>
+import Loader from "@/components/UI/Loader.vue";
+
 export default {
+  components: {Loader},
   data() {
     return {
-      user: {}
+      user: {},
+      isLoading: false
     }
   },
   methods: {
-    async get_user_data() {
-      try {
-        const response = await fetch(`http://localhost:8000/auth/profile/${this.$route.params.id}`, {
-          method: "GET",
-          headers: {"Content-Type": "application/json"},
-          credentials: 'include',
-        });
-        this.user = await response.json();
-        // TODO доделать
-      } catch (error) {
-        console.log(error);
-      }
-    }
+
   },
-  mounted() {
-    this.get_user_data()
+  async mounted() {
+    this.isLoading = true
+    try {
+      const response = await fetch(`http://localhost:8000/auth/profile/${this.$route.params.id}`, {
+        method: "GET",
+        headers: {"Content-Type": "application/json"},
+        credentials: 'include',
+      });
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      this.user = await response.json();
+      console.log(this.user);
+      // TODO доделать
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.isLoading = false
+    }
   }
 }
 </script>
