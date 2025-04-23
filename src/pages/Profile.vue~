@@ -2,7 +2,21 @@
   <loader v-if="this.isLoading"></loader>
   <div>
     <h1>Профиль пользователя</h1>
-    <img src="http://localhost:8000{{ this.user.avatar_url }}" alt="avatar">
+    <div>
+      <img
+          :src="`http://localhost:8000/public/${this.user.avatar_url || 'public/avatars/avatar.png'}`"
+          alt="avatar"
+          width="200"
+          @click="triggerAvatarInput"
+      />
+      <input
+          type="file"
+          ref="avatarInput"
+          accept="image/*"
+          style="display: none"
+          @change="avatarLoadHandler"
+      >
+    </div>
     <ul>
       <li>ID: {{ this.user.id }}</li>
       <li>Username: {{ this.user.name }}</li>
@@ -14,7 +28,8 @@
     <h1>Список шейдеров</h1>
     <ol>
       <li v-for="shader in user.shaders" :key="shader.id">
-        <router-link :to="`/new/${shader.id}`">{{ shader.id }} - {{ shader.title }} - {{shader.visibility}}</router-link>
+        <router-link :to="`/new/${shader.id}`">{{ shader.id }} - {{ shader.title }} - {{ shader.visibility }}
+        </router-link>
       </li>
     </ol>
   </div>
@@ -32,16 +47,48 @@ export default {
     }
   },
   methods: {
+    triggerAvatarInput() {
+      this.$refs.avatarInput.click()
+    },
+    async avatarLoadHandler(event) {
+      const file = event.target.files[0];
+      if (!file) {
+        // TODO открыть модальное окно с ошибкой
+      }
 
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const response = await fetch('http://localhost:8000/profile/avatar', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error('Ошибка загрузки аватара');
+        }
+
+        const data = await response.json();
+        this.user.avatar_url = data.avatar_url;
+
+      } catch (error) {
+        console.error('Ошибка при загрузке:', error);
+        // TODO тут можно добавить всплывающее сообщение или визуальное уведомление
+      }
+
+    }
   },
   async mounted() {
     this.isLoading = true
     try {
-      const response = await fetch(`http://localhost:8000/auth/profile/${this.$route.params.id}`, {
+      const response = await fetch(`http://localhost:8000/profile/${this.$route.params.id}`, {
         method: "GET",
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
       });
+      // TODO обработать 409, когда указан несуществующий пользователь
       await new Promise(resolve => setTimeout(resolve, 1000));
       this.user = await response.json();
       console.log(this.user);
