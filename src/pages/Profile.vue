@@ -2,7 +2,7 @@
   <loader v-if="this.isLoading"></loader>
   <div>
     <h1>Профиль пользователя</h1>
-    <div>
+    <div class="avatar-wrapper">
       <img
           :src="`http://localhost:8000/public/${this.user.avatar_url || 'avatars/avatar.png'}`"
           alt="avatar"
@@ -103,5 +103,9 @@ export default {
 </script>
 
 <style scoped>
-
+.avatar-wrapper{
+  cursor: pointer;
+  display: flex;
+  width: fit-content;
+}
 </style>
