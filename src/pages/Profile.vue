@@ -1,7 +1,7 @@
 <template>
   <loader v-if="this.isLoading"></loader>
   <!-- TODO сделать обработку удаленных пользователей -->
-  <div>
+  <div v-else>
     <h1>Профиль пользователя</h1>
     <div class="avatar-wrapper" :class="{'cursor-pointer': this.isStoreUser}">
       <img

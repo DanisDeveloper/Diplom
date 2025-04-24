@@ -1,6 +1,6 @@
 <template>
   <loader v-if="this.isLoading"></loader>
-<!-- TODO сделать обработку удаленных пользователей -->
+  <!-- TODO сделать обработку удаленных пользователей -->
   <div>
     <h1>Профиль пользователя</h1>
     <div class="avatar-wrapper" :class="{'cursor-pointer': this.isStoreUser}">
@@ -11,9 +11,9 @@
           height="224"
           @click="triggerAvatarInput"
       />
-<!--      v-if="this.isStoreUser"-->
 
       <input
+          v-if="this.isStoreUser"
           type="file"
           ref="avatarInput"
           accept="image/*"
@@ -111,11 +111,12 @@ export default {
 </script>
 
 <style scoped>
-.avatar-wrapper{
+.avatar-wrapper {
   display: flex;
   width: fit-content;
 }
-.cursor-pointer{
+
+.cursor-pointer {
   cursor: pointer;
 }
 </style>
