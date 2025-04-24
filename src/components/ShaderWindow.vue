@@ -156,6 +156,9 @@ export default {
 
       this.gl.viewport(0, 0, canvas.width, canvas.height);
       this.gl.getExtension("OES_standard_derivatives");
+      this.gl.enable(this.gl.BLEND);
+      this.gl.blendFunc(this.gl.SRC_ALPHA, this.gl.ONE_MINUS_SRC_ALPHA);
+
       this.createProgram();
 
     },
