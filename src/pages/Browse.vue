@@ -1,12 +1,15 @@
 <template>
   <loader v-if="isLoading"></loader>
+  <!--  TODO Сделать обработку, когда сервер недоступен-->
   <div v-else>
-    <div style="display: flex;">
+    <div class="header">
       <h1>Список шейдеров</h1>
-      <div style="margin:auto; margin-right: 10px;">
+      <div class="pagination">
         <button
             v-for="i in totalPages"
             :key="i"
+            class="page"
+            :class="{'active-page': i == page}"
             @click="handlePageClick(i)"
         >
           {{ i }}
@@ -14,30 +17,34 @@
       </div>
     </div>
     <div class="shader-grid">
-      <shader-window
-          ref="shaders"
+      <div
           v-for="(shader, index) in shaders"
-          :key="index"
-          :code="shader['code']"
           class="shader-cell"
-          :initial-pause="true"
-          @mouseenter="handleMouseEnter(index)"
-          @mouseleave="handleMouseLeave(index)"
-          :disable-mouse-down-event="true"
-          :disable-mouse-up-event="true"
-          :disable-mouse-move-event="true"
-          @click="$router.push(`/new/${shader['id']}`)"
-      />
-      <!--      TODO реализовать получение shader по id-->
+      >
+        <shader-window
+            class="shader-window"
+            ref="shaders"
+            :key="index"
+            :code="shader['code']"
+            :initial-pause="true"
+            @mouseenter="handleMouseEnter(index)"
+            @mouseleave="handleMouseLeave(index)"
+            :disable-mouse-down-event="true"
+            :disable-mouse-up-event="true"
+            :disable-mouse-move-event="true"
+            @click="$router.push(`/new/${shader['id']}`)"
+        />
+        {{ shader['title'] }} by
+        <div class="author" @click="$router.push(`/profile/${shader['user_id']}`)">{{ shader['username'] }}</div>
+      </div>
     </div>
   </div>
-  <!--    TODO возможно придется переделать, чтобы была страница /view и передавать только id шейдера, чтобы потом делать fetch-->
 </template>
 
 
 <script>
 import ShaderWindow from "@/components/ShaderWindow.vue";
-import Loader from "@/components/UI/Loader.vue";
+import Loader from "@/components/Loader.vue";
 
 export default {
   components: {Loader, ShaderWindow},
@@ -76,7 +83,9 @@ export default {
         credentials: 'include',
       });
 
+      await new Promise(resolve => setTimeout(resolve, 1000));
       this.shaders = await response.json();
+      console.log(this.shaders)
       this.totalPages = parseInt(response.headers.get('x-total-count'));
 
     } catch (error) {
@@ -90,15 +99,49 @@ export default {
 
 
 <style scoped>
+.header {
+  display: flex;
+  margin: 0 16px;
+  align-items: center;
+}
+
+.pagination {
+  margin: 5px 0 5px auto;
+}
+
+.page {
+
+}
+
+.active-page {
+  background: red;
+}
+
 .shader-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(3, auto);
-  gap: 16px;
+  align-content: space-between;
 }
 
 .shader-cell {
-  cursor: pointer;
+  margin: 0 16px 16px;
 }
 
+.shader-window {
+  cursor: pointer;
+
+}
+
+.shader-window :deep(canvas) {
+  border-radius: 10px;
+}
+
+.author{
+  display: inline-block;
+  cursor: pointer;
+}
+.author:hover{
+  text-decoration: underline;
+}
 </style>
