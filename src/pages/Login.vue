@@ -9,23 +9,19 @@
 
       <form @submit.prevent="handleSubmit">
         <div v-if="!isLoginForm" class="input-group">
-          <label>Name</label>
-          <input type="name" v-model="form.name" required/>
+          <input type="name" placeholder="Name" v-model="form.name" required/>
         </div>
 
         <div class="input-group">
-          <label>Email</label>
-          <input type="email" v-model="form.email" required/>
+          <input type="email" placeholder="Email" v-model="form.email" required/>
         </div>
 
         <div class="input-group">
-          <label>Password</label>
-          <input type="password" v-model="form.password" required/>
+          <input type="password" placeholder="Password" v-model="form.password" required/>
         </div>
 
         <div v-if="!isLoginForm" class="input-group">
-          <label>Confirm password</label>
-          <input type="password" v-model="form.confirmPassword" required/>
+          <input type="password" placeholder="Confirm password" v-model="form.confirmPassword" required/>
         </div>
 
         <button type="submit">{{ isLoginForm ? "Sign in" : "Sign up" }}</button>
@@ -113,16 +109,11 @@ export default {
 
 /* Стили для центрирования */
 .outer-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  width: 100%;
+  margin: 8rem auto 0;
 }
 
 .auth-container {
-  width: 30vw;
-  min-width: 400px;
+  min-width: 30vw;
   padding: 20px;
   text-align: center;
   border: 1px solid #ddd;
@@ -134,15 +125,15 @@ export default {
 .tabs {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 10px;
+  margin-bottom: 25px;
 }
 
 .tabs button {
   flex: 1;
   padding: 10px;
   cursor: pointer;
-  border: none;
   transition: background 0.3s, color 0.3s;
+  border: 1px solid transparent;
 }
 
 .tabs button.active {
@@ -164,9 +155,8 @@ export default {
   margin-bottom: 15px;
 }
 
-.input-group label {
+.input-group {
   display: block;
-  margin-bottom: 5px;
 }
 
 .input-group input {
@@ -179,12 +169,13 @@ export default {
 button {
   width: 100%;
   padding: 10px;
-  border: none;
   cursor: pointer;
   border-radius: 4px;
   transition: background 0.3s, color 0.3s;
   background: #282C34;
   color: white;
+  border: 1px solid transparent;
+  font-size: large;
 }
 
 button:hover {
