@@ -9,6 +9,7 @@
             @mouseenter="this.$refs.bestShaderWindow.togglePause()"
             @mouseleave="this.$refs.bestShaderWindow.togglePause()"
             :code="bestShader"
+            :initial-pause="true"
             @click="this.$router.push({ path: '/new', query: { code: bestShader } })"
             :disable-mouse-down-event="true"
             :disable-mouse-up-event="true"
@@ -30,6 +31,7 @@
             :key="n"
             :code="featuredShaders[n - 1]"
             class="feature-shader"
+            :initial-pause="true"
             @click="this.$router.push({ path: '/new', query: { code: featuredShaders[n - 1] } })"
             @mouseenter="handleMouseEnter(n - 1)"
             @mouseleave="handleMouseLeave(n - 1)"
@@ -68,12 +70,6 @@ export default {
       this.$refs.featureShaderWindows[index].togglePause()
     }
   },
-  mounted() {
-    this.$refs.bestShaderWindow.togglePause();
-    this.$refs.featureShaderWindows.forEach(ref => {
-      ref.togglePause();
-    })
-  }
 }
 </script>
 

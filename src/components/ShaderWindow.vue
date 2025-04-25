@@ -26,6 +26,10 @@ export default {
       required: true,
       default: "",
     },
+    initialPause: {
+      type: Boolean,
+      default: false
+    },
     disableMouseMoveEvent:{
       type: Boolean,
       default: false
@@ -56,7 +60,7 @@ export default {
       mouseDown: 0,
 
       // Переменные для таймера
-      isPaused: false,       // Флаг паузы
+      isPaused: this.initialPause,       // Флаг паузы
       lastFrameTime: 0,      // Время, зафиксированное в предыдущем кадре (в мс)
       accumulatedTime: 0,    // Накопленное время в секундах (отсчёт, начиная с нуля)
 

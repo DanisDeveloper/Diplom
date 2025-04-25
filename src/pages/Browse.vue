@@ -1,12 +1,104 @@
 <template>
-  <h1>Список шейдеров</h1>
+  <loader v-if="isLoading"></loader>
+  <div v-else>
+    <div style="display: flex;">
+      <h1>Список шейдеров</h1>
+      <div style="margin:auto; margin-right: 10px;">
+        <button
+            v-for="i in totalPages"
+            :key="i"
+            @click="handlePageClick(i)"
+        >
+          {{ i }}
+        </button>
+      </div>
+    </div>
+    <div class="shader-grid">
+      <shader-window
+          ref="shaders"
+          v-for="(shader, index) in shaders"
+          :key="index"
+          :code="shader['code']"
+          class="shader-cell"
+          :initial-pause="true"
+          @mouseenter="handleMouseEnter(index)"
+          @mouseleave="handleMouseLeave(index)"
+          :disable-mouse-down-event="true"
+          :disable-mouse-up-event="true"
+          :disable-mouse-move-event="true"
+          @click="$router.push(`/new/${shader['id']}`)"
+      />
+      <!--      TODO реализовать получение shader по id-->
+    </div>
+  </div>
+  <!--    TODO возможно придется переделать, чтобы была страница /view и передавать только id шейдера, чтобы потом делать fetch-->
 </template>
 
+
 <script>
-export default {}
+import ShaderWindow from "@/components/ShaderWindow.vue";
+import Loader from "@/components/UI/Loader.vue";
+
+export default {
+  components: {Loader, ShaderWindow},
+  data() {
+    return {
+      isLoading: false,
+      totalPages: null,
+      page: this.$route.query.page || 1,
+      shaders: [],
+    }
+  },
+  methods: {
+    handleMouseEnter(index) {
+      this.$refs.shaders[index].togglePause();
+    },
+    handleMouseLeave(index) {
+      this.$refs.shaders[index].togglePause()
+    },
+    handlePageClick(newPage) {
+      if (this.page === newPage) return;
+      this.$router.push({
+        path: `/browse/`,
+        query: {
+          page: newPage
+        }
+      });
+    }
+  },
+  async mounted() {
+    this.isLoading = true;
+    try {
+      const endpoint = `http://localhost:8000/shaders/?page=${this.page}`;
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers: {"Content-Type": "application/json"},
+        credentials: 'include',
+      });
+
+      this.shaders = await response.json();
+      this.totalPages = parseInt(response.headers.get('x-total-count'));
+
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+}
 </script>
 
 
 <style scoped>
+.shader-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, auto);
+  gap: 16px;
+}
+
+.shader-cell {
+  cursor: pointer;
+}
 
 </style>
