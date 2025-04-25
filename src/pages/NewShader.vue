@@ -113,7 +113,7 @@ import DownIcon from "@/components/UI/DownIcon.vue";
 import SaveIcon from "@/components/UI/SaveIcon.vue";
 import UpIcon from "@/components/UI/UpIcon.vue";
 import ForbiddenIcon from "@/components/UI/ForbiddenIcon.vue";
-import Loader from "@/components/UI/Loader.vue";
+import Loader from "@/components/Loader.vue";
 
 export default {
   components: {
@@ -309,12 +309,11 @@ export default {
   background: transparent;
   border-radius: 8px;
   border: 1px solid #282C34;
-  padding: 4px;
   font-size: large;
   color: lightgray;
   cursor: pointer;
-  margin-right: 10px;
   display: flex;
+  margin: 0 5px;
   align-items: center;
   justify-content: center;
   transition: border 0.2s ease, color 0.2s ease;
