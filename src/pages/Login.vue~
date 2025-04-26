@@ -1,0 +1,193 @@
+<template>
+  <div class="outer-container">
+
+    <div class="auth-container">
+      <div class="tabs">
+        <button :class="{ active: isLoginForm }" @click="isLoginForm = true">Login</button>
+        <button :class="{ active: !isLoginForm }" @click="isLoginForm = false">Registration</button>
+      </div>
+
+      <form @submit.prevent="handleSubmit">
+        <div v-if="!isLoginForm" class="input-group">
+          <input type="name" placeholder="Name" v-model="form.name" required/>
+        </div>
+
+        <div class="input-group">
+          <input type="email" placeholder="Email" v-model="form.email" required/>
+        </div>
+
+        <div class="input-group">
+          <input type="password" placeholder="Password" v-model="form.password" required/>
+        </div>
+
+        <div v-if="!isLoginForm" class="input-group">
+          <input type="password" placeholder="Confirm password" v-model="form.confirmPassword" required/>
+        </div>
+
+        <button class="submit-btn" type="submit">{{ isLoginForm ? "Sign in" : "Sign up" }}</button>
+      </form>
+
+      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    </div>
+  </div>
+</template>
+
+<script>
+import {checkAuth} from "@/auth/checkAuth.js";
+
+export default {
+  data() {
+    return {
+      isLoginForm: true, // Переключение между логином и регистрацией
+      form: {
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      },
+      errorMessage: "",
+    };
+  },
+  methods: {
+    async handleSubmit() {
+      this.errorMessage = "";
+
+      // Registration
+      if (!this.isLoginForm) {
+        if (this.form.password !== this.form.confirmPassword) {
+          this.errorMessage = "Passwords are different";
+          return;
+        }
+
+        const payload = {
+          name: this.form.name,
+          email: this.form.email,
+          password: this.form.password,
+        };
+        try {
+          const response = await fetch("http://localhost:8000/auth/register", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload),
+            credentials: "include", // Для работы с куками
+          });
+
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
+          this.$router.push("/");
+        } catch (error) {
+          this.errorMessage = error.message;
+        }
+      }
+
+      // Login
+      try {
+        const payload = {
+          email: this.form.email,
+          password: this.form.password,
+        };
+        const response = await fetch("http://localhost:8000/auth/login", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(payload),
+          credentials: "include", // Для работы с куками
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
+        await checkAuth(this.$store);
+        this.$router.push("/");
+      } catch (error) {
+        this.errorMessage = error.message;
+      }
+    },
+  },
+};
+</script>
+
+<style scoped>
+
+/* Стили для центрирования */
+.outer-container {
+  margin: 8rem auto 0;
+}
+
+.auth-container {
+  min-width: 30vw;
+  padding: 20px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+.tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 25px;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.3s, color 0.3s;
+  border: 1px solid transparent;
+}
+
+.tabs button.active {
+  background: #282C34;
+  color: white;
+}
+
+.tabs button:not(.active) {
+  background: #ccc;
+  color: #282C34;
+}
+
+.tabs button:hover {
+  background: #282C34;
+  color: white;
+}
+
+.input-group {
+  margin-bottom: 15px;
+  display: block;
+}
+
+
+.input-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: large;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background 0.3s, color 0.3s;
+  background: #282C34;
+  color: white;
+  border: 1px solid transparent;
+  font-size: large;
+}
+
+button:hover {
+  background: #ccc;
+  color: #282C34;
+  border: 1px solid #282C34;
+}
+.submit-btn{
+  margin-bottom: 10px;
+}
+
+.error {
+  color: red;
+  margin-top: 10px;
+}
+</style>

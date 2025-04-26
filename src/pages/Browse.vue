@@ -4,13 +4,15 @@
   <div v-else>
     <div class="header">
       <h1>Список шейдеров</h1>
+<!--      # TODO сделать сортировку по разным параметрам-->
       <div class="pagination">
         <button
-            v-for="i in totalPages"
+            v-for="i in pages"
             :key="i"
             class="page"
-            :class="{'active-page': i == page}"
-            @click="handlePageClick(i)"
+            :class="{'active-page': i == this.page, 'dots': i === '...'}"
+            @click="typeof i === 'number' && handlePageClick(i)"
+            :disabled="i === '...'"
         >
           {{ i }}
         </button>
@@ -83,6 +85,37 @@ export default {
       });
     }
   },
+  computed: {
+    pages() {
+      const total = this.totalPages;
+      const current = Number(this.page);
+
+      if (total <= 7) {
+        return Array.from({ length: total }, (_, i) => i + 1);
+      }
+
+      const pages = [];
+
+      pages.push(1);
+      if (current > 4) {
+        pages.push('...');
+      }
+
+      const start = Math.max(2, current - 2);
+      const end = Math.min(total - 1, current + 2);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (current < total - 3) {
+        pages.push('...');
+      }
+      pages.push(total);
+
+      return pages;
+    }
+  },
   async mounted() {
     this.isLoading = true;
     try {
@@ -93,7 +126,7 @@ export default {
         credentials: 'include',
       });
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // await new Promise(resolve => setTimeout(resolve, 1000));
       this.shaders = await response.json();
       console.log(this.shaders)
       this.totalPages = parseInt(response.headers.get('x-total-count'));
@@ -111,8 +144,9 @@ export default {
 <style scoped>
 .header {
   display: flex;
-  margin: 0 16px;
+  margin: 10px 16px;
   align-items: center;
+  color: #282C34;
 }
 
 .pagination {
@@ -120,11 +154,37 @@ export default {
 }
 
 .page {
+  padding: 4px 8px;
+  margin: 0 4px;
+  border-radius: 8px;
+  background: transparent;
+  font-size: large;
+  cursor: pointer;
+  color: #282C34;
+  transition: border 0.3s ease, color 0.3s ease;
+  border: 1px solid #282C34;
+}
 
+.page:hover {
+  color: lightgray;
+  background: #282C34;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .active-page {
-  background: red;
+  color: lightgray;
+  background: #282C34;
+}
+button.dots {
+  cursor: default;
+  background: transparent;
+  border: none;
+  color: #282C34;
+  margin: 0;
+}
+button.dots:hover{
+  background: transparent;
+  color: #282C34;
 }
 
 .shader-grid {
@@ -148,6 +208,7 @@ export default {
 
 .shader-window-info {
   display: flex;
+  color: #282C34;
 }
 
 .shader-window-text {
@@ -173,4 +234,6 @@ export default {
 .shader-window-author:hover {
   text-decoration: underline;
 }
+
+
 </style>
