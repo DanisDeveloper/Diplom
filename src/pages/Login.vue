@@ -24,7 +24,7 @@
           <input type="password" placeholder="Confirm password" v-model="form.confirmPassword" required/>
         </div>
 
-        <button type="submit">{{ isLoginForm ? "Sign in" : "Sign up" }}</button>
+        <button class="submit-btn" type="submit">{{ isLoginForm ? "Sign in" : "Sign up" }}</button>
       </form>
 
       <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
@@ -153,17 +153,16 @@ export default {
 
 .input-group {
   margin-bottom: 15px;
-}
-
-.input-group {
   display: block;
 }
+
 
 .input-group input {
   width: 100%;
   padding: 8px;
   border: 1px solid #ccc;
   border-radius: 4px;
+  font-size: large;
 }
 
 button {
@@ -182,6 +181,9 @@ button:hover {
   background: #ccc;
   color: #282C34;
   border: 1px solid #282C34;
+}
+.submit-btn{
+  margin-top: 10px;
 }
 
 .error {
