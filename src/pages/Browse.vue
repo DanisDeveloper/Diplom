@@ -34,8 +34,18 @@
             :disable-mouse-move-event="true"
             @click="$router.push(`/new/${shader['id']}`)"
         />
-        {{ shader['title'] }} by
-        <div class="author" @click="$router.push(`/profile/${shader['user_id']}`)">{{ shader['username'] }}</div>
+        <div class="shader-window-info">
+          <span class="shader-window-text">
+            <span class="shader-window-title">{{ shader['title'] }}</span>
+            <span>&nbsp;by&nbsp;</span>
+            <span
+                class="shader-window-author"
+                @click="$router.push(`/profile/${shader['user_id']}`)"
+            >
+              {{ shader['username'] }}
+            </span>
+          </span>
+        </div>
       </div>
     </div>
   </div>
@@ -119,7 +129,7 @@ export default {
 
 .shader-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: repeat(3, auto);
   align-content: space-between;
 }
@@ -130,18 +140,37 @@ export default {
 
 .shader-window {
   cursor: pointer;
-
 }
 
 .shader-window :deep(canvas) {
   border-radius: 10px;
 }
 
-.author{
-  display: inline-block;
+.shader-window-info {
+  display: flex;
+}
+
+.shader-window-text {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.shader-window-text > span {
+  white-space: nowrap;
+}
+
+.shader-window-title, .shader-window-author {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.shader-window-author {
   cursor: pointer;
 }
-.author:hover{
+
+.shader-window-author:hover {
   text-decoration: underline;
 }
 </style>
