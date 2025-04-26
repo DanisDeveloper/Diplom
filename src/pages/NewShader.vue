@@ -1,11 +1,4 @@
 <template>
-<!--  <div v-if="this.isLoading" class="loader-wrapper">-->
-<!--    <div class="smartglass-loader">-->
-<!--      <div class="arc arc1"></div>-->
-<!--      <div class="arc arc2"></div>-->
-<!--      <div class="arc arc3"></div>-->
-<!--    </div>-->
-<!--  </div>-->
   <loader v-if="this.isLoading"></loader>
   <div v-else-if="this.isForbidden" class="forbidden-block">
     <forbidden-icon></forbidden-icon>
@@ -60,8 +53,9 @@
             <button v-if="isSaving" class="action-btn btn-saving" disabled>
               <div class="spinner"></div>
             </button>
-            <button v-else v-if="this.$store.state.isAuth" class="action-btn" @click="handleSaveButtonClick">
-              <save-icon></save-icon>
+            <button v-else v-if="this.$store.state.isAuth" class="action-btn" @click="handleSaveOrForkButtonClick">
+              <save-icon v-if="isStoreUser"></save-icon>
+              <fork-icon v-else></fork-icon>
             </button>
           </div>
         </div>
@@ -74,10 +68,10 @@
             class="shader-description"
             placeholder="Description"
             v-model.trim="description"></textarea>
-<!--    TODO сделать join, чтобы получить имя пользователя, который создал шейдер    <label>created by </label>-->
-<!--      TODO также добавить поле с датой туда типа created <username> in <date>  -->
-<!--        TODO также добавить количество лайков-->
-        <label v-if="this.$store.state.isAuth" class="shader-visibility">
+        <!--    TODO сделать join, чтобы получить имя пользователя, который создал шейдер    <label>created by </label>-->
+        <!--      TODO также добавить поле с датой туда типа created <username> in <date>  -->
+        <!--        TODO также добавить количество лайков-->
+        <label v-if="isStoreUser" class="shader-visibility">
           Visibility:
           <select v-model="visibility" class="visibility-select">
             <option :value="true">Public</option>
@@ -114,9 +108,11 @@ import SaveIcon from "@/components/UI/SaveIcon.vue";
 import UpIcon from "@/components/UI/UpIcon.vue";
 import ForbiddenIcon from "@/components/UI/ForbiddenIcon.vue";
 import Loader from "@/components/Loader.vue";
+import ForkIcon from "@/components/UI/ForkIcon.vue";
 
 export default {
   components: {
+    ForkIcon,
     Loader,
     ForbiddenIcon,
     UpIcon,
@@ -145,6 +141,7 @@ export default {
       errorLog: [],
       isExpanded: false,
 
+      // TODO перенести все это в один объект
       id: null,
       title: "",
       description: "",
@@ -153,6 +150,7 @@ export default {
       created_at: null,
       updated_at: null,
       user_id: null,
+      id_forked: null,
 
       isSaving: false,
       isLoading: false,
@@ -192,7 +190,8 @@ export default {
     expandScreen() {
       this.$refs.shaderWindow.expandScreen();
     },
-    async handleSaveButtonClick() {
+    async handleSaveOrForkButtonClick() {
+      // Проверка, что название не пустое
       if (this.title.length === 0) {
         this.titleEmpty = true;
         clearTimeout(this.timeoutId)
@@ -202,40 +201,53 @@ export default {
         return;
       }
 
+      // Сохранение шейдера
       this.isSaving = true;
       try {
-        const response = await fetch('http://localhost:8000/shaders', {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          credentials: 'include',
-          body: JSON.stringify({
+        let requestBody = null
+        if (this.isStoreUser) {
+          requestBody = {
             id: this.id,
             title: this.title,
             description: this.description,
             code: this.code,
             visibility: this.visibility,
-          })
+            id_forked: null,
+          };
+        } else {
+          requestBody = {
+            id: null,
+            title: this.title,
+            description: this.description,
+            code: this.code,
+            visibility: this.visibility,
+            id_forked: this.id,
+          };
+        }
+        console.log(requestBody)
+        const response = await fetch('http://localhost:8000/shaders/', {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          credentials: 'include',
+          body: JSON.stringify(requestBody)
         });
         // TODO убрать паузу
         await new Promise(resolve => setTimeout(resolve, 1000));
         const body = await response.json();
-        this.id = body.id;
-        this.title = body.title;
-        this.description = body.description;
-        this.code = body.code;
-        this.visibility = body.visibility;
-        this.created_at = body.created_at;
-        this.updated_at = body.updated_at;
-        this.user_id = body.user_id;
-        this.$router.push(`/new/${body.id}`); // просто, чтобы было
-        // console.log(body);
+        if(!this.isStoreUser) {
+          this.$router.push(`/new/${body.id}/`);
+        }
       } catch (error) {
         // TODO сделать вывод ошибки на экран
-
         console.log(error);
       } finally {
         this.isSaving = false;
       }
+    }
+  },
+  computed: {
+    isStoreUser() {
+      return this.user_id === this.$store.state.user.id || this.user_id === null
     }
   },
   async mounted() {
@@ -261,6 +273,7 @@ export default {
       this.created_at = body.created_at;
       this.updated_at = body.updated_at;
       this.user_id = body.user_id;
+      this.id_forked = body.id_forked;
       // ждём, пока Vue применит все изменения, и только потом обновляем шейдер
       this.uploadShader();
     } catch (error) {
@@ -484,7 +497,6 @@ hr {
   height: 250px;
   margin-top: 100px;
 }
-
 
 
 </style>
