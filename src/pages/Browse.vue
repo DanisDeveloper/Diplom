@@ -4,7 +4,7 @@
   <div v-else>
     <div class="header">
       <h1>Shaders list</h1>
-<!--      # TODO сделать сортировку по разным параметрам-->
+      <!--      # TODO сделать сортировку по разным параметрам-->
       <div class="pagination">
         <button
             v-for="i in pages"
@@ -91,7 +91,7 @@ export default {
       const current = Number(this.page);
 
       if (total <= 7) {
-        return Array.from({ length: total }, (_, i) => i + 1);
+        return Array.from({length: total}, (_, i) => i + 1);
       }
 
       const pages = [];
@@ -175,6 +175,7 @@ export default {
   color: lightgray;
   background: #282C34;
 }
+
 button.dots {
   cursor: default;
   background: transparent;
@@ -182,7 +183,8 @@ button.dots {
   color: #282C34;
   margin: 0;
 }
-button.dots:hover{
+
+button.dots:hover {
   background: transparent;
   color: #282C34;
 }
@@ -229,6 +231,7 @@ button.dots:hover{
 
 .shader-window-author {
   cursor: pointer;
+  font-weight: bold;
 }
 
 .shader-window-author:hover {

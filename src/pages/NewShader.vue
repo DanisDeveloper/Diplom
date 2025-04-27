@@ -43,13 +43,16 @@
           </button>
 
           <div class="right-btns">
-            <button v-if="!isExpanded" :class="{'btn-border-error': !isExpanded && titleEmpty}" class="action-btn"
-                    @click="isExpanded = !isExpanded">
-              <down-icon :fill="!isExpanded && titleEmpty ? 'red' : 'lightgrey'"></down-icon>
+            <button v-if="isSavingLike" class="action-btn btn-saving" disabled>
+              <div class="spinner"></div>
             </button>
-            <button v-else class="action-btn" @click="isExpanded = !isExpanded">
-              <up-icon></up-icon>
+            <button v-else v-if="this.$store.state.isAuth" class="action-btn">
+              <like-icon
+                  :color="isLiked ? 'red' : 'lightgrey'"
+                  @click="handleLikeButtonClick"
+              ></like-icon>
             </button>
+
             <button v-if="isSavingShader" class="action-btn btn-saving" disabled>
               <div class="spinner"></div>
             </button>
@@ -61,30 +64,22 @@
         </div>
       </div>
 
-      <div v-if="isExpanded" class="description-area">
-          <input
-              :class="{'empty-title-error': titleEmpty}"
-              class="shader-title"
-              placeholder="Title"
-              v-model.trim="title"
-          >
-          <button v-if="isSavingLike" class="action-btn btn-saving" disabled>
-            <div class="spinner"></div>
-          </button>
-          <button v-else v-if="this.$store.state.isAuth" class="action-btn">
-            <like-icon
-                :color="isLiked ? 'red' : 'lightgrey'"
-                @click="handleLikeButtonClick"
-            ></like-icon>
-          </button>
+      <div v-if="this.id" class="description-area">
+        <input
+            maxlength="50"
+            :class="{'empty-title-error': titleEmpty}"
+            class="shader-title"
+            placeholder="Title"
+            v-model.trim="title"
+        >
+
         <textarea
             oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
             class="shader-description"
             placeholder="Description"
-            v-model.trim="description"></textarea>
-        <!--    TODO сделать join, чтобы получить имя пользователя, который создал шейдер    <label>created by </label>-->
-        <!--      TODO также добавить поле с датой туда типа created <username> in <date>  -->
-        <!--        TODO также добавить количество лайков-->
+            v-model.trim="description">
+        </textarea>
+
         <label v-if="isStoreUser" class="shader-visibility">
           Visibility:
           <select v-model="visibility" class="visibility-select">
@@ -92,6 +87,15 @@
             <option :value="false">Private</option>
           </select>
         </label>
+
+          <div class="shader-metadata">
+          <span v-if="id_forked">forked from
+            <span class="link" @click="$router.push(`/new/${id_forked}`)">shader</span>
+          </span>
+          <span v-else>Created</span>
+          by <span class="link" @click="$router.push(`/profile/${user_id}`)">{{ username }}</span>
+          in {{ formattedDate }}
+        </div>
       </div>
     </div>
 
@@ -148,7 +152,6 @@ export default {
       canvasHeight: 0,
       compileFailed: false,
       errorLog: [],
-      isExpanded: false,
 
       // TODO перенести все это в один объект (это все информация о шейдере)
       id: null,
@@ -162,6 +165,7 @@ export default {
       id_forked: null,
 
       isLiked: false,
+      username: '',
 
       isSavingShader: false,
       isSavingLike: false,
@@ -277,7 +281,16 @@ export default {
   computed: {
     isStoreUser() {
       return this.user_id === this.$store.state.user.id || this.user_id === null
-    }
+    },
+    formattedDate() {
+      const date = new Date(this.created_at);
+
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+
+      return `${day}-${month}-${year}`;
+    },
   },
   async mounted() {
     if (this.$route.params.id === undefined) return;
@@ -292,7 +305,7 @@ export default {
         this.isForbidden = true;
         return;
       }
-      const {shader, is_liked} = await response.json();
+      const {shader, is_liked, username} = await response.json();
       console.log(is_liked)
       await new Promise(resolve => setTimeout(resolve, 1000)); // TODO убрать
       this.id = shader.id;
@@ -305,6 +318,7 @@ export default {
       this.user_id = shader.user_id;
       this.id_forked = shader.id_forked;
       this.isLiked = is_liked;
+      this.username = username
       // ждём, пока Vue применит все изменения, и только потом обновляем шейдер
       this.uploadShader();
     } catch (error) {
@@ -507,5 +521,20 @@ hr {
   margin-top: 100px;
 }
 
+.shader-metadata{
+  margin-left: auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  white-space: nowrap;
+}
+.link{
+  font-weight: bold;
+
+}
+.link:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 </style>

@@ -9,19 +9,19 @@
 
       <form @submit.prevent="handleSubmit">
         <div v-if="!isLoginForm" class="input-group">
-          <input type="name" placeholder="Name" v-model="form.name" required/>
+          <input maxlength="20" type="name" placeholder="Name" v-model="form.name" required/>
         </div>
 
         <div class="input-group">
-          <input type="email" placeholder="Email" v-model="form.email" required/>
+          <input maxlength="254" type="email" placeholder="Email" v-model="form.email" required/>
         </div>
 
         <div class="input-group">
-          <input type="password" placeholder="Password" v-model="form.password" required/>
+          <input maxlength="254" type="password" placeholder="Password" v-model="form.password" required/>
         </div>
 
         <div v-if="!isLoginForm" class="input-group">
-          <input type="password" placeholder="Confirm password" v-model="form.confirmPassword" required/>
+          <input maxlength="254" type="password" placeholder="Confirm password" v-model="form.confirmPassword" required/>
         </div>
 
         <button class="submit-btn" type="submit">{{ isLoginForm ? "Sign in" : "Sign up" }}</button>
