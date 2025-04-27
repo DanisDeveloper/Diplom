@@ -64,7 +64,7 @@
         </div>
       </div>
 
-      <div class="description-area">
+      <div v-if="this.$store.state.isAuth" class="description-area">
         <input
             maxlength="50"
             :class="{'empty-title-error': titleEmpty}"
@@ -80,21 +80,23 @@
             v-model.trim="description">
         </textarea>
 
-        <label v-if="isStoreUser" class="shader-visibility">
-          Visibility:
-          <select v-model="visibility" class="visibility-select">
-            <option :value="true">Public</option>
-            <option :value="false">Private</option>
-          </select>
-        </label>
+        <div class="shader-description__bottom">
+          <label v-if="isStoreUser" class="shader-visibility">
+            Visibility:
+            <select v-model="visibility" class="visibility-select">
+              <option :value="true">Public</option>
+              <option :value="false">Private</option>
+            </select>
+          </label>
 
           <div v-if="this.id" class="shader-metadata">
           <span v-if="id_forked">forked from
             <span class="link" @click="$router.push(`/new/${id_forked}`)">shader</span>
           </span>
-          <span v-else>Created</span>
-          by <span class="link" @click="$router.push(`/profile/${user_id}`)">{{ username }}</span>
-          in {{ formattedDate }}
+            <span v-else>Created</span>
+            by <span class="link" @click="$router.push(`/profile/${user_id}`)">{{ username }}</span>
+            in {{ formattedDate }}
+          </div>
         </div>
       </div>
     </div>
@@ -467,7 +469,6 @@ hr {
 }
 
 .shader-visibility {
-  padding: 10px;
   color: lightgray;
   font-size: large;
   display: flex;
@@ -521,20 +522,28 @@ hr {
   margin-top: 100px;
 }
 
-.shader-metadata{
+.shader-metadata {
   margin-left: auto;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
   white-space: nowrap;
 }
-.link{
+
+.link {
   font-weight: bold;
 
 }
+
 .link:hover {
   text-decoration: underline;
   cursor: pointer;
 }
 
+.shader-description__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px;
+}
 </style>
