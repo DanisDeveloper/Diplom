@@ -206,14 +206,11 @@ export default {
       // Обработка ошибок
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         const err = gl.getShaderInfoLog(shader)
-        this.errorLog = err.split('\n').map((line) => {
+        this.errorLog = err.split('\n').slice(0, -1).map((line) => {
           const temp = line.split(':')
-          return `<strong>Line ${temp[2]}:</strong> ${temp[3]} : ${temp[4]}`
+          return {'line': temp[2], 'error': temp[3] + ' : ' + temp[4]}
         });
-        this.errorLog.pop(); // Удаляем пустой символ
         this.compileFailed = true
-        console.log(err)
-        console.log(this.errorLog)
 
         if (this.timeoutId) {
           clearTimeout(this.timeoutId)
@@ -224,6 +221,7 @@ export default {
         gl.deleteShader(shader);
         return null;
       }
+
       return shader;
     },
     setupBuffers() {
