@@ -46,7 +46,7 @@
             <button v-if="isSavingLike" class="action-btn btn-saving" disabled>
               <div class="spinner"></div>
             </button>
-            <button v-else v-if="this.$store.state.isAuth" class="action-btn">
+            <button v-else v-if="this.$store.state.isAuth && this.id" class="action-btn">
               <like-icon
                   :color="isLiked ? 'red' : 'lightgrey'"
                   @click="handleLikeButtonClick"
@@ -64,7 +64,7 @@
         </div>
       </div>
 
-      <div v-if="this.id" class="description-area">
+      <div class="description-area">
         <input
             maxlength="50"
             :class="{'empty-title-error': titleEmpty}"
@@ -88,7 +88,7 @@
           </select>
         </label>
 
-          <div class="shader-metadata">
+          <div v-if="this.id" class="shader-metadata">
           <span v-if="id_forked">forked from
             <span class="link" @click="$router.push(`/new/${id_forked}`)">shader</span>
           </span>

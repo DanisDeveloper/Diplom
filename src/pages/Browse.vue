@@ -37,16 +37,21 @@
             @click="$router.push(`/new/${shader['id']}`)"
         />
         <div class="shader-window-info">
-          <span class="shader-window-text">
-            <span class="shader-window-title">{{ shader['title'] }}</span>
+          <span class="shader-window__text">
+            <span class="shader-window__title">{{ shader['title'] }}</span>
             <span>&nbsp;by&nbsp;</span>
             <span
-                class="shader-window-author"
+                class="shader-window__author"
                 @click="$router.push(`/profile/${shader['user_id']}`)"
             >
               {{ shader['username'] }}
             </span>
           </span>
+          <span class="shader-window-info__likes">
+            {{shader['likes']}}
+            <like-icon class="like-icon" :width="16" :height="16" :color="'#282C34'"></like-icon>
+          </span>
+
         </div>
       </div>
     </div>
@@ -57,9 +62,10 @@
 <script>
 import ShaderWindow from "@/components/ShaderWindow.vue";
 import Loader from "@/components/Loader.vue";
+import LikeIcon from "@/components/UI/LikeIcon.vue";
 
 export default {
-  components: {Loader, ShaderWindow},
+  components: {LikeIcon, Loader, ShaderWindow},
   data() {
     return {
       isLoading: false,
@@ -213,30 +219,36 @@ button.dots:hover {
   color: #282C34;
 }
 
-.shader-window-text {
+.shader-window__text {
   display: flex;
   flex-wrap: wrap;
   max-width: 100%;
 }
 
-.shader-window-text > span {
+.shader-window__text > span {
   white-space: nowrap;
 }
 
-.shader-window-title, .shader-window-author {
+.shader-window__title, .shader-window__author {
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;
 }
 
-.shader-window-author {
+.shader-window__author {
   cursor: pointer;
   font-weight: bold;
 }
 
-.shader-window-author:hover {
+.shader-window__author:hover {
   text-decoration: underline;
 }
+.shader-window-info__likes{
+  margin-left: auto;
+}
 
-
+.like-icon{
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
 </style>
