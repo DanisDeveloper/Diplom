@@ -50,7 +50,7 @@
             <button v-else class="action-btn" @click="isExpanded = !isExpanded">
               <up-icon></up-icon>
             </button>
-            <button v-if="isSaving" class="action-btn btn-saving" disabled>
+            <button v-if="isSavingShader" class="action-btn btn-saving" disabled>
               <div class="spinner"></div>
             </button>
             <button v-else v-if="this.$store.state.isAuth" class="action-btn" @click="handleSaveOrForkButtonClick">
@@ -62,7 +62,21 @@
       </div>
 
       <div v-if="isExpanded" class="description-area">
-        <input :class="{'empty-title-error': titleEmpty}" class="shader-title" placeholder="Title" v-model.trim="title">
+          <input
+              :class="{'empty-title-error': titleEmpty}"
+              class="shader-title"
+              placeholder="Title"
+              v-model.trim="title"
+          >
+          <button v-if="isSavingLike" class="action-btn btn-saving" disabled>
+            <div class="spinner"></div>
+          </button>
+          <button v-else v-if="this.$store.state.isAuth" class="action-btn">
+            <like-icon
+                :color="isLiked ? 'red' : 'lightgrey'"
+                @click="handleLikeButtonClick"
+            ></like-icon>
+          </button>
         <textarea
             oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
             class="shader-description"
@@ -109,9 +123,11 @@ import UpIcon from "@/components/UI/UpIcon.vue";
 import ForbiddenIcon from "@/components/UI/ForbiddenIcon.vue";
 import Loader from "@/components/Loader.vue";
 import ForkIcon from "@/components/UI/ForkIcon.vue";
+import LikeIcon from "@/components/UI/LikeIcon.vue";
 
 export default {
   components: {
+    LikeIcon,
     ForkIcon,
     Loader,
     ForbiddenIcon,
@@ -141,7 +157,7 @@ export default {
       errorLog: [],
       isExpanded: false,
 
-      // TODO перенести все это в один объект
+      // TODO перенести все это в один объект (это все информация о шейдере)
       id: null,
       title: "",
       description: "",
@@ -152,7 +168,10 @@ export default {
       user_id: null,
       id_forked: null,
 
-      isSaving: false,
+      isLiked: false,
+
+      isSavingShader: false,
+      isSavingLike: false,
       isLoading: false,
       isForbidden: false,
     }
@@ -202,7 +221,7 @@ export default {
       }
 
       // Сохранение шейдера
-      this.isSaving = true;
+      this.isSavingShader = true;
       try {
         let requestBody = null
         if (this.isStoreUser) {
@@ -224,7 +243,6 @@ export default {
             id_forked: this.id,
           };
         }
-        console.log(requestBody)
         const response = await fetch('http://localhost:8000/shaders/', {
           method: "POST",
           headers: {"Content-Type": "application/json"},
@@ -234,14 +252,32 @@ export default {
         // TODO убрать паузу
         await new Promise(resolve => setTimeout(resolve, 1000));
         const body = await response.json();
-        if(!this.isStoreUser) {
+        if (!this.isStoreUser || this.id === null) {
           this.$router.push(`/new/${body.id}/`);
         }
       } catch (error) {
         // TODO сделать вывод ошибки на экран
         console.log(error);
       } finally {
-        this.isSaving = false;
+        this.isSavingShader = false;
+      }
+    },
+    async handleLikeButtonClick() {
+      this.isSavingLike = true;
+      try {
+        const response = await fetch(`http://localhost:8000/likes/${this.id}/`, {
+          method: this.isLiked ? "DELETE" : "POST",
+          headers: {"Content-Type": "application/json"},
+          credentials: 'include',
+        });
+        await new Promise(resolve => setTimeout(resolve, 1000)); // TODO убрать
+        if (response.ok) {
+          this.isLiked = !this.isLiked;
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.isSavingLike = false;
       }
     }
   },
@@ -254,7 +290,7 @@ export default {
     if (this.$route.params.id === undefined) return;
     this.isLoading = true
     try {
-      const response = await fetch(`http://localhost:8000/shaders/${this.$route.params.id}`, {
+      const response = await fetch(`http://localhost:8000/shaders/${this.$route.params.id}/`, {
         method: "GET",
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
@@ -263,17 +299,19 @@ export default {
         this.isForbidden = true;
         return;
       }
-      const body = await response.json();
+      const {shader, is_liked} = await response.json();
+      console.log(is_liked)
       await new Promise(resolve => setTimeout(resolve, 1000)); // TODO убрать
-      this.id = body.id;
-      this.title = body.title;
-      this.description = body.description;
-      this.code = body.code;
-      this.visibility = body.visibility;
-      this.created_at = body.created_at;
-      this.updated_at = body.updated_at;
-      this.user_id = body.user_id;
-      this.id_forked = body.id_forked;
+      this.id = shader.id;
+      this.title = shader.title;
+      this.description = shader.description;
+      this.code = shader.code;
+      this.visibility = shader.visibility;
+      this.created_at = shader.created_at;
+      this.updated_at = shader.updated_at;
+      this.user_id = shader.user_id;
+      this.id_forked = shader.id_forked;
+      this.isLiked = is_liked;
       // ждём, пока Vue применит все изменения, и только потом обновляем шейдер
       this.uploadShader();
     } catch (error) {
