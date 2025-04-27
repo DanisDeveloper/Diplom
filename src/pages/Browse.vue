@@ -3,7 +3,7 @@
   <!--  TODO Сделать обработку, когда сервер недоступен-->
   <div v-else>
     <div class="header">
-      <h1>Список шейдеров</h1>
+      <h1>Shaders list</h1>
 <!--      # TODO сделать сортировку по разным параметрам-->
       <div class="pagination">
         <button
