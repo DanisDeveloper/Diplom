@@ -83,23 +83,32 @@
         </textarea>
 
         <div v-if="this.id !== null || this.$store.state.isAuth" class="shader-description__bottom">
-          <label v-if="isStoreUser || this.id===null && this.$store.state.isAuth" class="shader-visibility">
-            Visibility:
-            <select v-model="visibility" class="visibility-select">
-              <option :value="true">Public</option>
-              <option :value="false">Private</option>
-            </select>
-          </label>
+          <div class="shader-visibility">
+            <label v-if="isStoreUser || (this.id === null && this.$store.state.isAuth)">
+              Visibility:
+              <select v-model="visibility" class="visibility-select">
+                <option :value="true">Public</option>
+                <option :value="false">Private</option>
+              </select>
+            </label>
+          </div>
 
-          <div v-if="this.id" class="shader-metadata">
-          <span v-if="id_forked">forked from
-            <span class="link" @click="$router.push(`/new/${id_forked}`)">shader</span>
-          </span>
-            <span v-else>Created</span>
-            by <span class="link" @click="$router.push(`/profile/${user_id}`)">{{ username }}</span>
-            in {{ formattedDate }}
+          <div class="shader-metadata">
+            <span v-if="this.id && id_forked">
+              forked from
+              <span class="link" @click="$router.push(`/new/${id_forked}`)">shader</span>
+            </span>
+            <span v-else-if="this.id">
+              Created
+            </span>
+            <span v-if="this.id">
+              by
+              <span class="link" @click="$router.push(`/profile/${user_id}`)">{{ username }}</span>
+              in {{ formattedDate }}
+            </span>
           </div>
         </div>
+
       </div>
     </div>
 
