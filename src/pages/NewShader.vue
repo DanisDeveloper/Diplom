@@ -66,7 +66,7 @@
 
       <div class="description-area">
         <input
-            :disabled="!isStoreUser"
+            :disabled="!isStoreUser && this.id"
             maxlength="50"
             :class="{'empty-title-error': titleEmpty}"
             class="shader-title"
@@ -75,7 +75,7 @@
         >
 
         <textarea
-            :disabled="!isStoreUser"
+            :disabled="!isStoreUser && this.id"
             oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
             class="shader-description"
             placeholder="Description"
