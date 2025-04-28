@@ -57,15 +57,16 @@
               <div class="spinner"></div>
             </button>
             <button v-else v-if="this.$store.state.isAuth" class="action-btn" @click="handleSaveOrForkButtonClick">
-              <save-icon v-if="isStoreUser"></save-icon>
+              <save-icon v-if="isStoreUser || this.id === null"></save-icon>
               <fork-icon v-else></fork-icon>
             </button>
           </div>
         </div>
       </div>
 
-      <div v-if="this.$store.state.isAuth" class="description-area">
+      <div class="description-area">
         <input
+            :disabled="!isStoreUser"
             maxlength="50"
             :class="{'empty-title-error': titleEmpty}"
             class="shader-title"
@@ -74,14 +75,15 @@
         >
 
         <textarea
+            :disabled="!isStoreUser"
             oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
             class="shader-description"
             placeholder="Description"
             v-model.trim="description">
         </textarea>
 
-        <div class="shader-description__bottom">
-          <label v-if="isStoreUser" class="shader-visibility">
+        <div v-if="this.id !== null || this.$store.state.isAuth" class="shader-description__bottom">
+          <label v-if="isStoreUser || this.id===null && this.$store.state.isAuth" class="shader-visibility">
             Visibility:
             <select v-model="visibility" class="visibility-select">
               <option :value="true">Public</option>
@@ -282,7 +284,7 @@ export default {
   },
   computed: {
     isStoreUser() {
-      return this.user_id === this.$store.state.user.id || this.user_id === null
+      return this.user_id === this.$store.state.user.id
     },
     formattedDate() {
       const date = new Date(this.created_at);
