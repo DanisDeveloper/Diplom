@@ -3,8 +3,10 @@
   <!--  TODO Сделать обработку, когда сервер недоступен-->
   <div v-else>
     <div class="header">
-      <h1>Shaders list</h1>
-      <!--      # TODO сделать сортировку по разным параметрам-->
+      <sort-radio-buttons
+          v-model="this.ordering"
+          :options="this.sortOptions"
+      ></sort-radio-buttons>
       <div class="pagination">
         <button
             v-for="i in pages"
@@ -48,7 +50,7 @@
             </span>
           </span>
           <span class="shader-window-info__likes">
-            {{shader['likes']}}
+            {{ shader['likes'] }}
             <like-icon class="like-icon" :width="16" :height="16" :color="'#282C34'"></like-icon>
           </span>
 
@@ -63,18 +65,22 @@
 import ShaderWindow from "@/components/ShaderWindow.vue";
 import Loader from "@/components/Loader.vue";
 import LikeIcon from "@/components/UI/LikeIcon.vue";
+import SortRadioButtons from "@/components/RadioButtons.vue";
 
 export default {
-  components: {LikeIcon, Loader, ShaderWindow},
+  components: {SortRadioButtons, LikeIcon, Loader, ShaderWindow},
   data() {
     return {
       isLoading: false,
       totalPages: null,
       page: this.$route.query.page || 1,
       shaders: [],
+      ordering: this.$route.query.sort || 'Newest',
+      sortOptions: ['Newest', 'Popular'],
     }
   },
   methods: {
+
     handleMouseEnter(index) {
       this.$refs.shaders[index].togglePause();
     },
@@ -86,10 +92,11 @@ export default {
       this.$router.push({
         path: `/browse/`,
         query: {
-          page: newPage
+          page: newPage,
+          sort: this.ordering
         }
       });
-    }
+    },
   },
   computed: {
     pages() {
@@ -122,10 +129,21 @@ export default {
       return pages;
     }
   },
+  watch: {
+    ordering(newOption) {
+      this.$router.push({
+        path: `/browse/`,
+        query: {
+          page: this.page,
+          sort: newOption
+        }
+      })
+    }
+  },
   async mounted() {
     this.isLoading = true;
     try {
-      const endpoint = `http://localhost:8000/shaders/?page=${this.page}`;
+      const endpoint = `http://localhost:8000/shaders/?page=${this.page}&sort=${this.ordering}`;
       const response = await fetch(endpoint, {
         method: "GET",
         headers: {"Content-Type": "application/json"},
@@ -195,6 +213,7 @@ button.dots:hover {
   color: #282C34;
 }
 
+
 .shader-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -243,11 +262,12 @@ button.dots:hover {
 .shader-window__author:hover {
   text-decoration: underline;
 }
-.shader-window-info__likes{
+
+.shader-window-info__likes {
   margin-left: auto;
 }
 
-.like-icon{
+.like-icon {
   vertical-align: middle;
   padding-bottom: 2px;
 }
