@@ -46,6 +46,7 @@ export default {
         confirmPassword: "",
       },
       errorMessage: "",
+      API_URL: import.meta.env.VITE_API_URL
     };
   },
   methods: {
@@ -65,7 +66,7 @@ export default {
           password: this.form.password,
         };
         try {
-          const response = await fetch("http://localhost:8000/auth/register", {
+          const response = await fetch(this.API_URL + "/auth/register", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(payload),
@@ -86,13 +87,14 @@ export default {
           email: this.form.email,
           password: this.form.password,
         };
-        const response = await fetch("http://localhost:8000/auth/login", {
+        console.log(payload)
+        const response = await fetch(this.API_URL + "/auth/login", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify(payload),
           credentials: "include", // Для работы с куками
         });
-
+        console.log("YES");
         const data = await response.json();
         if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
         await checkAuth(this.$store);

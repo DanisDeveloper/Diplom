@@ -1,0 +1,65 @@
+<template>
+  <div class="sorting">
+    <button
+        v-for="option in options"
+        :key="option"
+        class="sort-button"
+        :class="{ active: modelValue === option }"
+        @click="handleSortButtonClick(option)"
+    >
+      {{ option }}
+    </button>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    modelValue: {
+      type: String,
+      required: true
+    },
+    options: {
+      type: Array,
+      required: true
+    }
+  },
+  emits: ['update:modelValue'],
+  methods: {
+    handleSortButtonClick(option) {
+      this.$emit('update:modelValue', option)
+    }
+  }
+};
+</script>
+
+<style scoped>
+.sort-button {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 8px;
+  background: transparent;
+  font-size: large;
+  cursor: pointer;
+  color: #282C34;
+  transition: background 0.2s ease, border 0.2s ease, color 0.2s ease;
+  border: 1px solid #282C34;
+}
+
+.sort-button.active {
+  background: #282C34;
+  color: lightgray;
+}
+
+.sort-button:hover {
+  background: #3f78cc;
+  color: lightgray;
+}
+
+.sort-button.active:hover {
+  background: #cc1f1f;
+  color: lightgray;
+}
+
+
+</style>

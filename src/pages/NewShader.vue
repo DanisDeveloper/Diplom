@@ -104,15 +104,41 @@
             <span v-if="this.id">
               by
               <span class="link" @click="$router.push(`/profile/${user_id}`)">{{ username }}</span>
-              in {{ formattedDate }}
+              in {{ this.formatDate(this.created_at) }}
             </span>
           </div>
         </div>
+      </div>
 
+      <div class="comments-area">
+        <h3>Comments</h3>
+        <textarea
+            oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+            class="comment-post"
+            placeholder="Your comment..."
+            v-model.trim="comment">
+        </textarea>
+        <button class="post-btn" @click="postComment">Post</button>
+        <div v-for="comment in comments" class="comment">
+          <img
+              class="comment__avatar"
+              width="40"
+              height="40"
+              :src="`${this.API_URL}/public/${comment['avatar_url'] ? comment['avatar_url'] : 'avatars/avatar.png'}`"
+              alt="avatar">
+          <div class="comment__header">{{ comment['username'] }} in {{ this.formatDate(comment['created_at']) }}</div>
+          <div class="comment__content">
+            {{ comment['text'] }}
+          </div>
+        </div>
       </div>
     </div>
 
-    <shader-editor v-model="code" :errors="this.errorLog" class="shader-editor"></shader-editor>
+    <shader-editor
+        v-model="code"
+        :errors="this.errorLog"
+        class="shader-editor">
+    </shader-editor>
   </div>
 </template>
 
@@ -180,10 +206,16 @@ export default {
       isLiked: false,
       username: '',
 
+      comments: [],
+      comment: '',
+
       isSavingShader: false,
       isSavingLike: false,
       isLoading: false,
       isForbidden: false,
+
+      API_URL: import.meta.env.VITE_API_URL,
+
     }
   },
   methods: {
@@ -253,7 +285,7 @@ export default {
             id_forked: this.id,
           };
         }
-        const response = await fetch('http://localhost:8000/shaders/', {
+        const response = await fetch(`${this.API_URL}/shaders/`, {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
@@ -275,7 +307,7 @@ export default {
     async handleLikeButtonClick() {
       this.isSavingLike = true;
       try {
-        const response = await fetch(`http://localhost:8000/likes/${this.id}/`, {
+        const response = await fetch(`${this.API_URL}/likes/${this.id}/`, {
           method: this.isLiked ? "DELETE" : "POST",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
@@ -289,27 +321,30 @@ export default {
       } finally {
         this.isSavingLike = false;
       }
-    }
+    },
+    postComment(){
+      // TODO доделать
+    },
+    formatDate(date) {
+      const _date = new Date(date);
+
+      const day = String(_date.getDate()).padStart(2, '0');
+      const month = String(_date.getMonth() + 1).padStart(2, '0');
+      const year = _date.getFullYear();
+
+      return `${day}-${month}-${year}`;
+    },
   },
   computed: {
     isStoreUser() {
       return this.user_id === this.$store.state.user.id
-    },
-    formattedDate() {
-      const date = new Date(this.created_at);
-
-      const day = String(date.getDate()).padStart(2, '0');
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const year = date.getFullYear();
-
-      return `${day}-${month}-${year}`;
     },
   },
   async mounted() {
     if (this.$route.params.id === undefined) return;
     this.isLoading = true
     try {
-      const response = await fetch(`http://localhost:8000/shaders/${this.$route.params.id}/`, {
+      const response = await fetch(`${this.API_URL}/shaders/${this.$route.params.id}/`, {
         method: "GET",
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
@@ -318,8 +353,7 @@ export default {
         this.isForbidden = true;
         return;
       }
-      const {shader, is_liked, username} = await response.json();
-      console.log(is_liked)
+      const {shader, is_liked, username, comments} = await response.json();
       await new Promise(resolve => setTimeout(resolve, 1000)); // TODO убрать
       this.id = shader.id;
       this.title = shader.title;
@@ -331,7 +365,9 @@ export default {
       this.user_id = shader.user_id;
       this.id_forked = shader.id_forked;
       this.isLiked = is_liked;
-      this.username = username
+      this.username = username;
+      this.comments = comments;
+      console.log(this.comments);
       // ждём, пока Vue применит все изменения, и только потом обновляем шейдер
       this.uploadShader();
     } catch (error) {
@@ -557,4 +593,54 @@ hr {
   align-items: center;
   margin: 10px;
 }
+
+
+.comment-post {
+  padding: 10px;
+  border: 1px solid lightgray;
+  border-radius: 8px;
+  background: #282C34;
+  font-size: large;
+  cursor: pointer;
+  color: lightgray;
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  min-height: 100px;
+}
+
+.post-btn {
+  display: flex;
+  padding: 4px 24px;
+  margin: 0 0 0 auto;
+  border-radius: 8px;
+  background: transparent;
+  font-size: large;
+  cursor: pointer;
+  color: #282C34;
+  transition: border 0.3s ease, color 0.3s ease;
+  border: 1px solid #282C34;
+}
+
+.post-btn:hover {
+  transition: background 0.3s ease, color 0.3s ease;
+  background: #282C34;
+  color: lightgray;
+}
+
+.comment {
+  background: #282C34;
+  padding: 10px;
+  border-radius: 8px;
+  margin: 10px 0;
+  color: lightgray;
+}
+
+
+.comment__avatar {
+  float: left;
+  margin-right: 10px;
+  border-radius: 8px;
+}
+
 </style>

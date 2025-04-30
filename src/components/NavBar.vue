@@ -20,6 +20,12 @@
 import {checkAuth} from "@/auth/checkAuth.js";
 
 export default {
+  data() {
+    return {
+      API_URL: import.meta.env.VITE_API_URL
+
+    }
+  },
   computed: {
     authText() {
       return this.$store.state.isAuth ? 'Log out' : 'Log in';
@@ -29,7 +35,7 @@ export default {
     async authHandler() {
       if (this.$store.state.isAuth) {
         try {
-          const response = await fetch('http://localhost:8000/auth/logout', {
+          const response = await fetch(this.API_URL + '/auth/logout', {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: 'include'

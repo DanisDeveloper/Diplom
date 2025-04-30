@@ -5,7 +5,7 @@
     <h1>Профиль пользователя</h1>
     <div class="avatar-wrapper" :class="{'cursor-pointer': this.isStoreUser}">
       <img
-          :src="`http://localhost:8000/public/${this.user.avatar_url || 'avatars/avatar.png'}`"
+          :src="`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`"
           alt="avatar"
           width="224"
           height="224"
@@ -48,6 +48,7 @@ export default {
     return {
       user: {},
       isLoading: false,
+      API_URL: import.meta.env.VITE_API_URL
     }
   },
   methods: {
@@ -64,7 +65,7 @@ export default {
       formData.append('avatar', file);
 
       try {
-        const response = await fetch('http://localhost:8000/profile/avatar', {
+        const response = await fetch(this.API_URL + '/profile/avatar', {
           method: 'POST',
           body: formData,
           credentials: 'include'
@@ -91,7 +92,7 @@ export default {
   async mounted() {
     this.isLoading = true
     try {
-      const response = await fetch(`http://localhost:8000/profile/${this.$route.params.id}`, {
+      const response = await fetch(`${this.API_URL}/profile/${this.$route.params.id}`, {
         method: "GET",
         headers: {"Content-Type": "application/json"},
         credentials: 'include',

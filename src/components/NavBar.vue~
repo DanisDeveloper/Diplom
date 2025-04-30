@@ -20,6 +20,12 @@
 import {checkAuth} from "@/auth/checkAuth.js";
 
 export default {
+  data() {
+    return {
+      API_URL: import.meta.env.VITE_API_URL
+
+    }
+  },
   computed: {
     authText() {
       return this.$store.state.isAuth ? 'Log out' : 'Log in';
@@ -29,7 +35,7 @@ export default {
     async authHandler() {
       if (this.$store.state.isAuth) {
         try {
-          const response = await fetch('http://localhost:8000/auth/logout', {
+          const response = await fetch(API_URL + '/auth/logout', {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
                 credentials: 'include'
@@ -39,6 +45,7 @@ export default {
           if (!response.ok) throw new Error(data.detail || "Server error!");
           this.$store.commit('logout');
           await checkAuth(this.$store);
+          this.$router.push('/');
         } catch (error) {
           this.errorMessage = error.message;
         }

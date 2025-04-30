@@ -9,7 +9,7 @@
 
       <form @submit.prevent="handleSubmit">
         <div v-if="!isLoginForm" class="input-group">
-          <input maxlength="37" type="name" placeholder="Name" v-model="form.name" required/>
+          <input maxlength="20" type="name" placeholder="Name" v-model="form.name" required/>
         </div>
 
         <div class="input-group">
@@ -17,11 +17,11 @@
         </div>
 
         <div class="input-group">
-          <input maxlength="37" type="password" placeholder="Password" v-model="form.password" required/>
+          <input maxlength="254" type="password" placeholder="Password" v-model="form.password" required/>
         </div>
 
         <div v-if="!isLoginForm" class="input-group">
-          <input maxlength="37" type="password" placeholder="Confirm password" v-model="form.confirmPassword" required/>
+          <input maxlength="254" type="password" placeholder="Confirm password" v-model="form.confirmPassword" required/>
         </div>
 
         <button class="submit-btn" type="submit">{{ isLoginForm ? "Sign in" : "Sign up" }}</button>
@@ -46,6 +46,7 @@ export default {
         confirmPassword: "",
       },
       errorMessage: "",
+      API_URL: import.meta.env.VITE_API_URL
     };
   },
   methods: {
@@ -65,7 +66,7 @@ export default {
           password: this.form.password,
         };
         try {
-          const response = await fetch("http://localhost:8000/auth/register", {
+          const response = await fetch(this.API_URL + "/auth/register", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(payload),
@@ -86,7 +87,8 @@ export default {
           email: this.form.email,
           password: this.form.password,
         };
-        const response = await fetch("http://localhost:8000/auth/login", {
+        console.log(payload)
+        const response = await fetch(this.API_URL + "/auth/login", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify(payload),

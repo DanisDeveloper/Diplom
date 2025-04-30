@@ -77,6 +77,8 @@ export default {
       shaders: [],
       ordering: this.$route.query.sort || 'Newest',
       sortOptions: ['Newest', 'Popular'],
+      API_URL: import.meta.env.VITE_API_URL
+
     }
   },
   methods: {
@@ -143,7 +145,7 @@ export default {
   async mounted() {
     this.isLoading = true;
     try {
-      const endpoint = `http://localhost:8000/shaders/?page=${this.page}&sort=${this.ordering}`;
+      const endpoint = `${this.API_URL}/shaders/?page=${this.page}&sort=${this.ordering}`;
       const response = await fetch(endpoint, {
         method: "GET",
         headers: {"Content-Type": "application/json"},
