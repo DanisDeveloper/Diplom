@@ -49,6 +49,10 @@
               {{ shader['username'] }}
             </span>
           </span>
+          <span class="shader-window-info__comments">
+            {{ shader['comments'] }}
+            <comment-icon class="comment-icon" :width="16" :height="16" :color="'#282C34'"></comment-icon>
+          </span>
           <span class="shader-window-info__likes">
             {{ shader['likes'] }}
             <like-icon class="like-icon" :width="16" :height="16" :color="'#282C34'"></like-icon>
@@ -66,9 +70,10 @@ import ShaderWindow from "@/components/ShaderWindow.vue";
 import Loader from "@/components/Loader.vue";
 import LikeIcon from "@/components/UI/LikeIcon.vue";
 import SortRadioButtons from "@/components/RadioButtons.vue";
+import CommentIcon from "@/components/UI/CommentIcon.vue";
 
 export default {
-  components: {SortRadioButtons, LikeIcon, Loader, ShaderWindow},
+  components: {CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},
   data() {
     return {
       isLoading: false,
@@ -76,7 +81,7 @@ export default {
       page: this.$route.query.page || 1,
       shaders: [],
       ordering: this.$route.query.sort || 'Newest',
-      sortOptions: ['Newest', 'Popular'],
+      sortOptions: ['Newest', 'Liked', 'Commented'],
       API_URL: import.meta.env.VITE_API_URL
 
     }
@@ -264,11 +269,11 @@ button.dots:hover {
   text-decoration: underline;
 }
 
-.shader-window-info__likes {
+.shader-window-info__comments {
   margin-left: auto;
 }
 
-.like-icon {
+.like-icon, .comment-icon {
   vertical-align: middle;
   padding-bottom: 2px;
 }
