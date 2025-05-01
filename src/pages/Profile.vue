@@ -71,10 +71,6 @@ export default {
           credentials: 'include'
         });
 
-        if (!response.ok) {
-          throw new Error('Ошибка загрузки аватара');
-        }
-
         const data = await response.json();
         this.user.avatar_url = data.avatar_url;
 
@@ -86,11 +82,11 @@ export default {
   },
   computed: {
     isStoreUser() {
-      return this.user.id === this.$store.state.user.id
+      return this.user.id === this.$store.state.user.id;
     }
   },
   async mounted() {
-    this.isLoading = true
+    this.isLoading = true;
     try {
       const response = await fetch(`${this.API_URL}/profile/${this.$route.params.id}`, {
         method: "GET",
@@ -98,14 +94,13 @@ export default {
         credentials: 'include',
       });
       // TODO обработать 409, когда указан несуществующий пользователь
-      await new Promise(resolve => setTimeout(resolve, 1000));
       this.user = await response.json();
       console.log(this.user);
       // TODO доделать
     } catch (error) {
       console.log(error);
     } finally {
-      this.isLoading = false
+      this.isLoading = false;
     }
   }
 }

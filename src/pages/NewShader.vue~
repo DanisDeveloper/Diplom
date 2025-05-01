@@ -68,7 +68,7 @@
         <input
             :disabled="!isStoreUser && this.id"
             maxlength="50"
-            :class="{'empty-title-error': titleEmpty}"
+            :class="{'empty-title-error': titleEmpty, 'disabled-input': !isStoreUser && this.id}"
             class="shader-title"
             placeholder="Title"
             v-model.trim="title"
@@ -76,8 +76,10 @@
 
         <textarea
             :disabled="!isStoreUser && this.id"
-            oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
+            @change="textareaHeightHandler"
+            @input="textareaHeightHandler"
             class="shader-description"
+            :class="{'disabled-input': !isStoreUser && this.id}"
             placeholder="Description"
             v-model.trim="description">
         </textarea>
@@ -110,23 +112,43 @@
         </div>
       </div>
 
-      <div class="comments-area">
+      <div v-if="this.id" class="comments-area">
         <h3>Comments</h3>
-        <textarea
-            oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';"
-            class="comment-post"
-            placeholder="Your comment..."
-            v-model.trim="comment">
-        </textarea>
-        <button class="post-btn" @click="postComment">Post</button>
-        <div v-for="comment in comments" class="comment">
+        <div v-if="this.$store.state.isAuth">
+          <textarea
+              @change="textareaHeightHandler"
+              @input="textareaHeightHandler"
+              class="comment-post"
+              placeholder="Your comment..."
+              v-model.trim="comment">
+          </textarea>
+          <button v-if="isCommentPosting" class="post-btn btn-saving" disabled>
+            <div class="spinner"></div>
+          </button>
+          <button v-else :disabled="isCommentPosting" class="post-btn" @click="postComment">Post</button>
+        </div>
+        <div v-for="comment in comments" :key="comment['id']" class="comment">
           <img
               class="comment__avatar"
               width="40"
               height="40"
               :src="`${this.API_URL}/public/${comment['avatar_url'] ? comment['avatar_url'] : 'avatars/avatar.png'}`"
+              @click="$router.push(`/profile/${comment['user_id']}`)"
               alt="avatar">
-          <div class="comment__header">{{ comment['username'] }} in {{ this.formatDate(comment['created_at']) }}</div>
+          <button v-if="isSavingHiddenState && comment['id'] === commentToHide" class="comment__hide btn-saving" disabled>
+            <div class="spinner"></div>
+          </button>
+          <div v-else v-if="this.$store.state.user.id === comment['user_id']" class="comment__hide">
+            <unhide-icon :width="24" :height="24" v-if="comment['hidden']" @click="handleHideButton(comment)"></unhide-icon>
+            <hide-icon :width="24" :height="24" v-else @click="handleHideButton(comment)"></hide-icon>
+          </div>
+          <div class="comment__header">
+            <span @click="$router.push(`/profile/${comment['user_id']}`)" class="link">
+              {{ comment['username'] }}
+            </span>
+            in {{ this.formatDate(comment['created_at']) }}
+          </div>
+
           <div class="comment__content">
             {{ comment['text'] }}
           </div>
@@ -160,9 +182,13 @@ import ForbiddenIcon from "@/components/UI/ForbiddenIcon.vue";
 import Loader from "@/components/Loader.vue";
 import ForkIcon from "@/components/UI/ForkIcon.vue";
 import LikeIcon from "@/components/UI/LikeIcon.vue";
+import HideIcon from "@/components/UI/HideIcon.vue";
+import UnhideIcon from "@/components/UI/UnhideIcon.vue";
 
 export default {
   components: {
+    UnhideIcon,
+    HideIcon,
     LikeIcon,
     ForkIcon,
     Loader,
@@ -208,6 +234,9 @@ export default {
 
       comments: [],
       comment: '',
+      isCommentPosting: false,
+      isSavingHiddenState: false,
+      commentToHide: null,
 
       isSavingShader: false,
       isSavingLike: false,
@@ -291,8 +320,6 @@ export default {
           credentials: 'include',
           body: JSON.stringify(requestBody)
         });
-        // TODO убрать паузу
-        await new Promise(resolve => setTimeout(resolve, 1000));
         const body = await response.json();
         if (!this.isStoreUser || this.id === null) {
           this.$router.push(`/new/${body.id}/`);
@@ -312,7 +339,6 @@ export default {
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
         });
-        await new Promise(resolve => setTimeout(resolve, 1000)); // TODO убрать
         if (response.ok) {
           this.isLiked = !this.isLiked;
         }
@@ -322,8 +348,53 @@ export default {
         this.isSavingLike = false;
       }
     },
-    postComment(){
-      
+    async postComment() {
+      if (this.comment.length === 0) return;
+      this.isCommentPosting = true;
+      try {
+        const response = await fetch(`${this.API_URL}/comments/${this.id}`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          credentials: 'include',
+          body: JSON.stringify({text: this.comment})
+        });
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const body = await response.json();
+        this.comments.unshift(body);
+        this.comment = '';
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.isCommentPosting = false;
+      }
+    },
+    async handleHideButton(comment) {
+      this.isSavingHiddenState = true;
+      this.commentToHide = comment['id'];
+      try {
+        const response = await fetch(`${this.API_URL}/comments/${comment.id}/`, {
+          method: "PATCH",
+          headers: {"Content-Type": "application/json"},
+          credentials: 'include',
+          body: JSON.stringify({hidden: !comment['hidden']})
+        });
+
+        const body = await response.json();
+        console.log(comment);
+        console.log(body);
+        Object.assign(comment, body);
+      } catch (error) {
+        console.log(error);
+      }finally{
+        this.isSavingHiddenState = false;
+        this.commentToHide = null;
+      }
+    },
+    textareaHeightHandler(event) {
+      // TODO доделать, чтобы высота возвращалась
+      const textarea = event.target;
+      textarea.style.height = '';
+      textarea.style.height = textarea.scrollHeight + 'px';
     },
     formatDate(date) {
       const _date = new Date(date);
@@ -354,7 +425,6 @@ export default {
         return;
       }
       const {shader, is_liked, username, comments} = await response.json();
-      await new Promise(resolve => setTimeout(resolve, 1000)); // TODO убрать
       this.id = shader.id;
       this.title = shader.title;
       this.description = shader.description;
@@ -486,7 +556,7 @@ hr {
   border-radius: 8px;
   background: transparent;
   font-size: large;
-  cursor: pointer;
+  cursor: text;
   color: lightgray;
 }
 
@@ -495,6 +565,10 @@ hr {
   resize: none;
   overflow: hidden;
 
+}
+
+.disabled-input {
+  cursor: not-allowed;
 }
 
 .visibility-select {
@@ -601,7 +675,7 @@ hr {
   border-radius: 8px;
   background: #282C34;
   font-size: large;
-  cursor: pointer;
+  cursor: text;
   color: lightgray;
   width: 100%;
   resize: none;
@@ -634,13 +708,46 @@ hr {
   border-radius: 8px;
   margin: 10px 0;
   color: lightgray;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: auto;
+
 }
 
+.comment__header {
+  display: flex;
+  width: fit-content;
+}
 
 .comment__avatar {
   float: left;
   margin-right: 10px;
   border-radius: 8px;
+  cursor: pointer;
 }
 
+.comment__hide {
+  cursor: pointer;
+  float: right;
+
+  background: transparent;
+  border-radius: 8px;
+  border: 1px solid #282C34;
+  color: lightgray;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border 0.2s ease;
+
+}
+
+.comment__hide:hover {
+  border-color: lightgray;
+}
+
+h1, h3{
+  color: #282C34;
+}
 </style>

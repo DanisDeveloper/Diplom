@@ -152,6 +152,7 @@ export default {
         credentials: 'include',
       });
 
+      // await new Promise(resolve => setTimeout(resolve, 1000));
       this.shaders = await response.json();
       console.log(this.shaders)
       this.totalPages = parseInt(response.headers.get('x-total-count'));
