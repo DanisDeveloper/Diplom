@@ -112,7 +112,7 @@
         </div>
       </div>
 
-      <div v-if="this.id" class="comments-area">
+      <div v-if="this.id && this.comments.length > 0" class="comments-area">
         <h3>Comments</h3>
         <div v-if="this.$store.state.isAuth">
           <textarea
@@ -358,7 +358,6 @@ export default {
           credentials: 'include',
           body: JSON.stringify({text: this.comment})
         });
-        await new Promise(resolve => setTimeout(resolve, 1000));
         const body = await response.json();
         this.comments.unshift(body);
         this.comment = '';

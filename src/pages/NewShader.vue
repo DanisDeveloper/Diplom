@@ -112,8 +112,8 @@
         </div>
       </div>
 
-      <div v-if="this.id" class="comments-area">
-        <h3>Comments</h3>
+      <div v-if="this.id && this.comments.length > 0" class="comments-area">
+        <h3>Comments ({{this.comments.length}})</h3>
         <div v-if="this.$store.state.isAuth">
           <textarea
               @change="textareaHeightHandler"
