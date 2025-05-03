@@ -170,20 +170,21 @@ import ShaderWindow from "@/components/ShaderWindow.vue";
 import ShaderEditor from "@/components/ShaderEditor.vue";
 import exampleShader from "@/shaders/example.js";
 import FooterInfo from "@/components/AppFooter.vue";
-import UploadIcon from "@/components/UI/UploadIcon.vue";
-import RestartIcon from "@/components/UI/RestartIcon.vue";
-import PlayIcon from "@/components/UI/PlayIcon.vue";
-import PauseIcon from "@/components/UI/PauseIcon.vue";
-import ExpandIcon from "@/components/UI/ExpandIcon.vue";
-import DownIcon from "@/components/UI/DownIcon.vue";
-import SaveIcon from "@/components/UI/SaveIcon.vue";
-import UpIcon from "@/components/UI/UpIcon.vue";
-import ForbiddenIcon from "@/components/UI/ForbiddenIcon.vue";
+import UploadIcon from "@/components/UI/Icons/UploadIcon.vue";
+import RestartIcon from "@/components/UI/Icons/RestartIcon.vue";
+import PlayIcon from "@/components/UI/Icons/PlayIcon.vue";
+import PauseIcon from "@/components/UI/Icons/PauseIcon.vue";
+import ExpandIcon from "@/components/UI/Icons/ExpandIcon.vue";
+import DownIcon from "@/components/UI/Icons/DownIcon.vue";
+import SaveIcon from "@/components/UI/Icons/SaveIcon.vue";
+import UpIcon from "@/components/UI/Icons/UpIcon.vue";
+import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
 import Loader from "@/components/Loader.vue";
-import ForkIcon from "@/components/UI/ForkIcon.vue";
-import LikeIcon from "@/components/UI/LikeIcon.vue";
-import HideIcon from "@/components/UI/HideIcon.vue";
-import UnhideIcon from "@/components/UI/UnhideIcon.vue";
+import ForkIcon from "@/components/UI/Icons/ForkIcon.vue";
+import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
+import HideIcon from "@/components/UI/Icons/HideIcon.vue";
+import UnhideIcon from "@/components/UI/Icons/UnhideIcon.vue";
+
 
 export default {
   components: {

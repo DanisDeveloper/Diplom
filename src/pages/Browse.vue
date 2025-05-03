@@ -68,9 +68,9 @@
 <script>
 import ShaderWindow from "@/components/ShaderWindow.vue";
 import Loader from "@/components/Loader.vue";
-import LikeIcon from "@/components/UI/LikeIcon.vue";
+import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
 import SortRadioButtons from "@/components/RadioButtons.vue";
-import CommentIcon from "@/components/UI/CommentIcon.vue";
+import CommentIcon from "@/components/UI/Icons/CommentIcon.vue";
 
 export default {
   components: {CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},

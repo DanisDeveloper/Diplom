@@ -12,11 +12,11 @@
 
 <script>
 import vertexShaderCode from "@/shaders/vertex.js";
-import IconUpload from "@/components/UI/UploadIcon.vue";
-import UploadIcon from "@/components/UI/UploadIcon.vue";
-import PlayIcon from "@/components/UI/PlayIcon.vue";
-import RestartIcon from "@/components/UI/RestartIcon.vue";
-import PauseIcon from "@/components/UI/PauseIcon.vue";
+import IconUpload from "@/components/UI/Icons/UploadIcon.vue";
+import UploadIcon from "@/components/UI/Icons/UploadIcon.vue";
+import PlayIcon from "@/components/UI/Icons/PlayIcon.vue";
+import RestartIcon from "@/components/UI/Icons/RestartIcon.vue";
+import PauseIcon from "@/components/UI/Icons/PauseIcon.vue";
 
 export default {
   components: {PauseIcon, RestartIcon, PlayIcon, UploadIcon, IconUpload},
