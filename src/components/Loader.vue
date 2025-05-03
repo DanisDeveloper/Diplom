@@ -1,19 +1,71 @@
 <template>
   <div class="loader-wrapper">
-    <div class="smartglass-loader">
-      <div class="arc arc1"></div>
-      <div class="arc arc2"></div>
-      <div class="arc arc3"></div>
+    <div class="smartglass-loader" :style="sizeStyle">
+      <div
+          class="arc arc1"
+          :style="arcStyle(1)"
+      ></div>
+      <div
+          class="arc arc2"
+          :style="arcStyle(2)"
+      ></div>
+      <div
+          class="arc arc3"
+          :style="arcStyle(3)"
+      ></div>
     </div>
   </div>
 </template>
 
 <script>
-export default {}
+export default {
+  name: 'SmartglassLoader',
+  props: {
+    color: {
+      type: String,
+      default: '#282C34'
+    },
+    size: {
+      type: [Number, String],
+      default: 200
+    },
+    thickness: {
+      type: [Number, String],
+      default: 6
+    }
+  },
+  computed: {
+    sizeStyle() {
+      const val = typeof this.size === 'number' ? `${this.size}px` : this.size;
+      return {
+        width: val,
+        height: val
+      };
+    }
+  },
+  methods: {
+    arcStyle(index) {
+      // Для index 1,2,3 задаём свои значения shrink и offset
+      const values = {
+        1: { shrink: 0, offset: 0 },
+        2: { shrink: 20, offset: 10 },
+        3: { shrink: 40, offset: 20 }
+      };
+      const { shrink, offset } = values[index] || values[1];
+      return {
+        width: `calc(100% - ${shrink}%)`,
+        height: `calc(100% - ${shrink}%)`,
+        top: `${offset}%`,
+        left: `${offset}%`,
+        borderWidth: typeof this.thickness === 'number' ? `${this.thickness}px` : this.thickness,
+        borderTopColor: this.color
+      };
+    }
+  }
+};
 </script>
 
 <style scoped>
-
 .loader-wrapper {
   display: flex;
   justify-content: center;
@@ -24,48 +76,24 @@ export default {}
 
 .smartglass-loader {
   position: relative;
-  width: 200px;
-  height: 200px;
   border-radius: 50%;
   overflow: hidden;
 }
 
 .arc {
   position: absolute;
-  border: 6px solid transparent;
-  border-top-color: #282C34;
+  border-style: solid;
+  border-color: transparent;
   border-radius: 50%;
   animation: spin linear infinite;
 }
 
-.arc1 {
-  width: 100%;
-  height: 100%;
-  animation-duration: 1.05s;
-}
-
-.arc2 {
-  width: 80%;
-  height: 80%;
-  top: 10%;
-  left: 10%;
-  animation-duration: 0.95s;
-}
-
-.arc3 {
-  width: 60%;
-  height: 60%;
-  top: 20%;
-  left: 20%;
-  animation-duration: 0.85s;
-}
+.arc1 { animation-duration: 1.05s; }
+.arc2 { animation-duration: 0.95s; }
+.arc3 { animation-duration: 0.85s; }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 </style>
