@@ -13,8 +13,11 @@
       </div>
     </dialog-window>
     <div class="user-wrapper">
-      <div class="user-main-info">
-        <div class="avatar-wrapper" :class="{ 'editable': isStoreUser }">
+      <div class="user-background">
+        <img>
+      </div>
+      <div class="user-info-wrapper">
+        <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
           <img
               :src="`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`"
               class="avatar-img"
@@ -23,8 +26,8 @@
               height="224"
               @click="triggerAvatarInput"
           />
-
           <input
+              style="display: none;"
               v-if="this.isStoreUser"
               type="file"
               class="avatar-input"
@@ -33,90 +36,130 @@
               @change="avatarLoadHandler"
           >
         </div>
-        <div class="user-main-info__name">{{ this.user.name }}</div>
-        <hr>
-        <div class="user-side-info">
-          <div class="user-side-info__joined"><span class="user-side-info__title">Joined:</span>
-            {{ this.formatDate(this.user.created_at) }}
-          </div>
-          <div class="user-side-info__email"><span class="user-side-info__title">Email:</span> {{ this.user.email }}
-          </div>
-          <!--          <div class="user-side-info__biography"><span class="user-side-info__title">Biography:</span>-->
-          <!--            {{ this.user.biography }}-->
-          <!--          </div>-->
+        <div class="user-info">
+          <span>{{ this.user.name }}</span>
+          <span>{{ this.user.biography }}</span>
+          <span>
+            <code-icon :color="'#282C34'" class="user-info__icon"></code-icon> {{ this.shadersCount }}
+            <like-icon :color="'#282C34'" class="user-info__icon"></like-icon> {{ this.likesCount }}
+            <comment-icon :color="'#282C34'" class="user-info__icon"></comment-icon> {{ this.commentsCount }}
+          </span>
         </div>
       </div>
-      <div class="tabs-wrapper">
-        <div class="tabs">
-          <button
-              v-for="tab in tabs"
-              :key="tab"
-              :class="{ 'active': tab === activeTab }"
-              class="tab"
-              @click="handleTabClick(tab)">
-            {{ tab }}
-          </button>
-        </div>
+    </div>
 
-        <table v-if="activeTab === 'Shaders'" class="shader-table">
-          <thead>
-          <tr>
-            <th>Visibility</th>
-            <th>Shader</th>
-            <th>Created</th>
-            <th>Actions</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr class="shader-item" v-for="shader in user.shaders" :key="shader.id">
-            <td class="shader-item__visibility">
-              <unhide-icon class="icon-btn" v-if="shader.visibility"></unhide-icon>
-              <hide-icon class="icon-btn" v-else></hide-icon>
-            </td>
-            <td>
-              <router-link :to="`/new/${shader.id}`" class="shader-link">
-                {{ shader.title }}
-              </router-link>
-            </td>
-            <td>{{ formatDate(shader.created_at) }}</td>
-            <td>
-              <delete-icon v-if="isStoreUser" class="icon-btn action-btn" @click="handleDeleteShaderClick(shader.id)"></delete-icon>
-              <share-icon class="icon-btn action-btn" v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id" @click="shareShader(shader.id)" ></share-icon>
-              <check-icon class="icon-btn" v-else></check-icon>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-        <table v-else-if="activeTab === 'Activity'" class="shader-table">
-          <thead>
-          <tr>
-            <th>Activity</th>
-            <th>Shader</th>
-            <th>Date</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr class="shader-item" v-for="(activity,index) in user.activities" :key="index">
-            <td class="shader-item__activity">
-              <like-icon class="icon-btn" v-if="activity.type === 'like'"></like-icon>
-              <comment-icon class="icon-btn" v-else-if="activity.type === 'comment'"></comment-icon>
-              <fork-icon class="icon-btn" v-else-if="activity.type=== 'fork'"></fork-icon>
-            </td>
-            <td>
-              <router-link :to="`/new/${activity.shader_id}`" class="shader-link">
-                {{ activity.shader_title }}
-              </router-link>
-            </td>
-            <td>{{ formatDateTime(activity.action_created_at) }}</td>
-          </tr>
-          </tbody>
-        </table>
 
-        <div v-else-if="activeTab === 'Account'">
-          <!-- TODO добавить здесь биографию пользователя-->
-        </div>
+    <!--      <div class="user-main-info">-->
+    <!--        <div class="avatar-wrapper" :class="{ 'editable': isStoreUser }">-->
+    <!--          <img-->
+    <!--              :src="`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`"-->
+    <!--              class="avatar-img"-->
+    <!--              alt="avatar"-->
+    <!--              width="224"-->
+    <!--              height="224"-->
+    <!--              @click="triggerAvatarInput"-->
+    <!--          />-->
 
+    <!--                <input-->
+    <!--                    v-if="this.isStoreUser"-->
+    <!--                    type="file"-->
+    <!--                    class="avatar-input"-->
+    <!--                    ref="avatarInput"-->
+    <!--                    accept="image/*"-->
+    <!--                    @change="avatarLoadHandler"-->
+    <!--                >-->
+    <!--        </div>-->
+    <!--        <div class="user-main-info__name">{{ this.user.name }}</div>-->
+    <!--        <hr>-->
+    <!--        <div class="user-side-info">-->
+    <!--          <div class="user-side-info__joined"><span class="user-side-info__title">Joined:</span>-->
+    <!--            {{ this.formatDate(this.user.created_at) }}-->
+    <!--          </div>-->
+    <!--          <div class="user-side-info__email"><span class="user-side-info__title">Email:</span> {{ this.user.email }}-->
+    <!--          </div>-->
+    <!--          &lt;!&ndash;          <div class="user-side-info__biography"><span class="user-side-info__title">Biography:</span>&ndash;&gt;-->
+    <!--          &lt;!&ndash;            {{ this.user.biography }}&ndash;&gt;-->
+    <!--          &lt;!&ndash;          </div>&ndash;&gt;-->
+    <!--        </div>-->
+    <!--      </div>-->
+    <!--      <div>-->
+
+    <!--      </div>-->
+
+    <div class="tabs-wrapper">
+      <div class="tabs">
+        <button
+            v-for="tab in tabs"
+            :key="tab"
+            :class="{ 'active': tab === activeTab }"
+            class="tab"
+            @click="handleTabClick(tab)">
+          {{ tab }}
+        </button>
       </div>
+
+      <table v-if="activeTab === 'Shaders'" class="shader-table">
+        <thead>
+        <tr>
+          <th>Visibility</th>
+          <th>Shader</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="shader-item" v-for="shader in user.shaders" :key="shader.id">
+          <td class="shader-item__visibility">
+            <unhide-icon class="icon-btn" v-if="shader.visibility"></unhide-icon>
+            <hide-icon class="icon-btn" v-else></hide-icon>
+          </td>
+          <td>
+            <router-link :to="`/new/${shader.id}`" class="shader-link">
+              {{ shader.title }}
+            </router-link>
+          </td>
+          <td>{{ formatDate(shader.created_at) }}</td>
+          <td>
+            <delete-icon v-if="isStoreUser" class="icon-btn action-btn"
+                         @click="handleDeleteShaderClick(shader.id)"></delete-icon>
+            <share-icon class="icon-btn action-btn"
+                        v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"
+                        @click="shareShader(shader.id)"></share-icon>
+            <check-icon class="icon-btn" v-else></check-icon>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <table v-else-if="activeTab === 'Activity'" class="shader-table">
+        <thead>
+        <tr>
+          <th>Activity</th>
+          <th>Shader</th>
+          <th>Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="shader-item" v-for="(activity,index) in user.activities" :key="index">
+          <td class="shader-item__activity">
+            <like-icon class="icon-btn" v-if="activity.type === 'like'"></like-icon>
+            <comment-icon class="icon-btn" v-else-if="activity.type === 'comment'"></comment-icon>
+            <fork-icon class="icon-btn" v-else-if="activity.type=== 'fork'"></fork-icon>
+          </td>
+          <td>
+            <router-link :to="`/new/${activity.shader_id}`" class="shader-link">
+              {{ activity.shader_title }}
+            </router-link>
+          </td>
+          <td>{{ formatDateTime(activity.action_created_at) }}</td>
+        </tr>
+        </tbody>
+      </table>
+
+      <div v-else-if="activeTab === 'Account'">
+        <h1>Not implemented</h1>
+        <!-- TODO добавить здесь биографию пользователя-->
+      </div>
+
     </div>
   </div>
 </template>
@@ -133,12 +176,15 @@ import DialogWindow from "@/components/UI/DialogWindow.vue";
 import ForkIcon from "@/components/UI/Icons/ForkIcon.vue";
 import SaveIcon from "@/components/UI/Icons/SaveIcon.vue";
 import CheckIcon from "@/components/UI/Icons/CheckIcon.vue";
+import CodeIcon from "@/components/UI/Icons/CodeIcon.vue";
 
 export default {
   components: {
+    CodeIcon,
     CheckIcon,
     SaveIcon,
-    ForkIcon, DialogWindow, CommentIcon, LikeIcon, ShareIcon, DeleteIcon, UnhideIcon, HideIcon, Loader},
+    ForkIcon, DialogWindow, CommentIcon, LikeIcon, ShareIcon, DeleteIcon, UnhideIcon, HideIcon, Loader
+  },
   data() {
     return {
       user: {},
@@ -173,7 +219,7 @@ export default {
         // await new Promise(resolve => setTimeout(resolve, 1000));
         const response = await fetch(this.API_URL + '/shaders/' + this.shaderForDelete, {
           method: 'DELETE',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {'Content-Type': 'application/json'},
           credentials: 'include'
         });
 
@@ -247,6 +293,15 @@ export default {
   computed: {
     isStoreUser() {
       return this.user.id === this.$store.state.user.id;
+    },
+    commentsCount() {
+      return this.user.activities?.filter(activity => activity.type === 'comment').length;
+    },
+    likesCount() {
+      return this.user.activities?.filter(activity => activity.type === 'like').length;
+    },
+    shadersCount() {
+      return this.user.shaders?.length;
     }
   },
   async mounted() {
@@ -271,86 +326,82 @@ export default {
 </script>
 
 <style scoped>
-.avatar-wrapper {
+
+.user-wrapper {
   position: relative;
+  width: 100%;
+  font-family: 'Arial', sans-serif;
+  color: #282C34;
+}
+
+/* Баннер: неизменный */
+.user-background {
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #4b0082, #2a0048);
+}
+
+
+.user-info-wrapper {
+  position: absolute;
+  top: 240px; /* сразу под баннером */
+  left: 32px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+
+.user-info__avatar {
+  position: relative;
+  top: -64px; /* - половина 128px */
+  z-index: 10;
+}
+
+.user-info__avatar img {
   width: 128px;
   height: 128px;
   border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: 16px;
-  transition: transform 0.2s;
-}
-
-.avatar-wrapper.editable {
-  cursor: pointer;
-}
-
-.avatar-wrapper.editable:hover {
-  transform: scale(1.05);
-}
-
-.avatar-img {
-  height: 100%;
-  width: 100%;
+  border: 4px solid rgb(53, 59, 67);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
   object-fit: cover;
+  transition: all 0.3s ease;
 }
 
-.avatar-input {
-  display: none;
+.user-info__avatar.editable img:hover {
+  cursor: pointer;
+  transform: scale(1.05);
+  box-shadow: 0 4px 24px rgba(255, 255, 255, 0.5);
 }
 
-.user-main-info {
+.user-info {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  background: #282C34;
-  width: fit-content;
-  white-space: nowrap;
-  height: fit-content;
-  padding: 20px;
-  margin: 10px;
-  border-radius: 10px;
+  color: #282C34;
 }
 
-hr {
-  width: 100%;
-}
-
-.user-header {
-  display: flex;
-  flex-direction: row;
-}
-
-.user-main-info__name {
-  color: lightgray;
-  font-size: x-large;
-  align-self: center;
-}
-
-.user-side-info {
-  background: #282C34;
-  width: 100%;
-  border-radius: 10px;
-  color: lightgray;
-  margin-top: 10px;
-}
-
-.user-side-info__title {
+.user-info span:first-child {
+  font-size: 1.8rem;
   font-weight: bold;
+  line-height: 1.2;
 }
 
-
-.user-side-info__email {
-  margin-top: 10px;
+.user-info span:last-child {
+  font-size: 1rem;
+  margin-top: 4px;
 }
 
-.user-wrapper {
-  display: flex;
+.user-info__icon {
+  height: 20px;
+  width: 20px;
+  vertical-align: middle;
 }
-
 
 /* Основной контейнер приложения */
 .tabs-wrapper {
+  margin-top: 80px;
+
   width: 100%;
   padding: 16px;
   font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -364,6 +415,7 @@ hr {
   margin-bottom: 24px;
   position: relative;
 }
+
 .tabs::after {
   content: '';
   position: absolute;
@@ -374,6 +426,7 @@ hr {
   background-color: #e0e0e0;
   z-index: 0;
 }
+
 /* Кнопки вкладок */
 .tab {
   padding: 8px 16px;
@@ -487,7 +540,7 @@ hr {
   text-align: center !important;
 }
 
-.dialog-window__buttons{
+.dialog-window__buttons {
   display: flex;
   justify-content: space-between;
   margin: 10px 0 0;
