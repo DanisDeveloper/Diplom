@@ -26,37 +26,37 @@
         </div>
         <hr>
         <div class="btns">
-          <button class="action-btn" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
+          <button class="action-icon-btn" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
             <upload-icon :color="compileFailed? 'red' : 'lightgrey'"></upload-icon>
           </button>
-          <button v-if="isPaused" class="action-btn" @click="togglePause">
+          <button v-if="isPaused" class="action-icon-btn" @click="togglePause">
             <play-icon></play-icon>
           </button>
-          <button v-else class="action-btn" @click="togglePause">
+          <button v-else class="action-icon-btn" @click="togglePause">
             <pause-icon></pause-icon>
           </button>
-          <button class="action-btn" @click="resetTime">
+          <button class="action-icon-btn" @click="resetTime">
             <restart-icon></restart-icon>
           </button>
-          <button class="action-btn" @click="expandScreen">
+          <button class="action-icon-btn" @click="expandScreen">
             <expand-icon></expand-icon>
           </button>
 
           <div class="right-btns">
-            <button v-if="isSavingLike" class="action-btn btn-saving" disabled>
+            <button v-if="isSavingLike" class="action-icon-btn btn-saving" disabled>
               <div class="spinner"></div>
             </button>
-            <button v-else v-if="this.$store.state.isAuth && this.id" class="action-btn">
+            <button v-else v-if="this.$store.state.isAuth && this.id" class="action-icon-btn">
               <like-icon
                   :color="isLiked ? 'red' : 'lightgrey'"
                   @click="handleLikeButtonClick"
               ></like-icon>
             </button>
 
-            <button v-if="isSavingShader" class="action-btn btn-saving" disabled>
+            <button v-if="isSavingShader" class="action-icon-btn btn-saving" disabled>
               <div class="spinner"></div>
             </button>
-            <button v-else v-if="this.$store.state.isAuth" class="action-btn" @click="handleSaveOrForkButtonClick">
+            <button v-else v-if="this.$store.state.isAuth" class="action-icon-btn" @click="handleSaveOrForkButtonClick">
               <save-icon v-if="isStoreUser || this.id === null"></save-icon>
               <fork-icon v-else></fork-icon>
             </button>
@@ -481,7 +481,7 @@ export default {
   margin-top: 10px;
 }
 
-.action-btn {
+.action-icon-btn {
   background: transparent;
   border-radius: 8px;
   border: 1px solid #282C34;
@@ -497,7 +497,7 @@ export default {
   height: 36px; /* чтоб и по высоте не прыгало */
 }
 
-.action-btn:hover {
+.action-icon-btn:hover {
   color: white;
   border: 1px solid lightgray;
 }
