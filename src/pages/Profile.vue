@@ -14,7 +14,23 @@
     </dialog-window>
     <div class="user-wrapper">
       <div class="user-background">
-        <img>
+        <img
+            :src="`${this.API_URL}/public/${this.user.background_url}`"
+            alt=""
+        >
+        <input
+            style="display: none;"
+            v-if="this.isStoreUser"
+            type="file"
+            ref="backgroundInput"
+            accept="image/*"
+            @change="backgroundLoadHandler"
+        >
+        <div v-if="this.isStoreUser" class="cover-btns">
+          <button class="cover-btn left-btn" @click="triggerBackgroundInput">Change cover</button>
+          <button class="cover-btn right-btn" @click="handleClearBackground">Clear</button>
+        </div>
+
       </div>
       <div class="user-info-wrapper">
         <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
@@ -117,12 +133,21 @@
               :disable-mouse-move-event="true"
           />
           <div class="shader-cell__info">
-            <div class="info-row"><span class="info-label">Title:</span> <span class="info-value">{{ shader.title }}</span></div>
-            <div class="info-row"><span class="info-label">Visibility:</span> <span class="info-value">{{ shader.visibility ? 'Public' : 'Private' }}</span></div>
-            <div class="info-row"><span class="info-label">Likes:</span> <span class="info-value">{{ shader.likes }}</span></div>
-            <div class="info-row"><span class="info-label">Comments:</span> <span class="info-value">{{ shader.comments }}</span></div>
-            <div class="info-row"><span class="info-label">Created at:</span> <span class="info-value">{{ formatDate(shader.created_at) }}</span></div>
-            <div class="info-row"><span class="info-label">Last update:</span> <span class="info-value">{{ formatDate(shader.updated_at) }}</span></div>
+            <div class="info-row"><span class="info-label">Title:</span> <span class="info-value">{{
+                shader.title
+              }}</span></div>
+            <div class="info-row"><span class="info-label">Visibility:</span> <span
+                class="info-value">{{ shader.visibility ? 'Public' : 'Private' }}</span></div>
+            <div class="info-row"><span class="info-label">Likes:</span> <span class="info-value">{{
+                shader.likes
+              }}</span></div>
+            <div class="info-row"><span class="info-label">Comments:</span> <span class="info-value">{{
+                shader.comments
+              }}</span></div>
+            <div class="info-row"><span class="info-label">Created at:</span> <span
+                class="info-value">{{ formatDate(shader.created_at) }}</span></div>
+            <div class="info-row"><span class="info-label">Last update:</span> <span
+                class="info-value">{{ formatDate(shader.updated_at) }}</span></div>
             <div class="info-row" :class="{'visible' : shader.id_forked === null}">
               <span class="info-label">Forked from:</span> <span class="info-value">{{ shader.id_forked }}</span>
             </div>
@@ -279,6 +304,9 @@ export default {
     triggerAvatarInput() {
       this.$refs.avatarInput.click()
     },
+    triggerBackgroundInput() {
+      this.$refs.backgroundInput.click()
+    },
     async avatarLoadHandler(event) {
       const file = event.target.files[0];
       if (!file) {
@@ -301,6 +329,48 @@ export default {
       } catch (error) {
         console.error('Ошибка при загрузке:', error);
         // TODO тут можно добавить всплывающее сообщение или визуальное уведомление
+      }
+    },
+    async backgroundLoadHandler(event) {
+      const file = event.target.files[0];
+      if (!file) {
+        // TODO открыть модальное окно с ошибкой
+      }
+
+      const formData = new FormData();
+      formData.append('background', file);
+
+      try {
+        const response = await fetch(this.API_URL + '/profile/background', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+
+        const data = await response.json();
+        this.user.background_url = data.background_url;
+
+      } catch (error) {
+        console.error('Ошибка при загрузке:', error);
+        // TODO тут можно добавить всплывающее сообщение или визуальное уведомление
+      }
+    },
+    async handleClearBackground() {
+      try {
+        const response = await fetch(this.API_URL + '/profile/background', {
+          method: 'DELETE',
+          headers: {'Content-Type': 'application/json'},
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          this.user.background_url = null;
+        }
+      } catch (error) {
+        console.error('Ошибка при загрузке:', error);
+        // TODO тут можно добавить всплывающее сообщение или уведомление
+      } finally {
+        // TODO возможно стоит сделать лоадер
       }
     },
     handleTabClick(tab) {
@@ -378,7 +448,50 @@ export default {
   width: 100%;
   height: 240px;
   overflow: hidden;
-  background: linear-gradient(135deg, #4b0082, #2a0048);
+  background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77, #0d1b2a);
+}
+
+.user-background img{
+  width:100%;
+  object-fit: contain;
+}
+
+
+.cover-btns {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+
+.cover-btn {
+  padding: 8px 12px;
+  background: #282C34;
+  color: lightgray;
+  border: none;
+  opacity: 0;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.cover-btn:hover {
+  cursor: pointer;
+  background-color: #3a3f4b; /* чуть светлее при наведении */
+}
+
+.cover-btn.left-btn {
+  border-right: 1px solid lightgray;
+  border-radius: 8px 0 0 8px;
+}
+
+.cover-btn.right-btn {
+  border-radius: 0 8px 8px 0;
+}
+
+.user-background:hover .cover-btn {
+  opacity: 1;
 }
 
 
@@ -516,8 +629,8 @@ export default {
 
 .shader-table th:first-child,
 .shader-table td:first-child {
-  width: 1%; /* «трюк» — 1% от контейнера превращается в auto-подгонку */
-  white-space: nowrap; /* чтобы не переносилось и не растягивалось */
+  width: 1%;
+  white-space: nowrap;
 }
 
 
@@ -609,15 +722,20 @@ export default {
 
 .shader-cell {
   width: 100%;
-  padding: 10px;
-  position: relative;
-  border-radius: 12px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  margin: 10px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
 }
 
 .shader-cell:hover {
   transform: translateY(-10px) scale(1.02);
   cursor: pointer;
+  box-shadow: 0 10px 10px rgba(40, 44, 52, 0.8);
+
+}
+
+.shader-cell:hover .shader-cell__info {
+  background: rgba(40, 40, 60, 0.9);
 }
 
 .shader-window {
@@ -629,19 +747,18 @@ export default {
   border-top-right-radius: 10px;
 }
 
-
-
 .shader-cell__info {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 8px 16px;
   padding: 16px;
-  background: rgba(30, 30, 40, 0.8);
+  background: rgba(40, 44, 52, 0.8);
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-  color: #e0e0e0;
+  color: lightgray;
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.95rem;
+  transition: all 0.3s ease;
 
 }
 
@@ -667,14 +784,8 @@ export default {
   text-overflow: ellipsis;
 }
 
-/* При наведении слегка подсвечивать карточку */
-.shader-cell__info:hover {
-  background: rgba(40, 40, 60, 0.9);
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-}
 
-
-.visible{
+.visible {
   visibility: hidden;
 }
 

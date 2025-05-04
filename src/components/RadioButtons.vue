@@ -42,7 +42,7 @@ export default {
   font-size: large;
   cursor: pointer;
   color: #282C34;
-  transition: border 0.3s ease, color 0.3s ease;
+  transition: all 0.3s ease;
   border: 1px solid #282C34;
 }
 

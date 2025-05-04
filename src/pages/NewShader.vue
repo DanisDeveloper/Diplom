@@ -461,6 +461,7 @@ export default {
   margin-top: 10px;
   margin-left: 10px;
   flex: 1;
+  font-family: 'JetBrains Mono', monospace;
 }
 
 .shader-editor {
@@ -572,7 +573,6 @@ hr {
 }
 
 .visibility-select {
-  margin-left: 10px;
   padding: 4px 10px;
   border-radius: 8px;
   border: 1px solid #282C34;
