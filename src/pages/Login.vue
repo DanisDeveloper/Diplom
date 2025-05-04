@@ -95,7 +95,6 @@ export default {
           body: JSON.stringify(payload),
           credentials: "include", // Для работы с куками
         });
-        console.log("YES");
         const data = await response.json();
         if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
         await checkAuth(this.$store);
