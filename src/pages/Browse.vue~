@@ -197,7 +197,7 @@ export default {
 
 .page:hover {
   color: lightgray;
-  background: #282C34;
+  background: rgba(60,60,80,0.8);
   transition: all 0.3s ease;
 }
 
@@ -240,7 +240,7 @@ button.dots:hover {
 
 .shader-window:hover{
   transform: scale(1.03);
-  box-shadow: 0 0 16px rgba(40, 40, 60, 0.9);
+  box-shadow: 0 0 24px rgba(40, 40, 60, 0.9);
 }
 
 .shader-window :deep(canvas) {

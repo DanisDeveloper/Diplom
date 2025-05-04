@@ -64,44 +64,6 @@
       </div>
     </div>
 
-
-    <!--      <div class="user-main-info">-->
-    <!--        <div class="avatar-wrapper" :class="{ 'editable': isStoreUser }">-->
-    <!--          <img-->
-    <!--              :src="`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`"-->
-    <!--              class="avatar-img"-->
-    <!--              alt="avatar"-->
-    <!--              width="224"-->
-    <!--              height="224"-->
-    <!--              @click="triggerAvatarInput"-->
-    <!--          />-->
-
-    <!--                <input-->
-    <!--                    v-if="this.isStoreUser"-->
-    <!--                    type="file"-->
-    <!--                    class="avatar-input"-->
-    <!--                    ref="avatarInput"-->
-    <!--                    accept="image/*"-->
-    <!--                    @change="avatarLoadHandler"-->
-    <!--                >-->
-    <!--        </div>-->
-    <!--        <div class="user-main-info__name">{{ this.user.name }}</div>-->
-    <!--        <hr>-->
-    <!--        <div class="user-side-info">-->
-    <!--          <div class="user-side-info__joined"><span class="user-side-info__title">Joined:</span>-->
-    <!--            {{ this.formatDate(this.user.created_at) }}-->
-    <!--          </div>-->
-    <!--          <div class="user-side-info__email"><span class="user-side-info__title">Email:</span> {{ this.user.email }}-->
-    <!--          </div>-->
-    <!--          &lt;!&ndash;          <div class="user-side-info__biography"><span class="user-side-info__title">Biography:</span>&ndash;&gt;-->
-    <!--          &lt;!&ndash;            {{ this.user.biography }}&ndash;&gt;-->
-    <!--          &lt;!&ndash;          </div>&ndash;&gt;-->
-    <!--        </div>-->
-    <!--      </div>-->
-    <!--      <div>-->
-
-    <!--      </div>-->
-
     <div class="tabs-wrapper">
       <div class="tabs">
         <button
@@ -115,88 +77,67 @@
       </div>
 
       <div v-if="activeTab === 'Shaders'" class="shaders-wrapper">
-        <div
-            class="shader-cell"
-            v-for="(shader, index) in this.user.shaders?.slice(0, 4)"
-            @mouseenter="handleMouseEnter(index)"
-            @mouseleave="handleMouseLeave(index)"
-            @click="$router.push(`/new/${shader['id']}`)"
-        >
-          <shader-window
-              class="shader-window"
-              ref="shaders"
-              :key="index"
-              :code="shader.code"
-              :initial-pause="true"
-              :disable-mouse-down-event="true"
-              :disable-mouse-up-event="true"
-              :disable-mouse-move-event="true"
-          />
-          <div class="shader-cell__info">
-            <div class="info-row"><span class="info-label">Title:</span> <span class="info-value">{{
-                shader.title
-              }}</span></div>
-            <div class="info-row"><span class="info-label">Visibility:</span> <span
-                class="info-value">{{ shader.visibility ? 'Public' : 'Private' }}</span></div>
-            <div class="info-row"><span class="info-label">Likes:</span> <span class="info-value">{{
-                shader.likes
-              }}</span></div>
-            <div class="info-row"><span class="info-label">Comments:</span> <span class="info-value">{{
-                shader.comments
-              }}</span></div>
-            <div class="info-row"><span class="info-label">Created at:</span> <span
-                class="info-value">{{ formatDate(shader.created_at) }}</span></div>
-            <div class="info-row"><span class="info-label">Last update:</span> <span
-                class="info-value">{{ formatDate(shader.updated_at) }}</span></div>
-            <div class="info-row" :class="{'visible' : shader.id_forked === null}">
-              <span class="info-label">Forked from:</span> <span class="info-value">{{ shader.id_forked }}</span>
-            </div>
-            <div style="position: absolute; bottom: 10px; right: 10px">
-              <delete-icon
-                  v-if="isStoreUser"
-                  class="icon-btn action-btn"
-                  @click.stop="handleDeleteShaderClick(shader.id)"/>
-              <share-icon
-                  class="icon-btn action-btn"
-                  v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"
-                  @click.stop="shareShader(shader.id)"/>
-              <check-icon v-else class="icon-btn"/>
+        <div class="shader-grid">
+          <div
+              class="shader-cell"
+              v-for="(shader, index) in this.user.shaders?.slice(0, 8)"
+              @mouseenter="handleMouseEnter(index)"
+              @mouseleave="handleMouseLeave(index)"
+              @click="$router.push(`/new/${shader['id']}`)"
+          >
+            <shader-window
+                class="shader-window"
+                ref="shaders"
+                :key="index"
+                :code="shader.code"
+                :initial-pause="true"
+                :disable-mouse-down-event="true"
+                :disable-mouse-up-event="true"
+                :disable-mouse-move-event="true"
+            />
+            <div class="shader-cell__info">
+              <div class="info-row">
+                <span class="info-label">Title:</span> <span class="info-value">{{ shader.title }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Visibility:</span> <span
+                  class="info-value">{{ shader.visibility ? 'Public' : 'Private' }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Likes:</span> <span class="info-value">{{ shader.likes }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Comments:</span> <span class="info-value">{{ shader.comments }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Created at:</span> <span class="info-value">{{
+                  formatDate(shader.created_at)
+                }}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Last update:</span> <span class="info-value">{{
+                  formatDate(shader.updated_at)
+                }}</span>
+              </div>
+              <div class="info-row" :class="{'visible' : shader.id_forked === null}">
+                <span class="info-label">Forked from:</span> <span class="info-value">{{ shader.id_forked }}</span>
+              </div>
+              <div style="position: absolute; bottom: 10px; right: 10px">
+                <delete-icon
+                    v-if="isStoreUser"
+                    class="icon-btn action-btn"
+                    @click.stop="handleDeleteShaderClick(shader.id)"/>
+                <share-icon
+                    class="icon-btn action-btn"
+                    v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"
+                    @click.stop="shareShader(shader.id)"/>
+                <check-icon v-else class="icon-btn"/>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <!--      <table v-if="activeTab === 'Shaders'" class="shader-table">-->
-      <!--        <thead>-->
-      <!--        <tr>-->
-      <!--          <th>Visibility</th>-->
-      <!--          <th>Shader</th>-->
-      <!--          <th>Created</th>-->
-      <!--          <th>Actions</th>-->
-      <!--        </tr>-->
-      <!--        </thead>-->
-      <!--        <tbody>-->
-      <!--        <tr class="shader-item" v-for="shader in user.shaders" :key="shader.id">-->
-      <!--          <td class="shader-item__visibility">-->
-      <!--            <unhide-icon class="icon-btn" v-if="shader.visibility"></unhide-icon>-->
-      <!--            <hide-icon class="icon-btn" v-else></hide-icon>-->
-      <!--          </td>-->
-      <!--          <td>-->
-      <!--            <router-link :to="`/new/${shader.id}`" class="shader-link">-->
-      <!--              {{ shader.title }}-->
-      <!--            </router-link>-->
-      <!--          </td>-->
-      <!--          <td>{{ formatDate(shader.created_at) }}</td>-->
-      <!--          <td>-->
-      <!--            <delete-icon v-if="isStoreUser" class="icon-btn action-btn"-->
-      <!--                         @click="handleDeleteShaderClick(shader.id)"></delete-icon>-->
-      <!--            <share-icon class="icon-btn action-btn"-->
-      <!--                        v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"-->
-      <!--                        @click="shareShader(shader.id)"></share-icon>-->
-      <!--            <check-icon class="icon-btn" v-else></check-icon>-->
-      <!--          </td>-->
-      <!--        </tr>-->
-      <!--        </tbody>-->
-      <!--      </table>-->
+
       <table v-else-if="activeTab === 'Activity'" class="shader-table">
         <thead>
         <tr>
@@ -265,6 +206,8 @@ export default {
       shaderForDelete: null,
       isClipboardCopied: false,
       clipboardShaderId: null,
+      page: 1,
+      SHADERS_PER_PAGE: 8,
       API_URL: import.meta.env.VITE_API_URL
     }
   },
@@ -422,6 +365,9 @@ export default {
     },
     shadersCount() {
       return this.user.shaders?.length;
+    },
+    pagesCount(){
+      return Math.ceil(this.user.shaders?.length / this.SHADERS_PER_PAGE) || 0;
     }
   },
   async mounted() {
@@ -613,6 +559,7 @@ export default {
 }
 
 
+
 /* Таблица */
 .shader-table {
   width: 100%;
@@ -727,15 +674,22 @@ export default {
   cursor: pointer;
 }
 
+
 .shaders-wrapper {
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  flex-direction: column;
+}
+
+
+.shader-grid{
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
 }
 
 .shader-cell {
   width: 100%;
-  margin: 10px;
   border-radius: 10px;
   transition: all 0.3s ease;
 }
