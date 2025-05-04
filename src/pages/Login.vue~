@@ -9,7 +9,7 @@
 
       <form @submit.prevent="handleSubmit">
         <div v-if="!isLoginForm" class="input-group">
-          <input maxlength="20" type="name" placeholder="Name" v-model="form.name" required/>
+          <input maxlength="20" type="text" placeholder="Name" v-model="form.name" required/>
         </div>
 
         <div class="input-group">
@@ -17,11 +17,11 @@
         </div>
 
         <div class="input-group">
-          <input maxlength="254" type="password" placeholder="Password" v-model="form.password" required/>
+          <input maxlength="254" type="password" placeholder="Password" v-model.trim="form.password" required/>
         </div>
 
         <div v-if="!isLoginForm" class="input-group">
-          <input maxlength="254" type="password" placeholder="Confirm password" v-model="form.confirmPassword" required/>
+          <input maxlength="254" type="password" placeholder="Confirm password" v-model.trim="form.confirmPassword" required/>
         </div>
 
         <button class="submit-btn" type="submit">{{ isLoginForm ? "Sign in" : "Sign up" }}</button>
@@ -51,6 +51,7 @@ export default {
   },
   methods: {
     async handleSubmit() {
+      // TODO переделать, чтобы была форма
       this.errorMessage = "";
 
       // Registration
@@ -94,7 +95,7 @@ export default {
           body: JSON.stringify(payload),
           credentials: "include", // Для работы с куками
         });
-
+        console.log("YES");
         const data = await response.json();
         if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
         await checkAuth(this.$store);

@@ -81,7 +81,7 @@ export default {
       page: this.$route.query.page || 1,
       shaders: [],
       ordering: this.$route.query.sort || 'Newest',
-      sortOptions: ['Newest', 'Love', 'Popular'],
+      sortOptions: ['Newest', 'Liked', 'Commented'],
       API_URL: import.meta.env.VITE_API_URL
 
     }

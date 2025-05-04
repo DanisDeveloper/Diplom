@@ -105,6 +105,7 @@
             @mouseenter="handleMouseEnter(index)"
             @mouseleave="handleMouseLeave(index)"
             @click="$router.push(`/new/${shader['id']}`)"
+
         >
           <shader-window
               class="shader-window"
