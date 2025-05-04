@@ -29,13 +29,13 @@
         />
         <div class="shader-window-info">
           <span class="shader-window__text">
-            <span class="shader-window__title">{{ shader['title'] }}</span>
+            <span class="shader-window__title">{{ truncate(shader['title']) }}</span>
             <span>&nbsp;by&nbsp;</span>
             <span
                 class="shader-window__author"
                 @click="$router.push(`/profile/${shader['user_id']}`)"
             >
-              {{ shader['username'] }}
+              {{ truncate(shader['username']) }}
             </span>
           </span>
           <span class="shader-window-info__comments">
@@ -61,6 +61,7 @@ import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
 import SortRadioButtons from "@/components/RadioButtons.vue";
 import CommentIcon from "@/components/UI/Icons/CommentIcon.vue";
 import Pagination from "@/components/pagination.vue";
+import truncate from "@/utils/truncate.js";
 
 export default {
   components: {Pagination, CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},
@@ -77,6 +78,7 @@ export default {
     }
   },
   methods: {
+    truncate,
     handleMouseEnter(index) {
       this.$refs.shaders[index].togglePause();
     },

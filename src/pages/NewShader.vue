@@ -102,7 +102,7 @@
           <div class="shader-metadata">
             <span v-if="this.id && id_forked">
               forked from
-              <span class="link" @click="$router.push(`/new/${id_forked}`)">shader</span>
+              <span class="link" @click="$router.push(`/new/${id_forked}`)">{{truncate(forked_shader ? forked_shader['title'] : "")}}</span>
             </span>
             <span v-else-if="this.id">
               Created
@@ -188,6 +188,7 @@ import ForkIcon from "@/components/UI/Icons/ForkIcon.vue";
 import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
 import HideIcon from "@/components/UI/Icons/HideIcon.vue";
 import UnhideIcon from "@/components/UI/Icons/UnhideIcon.vue";
+import truncate from "@/utils/truncate.js";
 
 
 export default {
@@ -233,6 +234,7 @@ export default {
       updated_at: null,
       user_id: null,
       id_forked: null,
+      forked_shader: null,
 
       isLiked: false,
       username: '',
@@ -254,6 +256,7 @@ export default {
     }
   },
   methods: {
+    truncate,
     frameWatch(frame) {
       this.frame = frame
     },
@@ -432,7 +435,8 @@ export default {
         this.isNotFound = true;
         return;
       }
-      const {shader, is_liked, username, comments} = await response.json();
+      const {shader, is_liked, username, forked_shader ,comments} = await response.json();
+      this.forked_shader = forked_shader;
       this.id = shader.id;
       this.title = shader.title;
       this.description = shader.description;
@@ -649,6 +653,7 @@ hr {
   justify-content: center;
   height: 250px;
   margin-top: 100px;
+  color: #282C34;
 }
 
 .shader-metadata {
@@ -661,7 +666,6 @@ hr {
 
 .link {
   font-weight: bold;
-
 }
 
 .link:hover {
@@ -676,6 +680,10 @@ hr {
   margin: 10px;
 }
 
+
+.comments-area{
+  margin-bottom: 10px;
+}
 
 .comment-post {
   padding: 10px;
@@ -700,12 +708,11 @@ hr {
   font-size: large;
   cursor: pointer;
   color: #282C34;
-  transition: border 0.3s ease, color 0.3s ease;
+  transition: all 0.3s ease;
   border: 1px solid #282C34;
 }
 
 .post-btn:hover {
-  transition: background 0.3s ease, color 0.3s ease;
   background: #282C34;
   color: lightgray;
 }

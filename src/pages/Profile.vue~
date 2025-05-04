@@ -1,6 +1,9 @@
 <template>
   <loader v-if="this.isLoading"></loader>
-  <!-- TODO сделать обработку удаленных пользователей -->
+  <div v-else-if="this.isNotFound" class="error-page-block">
+    <forbidden-icon></forbidden-icon>
+    <h1>User does not exist</h1>
+  </div>
   <div v-else>
     <dialog-window v-model:show="this.showDialog">
       <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingShader"></loader>
@@ -78,6 +81,7 @@
 
       <div v-if="activeTab === 'Shaders'" class="shaders-wrapper">
         <pagination
+            v-if="pagesCount > this.SHADERS_PER_PAGE"
             v-model:page="page"
             :pages="pagesCount"
             class="pagination"/>
@@ -92,7 +96,7 @@
             <shader-window
                 class="shader-window"
                 ref="shaders"
-                :key="index"
+                :key="shader.id"
                 :code="shader.code"
                 :initial-pause="true"
                 :disable-mouse-down-event="true"
@@ -114,17 +118,13 @@
                 <span class="info-label">Comments:</span> <span class="info-value">{{ shader.comments }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Created at:</span> <span class="info-value">{{
-                  formatDate(shader.created_at)
-                }}</span>
+                <span class="info-label">Created at:</span> <span class="info-value">{{ formatDate(shader.created_at) }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Last update:</span> <span class="info-value">{{
-                  formatDate(shader.updated_at)
-                }}</span>
+                <span class="info-label">Last update:</span> <span class="info-value">{{formatDate(shader.updated_at)}}</span>
               </div>
-              <div class="info-row" :class="{'visible' : shader.id_forked === null}">
-                <span class="info-label">Forked from:</span> <span class="info-value">{{ shader.id_forked }}</span>
+              <div class="info-row" :class="{'invisible' : shader.id_forked === null}">
+                <span class="info-label">Forked:</span> <span class="info-value">{{ truncate(shader.forked_shader ? shader.forked_shader.title : "", 17) }}</span>
               </div>
               <div style="position: absolute; bottom: 10px; right: 10px">
                 <delete-icon
@@ -191,9 +191,12 @@ import CheckIcon from "@/components/UI/Icons/CheckIcon.vue";
 import CodeIcon from "@/components/UI/Icons/CodeIcon.vue";
 import ShaderWindow from "@/components/ShaderWindow.vue";
 import Pagination from "@/components/pagination.vue";
+import truncate from "../utils/truncate.js";
+import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
 
 export default {
   components: {
+    ForbiddenIcon,
     Pagination,
     ShaderWindow,
     CodeIcon,
@@ -205,7 +208,7 @@ export default {
     return {
       user: {},
       isLoading: false,
-      tabs: ['Shaders', 'Activity', 'Account'],
+      tabs: ['Shaders', 'Activity'], // Account добавляется в mounted
       activeTab: 'Shaders',
       showDialog: false,
       isDeletingShader: false,
@@ -214,10 +217,12 @@ export default {
       clipboardShaderId: null,
       page: 1,
       SHADERS_PER_PAGE: 8,
+      isNotFound: false,
       API_URL: import.meta.env.VITE_API_URL
     }
   },
   methods: {
+    truncate,
     handleMouseEnter(index) {
       this.$refs.shaders[index].togglePause();
     },
@@ -361,7 +366,7 @@ export default {
   },
   computed: {
     isStoreUser() {
-      return this.user.id === this.$store.state.user.id;
+      return this.user.id === this.$store.state.user.id && this.$store.state.isAuth;
     },
     commentsCount() {
       return this.user.activities?.filter(activity => activity.type === 'comment').length;
@@ -399,6 +404,9 @@ export default {
         credentials: 'include',
       });
       // TODO обработать 409, когда указан несуществующий пользователь
+      if(response.status === 409){
+        this.isNotFound = true;
+      }
       this.user = await response.json();
       console.log(this.user);
       // TODO доделать
@@ -406,6 +414,9 @@ export default {
       console.log(error);
     } finally {
       this.isLoading = false;
+    }
+    if(this.isStoreUser){
+      this.tabs.push('Account');
     }
   }
 }
@@ -689,7 +700,10 @@ export default {
   padding: 10px;
   align-items: center;
   justify-content: center;
-  transition: border 0.2s ease, color 0.2s ease;
+}
+
+.action-btn{
+  transition: all 0.3s ease;
 }
 
 .action-btn:hover {
@@ -776,9 +790,16 @@ export default {
 }
 
 
-.visible {
+.invisible {
   visibility: hidden;
 }
-
+.error-page-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  margin-top: 100px;
+}
 
 </style>

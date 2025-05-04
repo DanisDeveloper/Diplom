@@ -7,7 +7,7 @@
           v-model="this.ordering"
           :options="this.sortOptions"
       />
-      <pagination v-model:page="page" :pages="totalPages"/>
+      <pagination v-model:page="page" :pages="totalPages" class="pagination"/>
     </div>
     <div class="shader-grid">
       <div
@@ -29,7 +29,7 @@
         />
         <div class="shader-window-info">
           <span class="shader-window__text">
-            <span class="shader-window__title">{{ shader['title'] }}</span>
+            <span class="shader-window__title">{{ truncate(shader['title']) }}</span>
             <span>&nbsp;by&nbsp;</span>
             <span
                 class="shader-window__author"
@@ -61,6 +61,7 @@ import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
 import SortRadioButtons from "@/components/RadioButtons.vue";
 import CommentIcon from "@/components/UI/Icons/CommentIcon.vue";
 import Pagination from "@/components/pagination.vue";
+import truncate from "@/utils/truncate.js";
 
 export default {
   components: {Pagination, CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},
@@ -77,6 +78,7 @@ export default {
     }
   },
   methods: {
+    truncate,
     handleMouseEnter(index) {
       this.$refs.shaders[index].togglePause();
     },
@@ -136,6 +138,9 @@ export default {
   color: #282C34;
 }
 
+.pagination {
+  margin: 5px 0 5px auto;
+}
 
 .shader-grid {
   display: grid;
@@ -155,7 +160,7 @@ export default {
   border-radius: 10px;
 }
 
-.shader-window:hover{
+.shader-window:hover {
   transform: scale(1.03);
   box-shadow: 0 0 24px rgba(40, 40, 60, 0.9);
 }
