@@ -1,0 +1,108 @@
+<template>
+  <div class="pagination">
+    <button
+        v-for="i in totalPages"
+        :key="i"
+        class="page"
+        :class="{'active-page': i == this.page, 'dots': i === '...'}"
+        @click="typeof i === 'number' && handlePageClick(i)"
+        :disabled="i === '...'"
+    >
+      {{ i }}
+    </button>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "pagination",
+  props:{
+    pages:{
+      type: Number,
+      required: true
+    },
+    page: {
+      type: Number,
+      required: true
+    }
+  },
+  methods:{
+    handlePageClick(newPage){
+      this.$emit('update:page', newPage);
+    }
+  },
+  computed:{
+    totalPages() {
+      const total = this.pages;
+      const current = Number(this.page);
+
+      if (total <= 7) {
+        return Array.from({length: total}, (_, i) => i + 1);
+      }
+
+      const pages = [];
+
+      pages.push(1);
+      if (current > 4) {
+        pages.push('...');
+      }
+
+      const start = Math.max(2, current - 2);
+      const end = Math.min(total - 1, current + 2);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (current < total - 3) {
+        pages.push('...');
+      }
+      pages.push(total);
+
+      return pages;
+    }
+  }
+
+}
+</script>
+
+<style scoped>
+
+
+.page {
+  padding: 4px 8px;
+  margin: 0 4px;
+  border-radius: 8px;
+  background: transparent;
+  font-size: large;
+  cursor: pointer;
+  color: #282C34;
+  transition: all 0.3s ease;
+  border: 1px solid #282C34;
+}
+
+.page:hover {
+  color: lightgray;
+  background: #282C34;
+  transition: all 0.3s ease;
+}
+
+
+.active-page {
+  color: lightgray;
+  background: #282C34;
+}
+
+button.dots {
+  cursor: default;
+  background: transparent;
+  border: none;
+  color: #282C34;
+  margin: 0;
+}
+
+button.dots:hover {
+  background: transparent;
+  color: #282C34;
+}
+</style>

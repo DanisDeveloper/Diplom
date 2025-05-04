@@ -1,24 +1,13 @@
 <template>
-  <loader v-if="isLoading"></loader>
+  <loader v-if="isLoading"/>
   <!--  TODO Сделать обработку, когда сервер недоступен-->
   <div v-else>
     <div class="header">
       <sort-radio-buttons
           v-model="this.ordering"
           :options="this.sortOptions"
-      ></sort-radio-buttons>
-      <div class="pagination">
-        <button
-            v-for="i in pages"
-            :key="i"
-            class="page"
-            :class="{'active-page': i == this.page, 'dots': i === '...'}"
-            @click="typeof i === 'number' && handlePageClick(i)"
-            :disabled="i === '...'"
-        >
-          {{ i }}
-        </button>
-      </div>
+      />
+      <pagination v-model:page="page" :pages="totalPages" class="pagination"/>
     </div>
     <div class="shader-grid">
       <div
@@ -71,9 +60,10 @@ import Loader from "@/components/Loader.vue";
 import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
 import SortRadioButtons from "@/components/RadioButtons.vue";
 import CommentIcon from "@/components/UI/Icons/CommentIcon.vue";
+import Pagination from "@/components/pagination.vue";
 
 export default {
-  components: {CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},
+  components: {Pagination, CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},
   data() {
     return {
       isLoading: false,
@@ -87,54 +77,12 @@ export default {
     }
   },
   methods: {
-
     handleMouseEnter(index) {
       this.$refs.shaders[index].togglePause();
     },
     handleMouseLeave(index) {
       this.$refs.shaders[index].togglePause()
     },
-    handlePageClick(newPage) {
-      if (this.page === newPage) return;
-      this.$router.push({
-        path: `/browse/`,
-        query: {
-          page: newPage,
-          sort: this.ordering
-        }
-      });
-    },
-  },
-  computed: {
-    pages() {
-      const total = this.totalPages;
-      const current = Number(this.page);
-
-      if (total <= 7) {
-        return Array.from({length: total}, (_, i) => i + 1);
-      }
-
-      const pages = [];
-
-      pages.push(1);
-      if (current > 4) {
-        pages.push('...');
-      }
-
-      const start = Math.max(2, current - 2);
-      const end = Math.min(total - 1, current + 2);
-
-      for (let i = start; i <= end; i++) {
-        pages.push(i);
-      }
-
-      if (current < total - 3) {
-        pages.push('...');
-      }
-      pages.push(total);
-
-      return pages;
-    }
   },
   watch: {
     ordering(newOption) {
@@ -143,6 +91,15 @@ export default {
         query: {
           page: this.page,
           sort: newOption
+        }
+      })
+    },
+    page(newPage) {
+      this.$router.push({
+        path: `/browse/`,
+        query: {
+          page: newPage,
+          sort: this.ordering
         }
       })
     }
@@ -183,43 +140,6 @@ export default {
   margin: 5px 0 5px auto;
 }
 
-.page {
-  padding: 4px 8px;
-  margin: 0 4px;
-  border-radius: 8px;
-  background: transparent;
-  font-size: large;
-  cursor: pointer;
-  color: #282C34;
-  transition: all 0.3s ease;
-  border: 1px solid #282C34;
-}
-
-.page:hover {
-  color: lightgray;
-  background: #282C34;
-  transition: all 0.3s ease;
-}
-
-.active-page {
-  color: lightgray;
-  background: #282C34;
-}
-
-button.dots {
-  cursor: default;
-  background: transparent;
-  border: none;
-  color: #282C34;
-  margin: 0;
-}
-
-button.dots:hover {
-  background: transparent;
-  color: #282C34;
-}
-
-
 .shader-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -238,7 +158,7 @@ button.dots:hover {
   border-radius: 10px;
 }
 
-.shader-window:hover{
+.shader-window:hover {
   transform: scale(1.03);
   box-shadow: 0 0 24px rgba(40, 40, 60, 0.9);
 }
