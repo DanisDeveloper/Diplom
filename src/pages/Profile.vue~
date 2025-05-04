@@ -77,22 +77,14 @@
       </div>
 
       <div v-if="activeTab === 'Shaders'" class="shaders-wrapper">
-        <div class="pagination">
-          <button
-              v-for="i in pagesCount"
-              :key="i"
-              class="page"
-              :class="{'active-page': i == this.page, 'dots': i === '...'}"
-              @click="typeof i === 'number' && handlePageClick(i)"
-              :disabled="i === '...'"
-          >
-            {{ i }}
-          </button>
-        </div>
+        <pagination
+            v-model:page="page"
+            :pages="pagesCount"
+            class="pagination"/>
         <div class="shader-grid">
           <div
               class="shader-cell"
-              v-for="(shader, index) in this.user.shaders?.slice(0, 8)"
+              v-for="(shader, index) in showedShaders"
               @mouseenter="handleMouseEnter(index)"
               @mouseleave="handleMouseLeave(index)"
               @click="$router.push(`/new/${shader['id']}`)"
@@ -177,7 +169,7 @@
 
       <div v-else-if="activeTab === 'Account'">
         <h1>Not implemented</h1>
-        <!-- TODO добавить здесь биографию пользователя-->
+        <!-- TODO добавить здесь возможность изменить биографию пользователя-->
       </div>
 
     </div>
@@ -198,9 +190,11 @@ import SaveIcon from "@/components/UI/Icons/SaveIcon.vue";
 import CheckIcon from "@/components/UI/Icons/CheckIcon.vue";
 import CodeIcon from "@/components/UI/Icons/CodeIcon.vue";
 import ShaderWindow from "@/components/ShaderWindow.vue";
+import Pagination from "@/components/pagination.vue";
 
 export default {
   components: {
+    Pagination,
     ShaderWindow,
     CodeIcon,
     CheckIcon,
@@ -378,9 +372,23 @@ export default {
     shadersCount() {
       return this.user.shaders?.length;
     },
-    pagesCount(){
+    pagesCount() {
       return Math.ceil(this.user.shaders?.length / this.SHADERS_PER_PAGE) || 0;
+    },
+    showedShaders(){
+      console.log(this.user.shaders)
+      console.log((this.page - 1) * this.SHADERS_PER_PAGE, this.page * this.SHADERS_PER_PAGE)
+      return this.user.shaders?.slice((this.page - 1) * this.SHADERS_PER_PAGE, this.page * this.SHADERS_PER_PAGE)
     }
+  },
+  watch:{
+    page(newPage){
+      console.log(`Page changed to ${newPage}`)
+      this.page = newPage;
+      this.$refs.shaders.forEach(shader => {
+        shader.uploadShader()
+      });
+    },
   },
   async mounted() {
     this.isLoading = true;
@@ -571,6 +579,10 @@ export default {
 }
 
 
+.pagination {
+  margin: 0 0 16px auto;
+}
+
 
 /* Таблица */
 .shader-table {
@@ -693,7 +705,7 @@ export default {
 }
 
 
-.shader-grid{
+.shader-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
