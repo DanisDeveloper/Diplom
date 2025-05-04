@@ -5,6 +5,7 @@ import Main from "@/pages/Main.vue";
 import Login from "@/pages/Login.vue";
 import Profile from "@/pages/Profile.vue";
 import Browse from "@/pages/Browse.vue";
+import NotFound from "@/pages/NotFound.vue";
 
 const routes = [
     {
@@ -34,7 +35,13 @@ const routes = [
     {
         path: '/profile/:id',
         component: Profile
-    }
+    },
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: NotFound
+    },
+
 ]
 
 const router = createRouter({

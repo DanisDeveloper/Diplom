@@ -1,0 +1,28 @@
+<template>
+  <div class="not-found">
+    <forbidden-icon></forbidden-icon>
+    <h1>Error <span style="color: #8c2115">404</span> - Page not found</h1>
+  </div></template>
+
+<script>
+import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
+
+export default {
+  name: "NotFound",
+  components: {ForbiddenIcon}
+}
+</script>
+
+
+
+<style scoped>
+.not-found{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  margin-top: 100px;
+  color: #282C34;
+}
+</style>
