@@ -233,6 +233,14 @@ button.dots:hover {
 
 .shader-window {
   cursor: pointer;
+  transition: all 0.3s ease;
+  background: transparent;
+  border-radius: 10px;
+}
+
+.shader-window:hover{
+  transform: scale(1.03);
+  box-shadow: 0 0 24px rgba(40, 40, 60, 0.9);
 }
 
 .shader-window :deep(canvas) {
