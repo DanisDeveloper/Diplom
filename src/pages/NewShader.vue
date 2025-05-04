@@ -1,8 +1,12 @@
 <template>
   <loader v-if="this.isLoading"></loader>
-  <div v-else-if="this.isForbidden" class="forbidden-block">
+  <div v-else-if="this.isForbidden" class="error-page-block">
     <forbidden-icon></forbidden-icon>
     <h1>You are not allowed to access this page</h1>
+  </div>
+  <div v-else-if="this.isNotFound" class="error-page-block">
+    <forbidden-icon></forbidden-icon>
+    <h1>Shader was deleted or never existed</h1>
   </div>
   <div v-else class="main">
     <div class="canvas-container">
@@ -243,6 +247,7 @@ export default {
       isSavingLike: false,
       isLoading: false,
       isForbidden: false,
+      isNotFound: false,
 
       API_URL: import.meta.env.VITE_API_URL,
 
@@ -422,6 +427,9 @@ export default {
       });
       if ([401, 403].includes(response.status)) {
         this.isForbidden = true;
+        return;
+      }else if(response.status === 404){
+        this.isNotFound = true;
         return;
       }
       const {shader, is_liked, username, comments} = await response.json();
@@ -634,7 +642,7 @@ hr {
 }
 
 
-.forbidden-block {
+.error-page-block {
   display: flex;
   flex-direction: column;
   align-items: center;
