@@ -51,7 +51,7 @@ export default {
   },
   methods: {
     async handleSubmit() {
-      // TODO переделать, чтобы была форма
+      // TODO переделать, чтобы сервер работал с формой
       this.errorMessage = "";
 
       // Registration

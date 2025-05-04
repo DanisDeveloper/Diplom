@@ -151,6 +151,17 @@
             <div class="info-row" :class="{'visible' : shader.id_forked === null}">
               <span class="info-label">Forked from:</span> <span class="info-value">{{ shader.id_forked }}</span>
             </div>
+            <div style="position: absolute; bottom: 10px; right: 10px">
+              <delete-icon
+                  v-if="isStoreUser"
+                  class="icon-btn action-btn"
+                  @click.stop="handleDeleteShaderClick(shader.id)"/>
+              <share-icon
+                  class="icon-btn action-btn"
+                  v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"
+                  @click.stop="shareShader(shader.id)"/>
+              <check-icon v-else class="icon-btn"/>
+            </div>
           </div>
         </div>
       </div>
@@ -451,9 +462,8 @@ export default {
   background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77, #0d1b2a);
 }
 
-.user-background img{
-  height: 100%;
-  width:100%;
+.user-background img {
+  width: 100%;
   object-fit: contain;
 }
 
@@ -469,6 +479,7 @@ export default {
 
 
 .cover-btn {
+  position: relative;
   padding: 8px 12px;
   background: #282C34;
   color: lightgray;
@@ -482,13 +493,15 @@ export default {
   background-color: #3a3f4b; /* чуть светлее при наведении */
 }
 
-.cover-btn.left-btn {
-  border-right: 1px solid lightgray;
-  border-radius: 8px 0 0 8px;
-}
-
-.cover-btn.right-btn {
-  border-radius: 0 8px 8px 0;
+.cover-btn.left-btn::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 50%;
+  background-color: lightgray;
 }
 
 .user-background:hover .cover-btn {
@@ -749,6 +762,7 @@ export default {
 }
 
 .shader-cell__info {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 8px 16px;
@@ -760,7 +774,6 @@ export default {
   font-family: 'JetBrains Mono', monospace;
   font-size: 0.95rem;
   transition: all 0.3s ease;
-
 }
 
 /* Одна строка информации */
