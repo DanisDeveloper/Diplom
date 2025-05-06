@@ -3,8 +3,9 @@
 
     <div class="auth-container">
       <div class="tabs">
-        <button class="left-tab" :class="{ active: isLoginForm }" @click="isLoginForm = true">Login</button>
-        <button class="right-tab" :class="{ active: !isLoginForm }" @click="isLoginForm = false">Registration</button>
+        <button class="left-tab" :class="{ active: isLoginForm }" @click="handleLoginTabClick">Login</button>
+        <button class="right-tab" :class="{ active: !isLoginForm }" @click="handleRegisterTabClick">Registration
+        </button>
       </div>
 
       <form @submit.prevent="handleSubmit" class="form">
@@ -25,8 +26,13 @@
                  required/>
         </div>
 
-        <button class="submit-btn" type="submit">{{ isLoginForm ? "Sign in" : "Sign up" }}</button>
-        <label>{{ errorMessage }}</label>
+        <button class="submit-btn" :disabled="isLoading">
+          <span v-if="!isLoading">{{ isLoginForm ? 'Sign in' : 'Sign up' }}</span>
+          <spinner v-else></spinner>
+        </button>
+        <transition name="shake">
+          <label v-if="errorMessage">{{ errorMessage }}</label>
+        </transition>
       </form>
     </div>
   </div>
@@ -34,8 +40,10 @@
 
 <script>
 import {checkAuth} from "@/auth/checkAuth.js";
+import Spinner from "@/components/UI/Spinner.vue";
 
 export default {
+  components: {Spinner},
   data() {
     return {
       isLoginForm: true, // Переключение между логином и регистрацией
@@ -45,14 +53,25 @@ export default {
         password: "",
         confirmPassword: "",
       },
+      isLoading: false,
       errorMessage: "",
       API_URL: import.meta.env.VITE_API_URL
     };
   },
   methods: {
+    handleLoginTabClick() {
+      this.isLoginForm = true;
+      this.errorMessage = null;
+    },
+    handleRegisterTabClick() {
+      this.isLoginForm = false;
+      this.errorMessage = null;
+    },
     async handleSubmit() {
       // TODO переделать, чтобы сервер работал с формой
       this.errorMessage = "";
+      this.isLoading = true;
+      await new Promise(resolve => setTimeout(() => resolve(), 1000));
 
       // Registration
       if (!this.isLoginForm) {
@@ -79,56 +98,64 @@ export default {
           switch (response.status) {
             case 401:
               this.errorMessage = "Wrong email or password";
-              return;
+              break;
             case 409:
               this.errorMessage = "User already exists";
-              return;
+              break;
             case 422:
               this.errorMessage = "Validation error. Please check the form.";
-              return;
+              break;
             case 500:
               this.errorMessage = "Server error";
-              return;
+              break;
+            case 200:
+              this.$router.push("/");
+              await checkAuth(this.$store);
+              break;
           }
-          this.$router.push("/");
         } catch (error) {
           this.errorMessage = error.message;
-        }
-      }
-
-      // Login
-      try {
-        const payload = {
-          email: this.form.email,
-          password: this.form.password,
-        };
-        console.log(payload)
-        const response = await fetch(this.API_URL + "/auth/login", {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(payload),
-          credentials: "include", // Для работы с куками
-        });
-        const data = await response.json();
-        switch (response.status) {
-          case 401:
-            this.errorMessage = "Wrong email or password";
-            break;
-          case 409:
-            this.errorMessage = "User already exists";
-            break;
-          case 422:
-            this.errorMessage = "Validation error. Please check the form.";
-            break;
-          case 500:
-            this.errorMessage = "Server error";
-            break;
+        } finally {
+          this.isLoading = false;
         }
 
-        await checkAuth(this.$store);
-        this.$router.push("/");
-      } catch (error) {
-        this.errorMessage = error.message;
+      } else { // Login
+        try {
+          const payload = {
+            email: this.form.email,
+            password: this.form.password,
+          };
+          console.log(payload)
+          const response = await fetch(this.API_URL + "/auth/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(payload),
+            credentials: "include", // Для работы с куками
+          });
+          const data = await response.json();
+          switch (response.status) {
+            case 401:
+              this.errorMessage = "Wrong email or password";
+              break;
+            case 409:
+              this.errorMessage = "User already exists";
+              break;
+            case 422:
+              this.errorMessage = "Validation error. Please check the form.";
+              break;
+            case 500:
+              this.errorMessage = "Server error";
+              break;
+            case 200:
+              this.$router.push("/");
+              await checkAuth(this.$store);
+              break;
+          }
+        } catch (error) {
+          this.errorMessage = error.message;
+        } finally {
+          this.isLoading = false;
+        }
       }
     },
   },
@@ -210,6 +237,7 @@ export default {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
+/* Кнопка отправки */
 .submit-btn {
   padding: 0.75rem 1rem;
   background-color: #282C34;
@@ -219,18 +247,26 @@ export default {
   border-radius: 0.5rem;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
 }
+
+
 
 .submit-btn:hover {
   background-color: #3a3f4b;
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 .submit-btn:active {
   transform: translateY(0);
   box-shadow: none;
 }
+
+/* Ошибка запроса */
 .auth-container label {
   color: #ef4444;
   font-size: 0.875rem;
@@ -238,6 +274,27 @@ export default {
   min-height: 1em;
 }
 
+.shake-enter-active {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-8px);
+  }
+  40%, 80% {
+    transform: translateX(8px);
+  }
+}
+
+
+
+.spinner {
+  width: 1rem; height: 1rem;
+}
 
 
 
