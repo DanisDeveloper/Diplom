@@ -71,6 +71,7 @@ export default {
       // TODO переделать, чтобы сервер работал с формой
       this.errorMessage = "";
       this.isLoading = true;
+      await new Promise(resolve => setTimeout(() => resolve(), 1000));
 
       // Registration
       if (!this.isLoginForm) {
