@@ -118,13 +118,17 @@
                 <span class="info-label">Comments:</span> <span class="info-value">{{ shader.comments }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Created at:</span> <span class="info-value">{{ formatDate(shader.created_at) }}</span>
+                <span class="info-label">Created at:</span> <span class="info-value">{{
+                  formatDate(shader.created_at)
+                }}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">Last update:</span> <span class="info-value">{{formatDate(shader.updated_at)}}</span>
+                <span class="info-label">Last update:</span> <span
+                  class="info-value">{{ formatDate(shader.updated_at) }}</span>
               </div>
               <div class="info-row" :class="{'invisible' : shader.id_forked === null}">
-                <span class="info-label">Forked:</span> <span class="info-value">{{ truncate(shader.forked_shader ? shader.forked_shader.title : "", 17) }}</span>
+                <span class="info-label">Forked:</span> <span
+                  class="info-value">{{ truncate(shader.forked_shader ? shader.forked_shader.title : "", 17) }}</span>
               </div>
               <div style="position: absolute; bottom: 10px; right: 10px">
                 <delete-icon
@@ -145,7 +149,7 @@
       <table v-else-if="activeTab === 'Activity'" class="shader-table">
         <thead>
         <tr>
-          <th>Activity</th>
+          <th :class="{'bottom-left-border-radius': this.user.activities.length === 0}">Activity</th>
           <th>Shader</th>
           <th>Date</th>
         </tr>
@@ -168,8 +172,26 @@
       </table>
 
       <div v-else-if="activeTab === 'Account'">
-        <h1>Not implemented</h1>
-        <!-- TODO добавить здесь возможность изменить биографию пользователя-->
+        <div class="change-password-wrapper">
+          <h1>Change password</h1>
+          <input
+              type="password"
+              placeholder="Old password"
+              v-model="oldPassword"
+              required/>
+          <input
+              type="password"
+              placeholder="New password"
+              v-model="newPassword"
+              required/>
+          <input
+              type="password"
+              placeholder="Confirm password"
+              v-model="confirmPassword"
+              required/>
+          <button class="submit-btn" type="submit" @click="changePassword">Change password</button>
+          <label :class="{'success' : this.successedPasswordChange}">{{ this.passwordLog }}</label>
+        </div>
       </div>
 
     </div>
@@ -218,11 +240,52 @@ export default {
       page: 1,
       SHADERS_PER_PAGE: 8,
       isNotFound: false,
+
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
+      passwordLog: null,
+      successedPasswordChange: false,
+
       API_URL: import.meta.env.VITE_API_URL
     }
   },
   methods: {
     truncate,
+    async changePassword() {
+      if (this.newPassword !== this.confirmPassword) {
+        this.passwordLog = "Passwords don't match";
+        return;
+      }
+
+      const payload = {
+        oldPassword: this.oldPassword,
+        newPassword: this.newPassword
+      };
+
+      try {
+        const response = await fetch(this.API_URL + '/auth/password', {
+          method: 'PATCH',
+          headers: {'Content-Type': 'application/json'},
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+        console.log(response.status);
+        if(response.status === 401){
+          this.passwordLog = "Wrong old password";
+          return;
+        }
+        this.successedPasswordChange = true;
+        this.passwordLog = "Password changed successfully";
+        this.oldPassword = '';
+        this.newPassword = '';
+        this.confirmPassword = '';
+      } catch (error) {
+        console.log(error);
+        // TODO сделать обработку ошибок
+      } finally {
+      }
+    },
     handleMouseEnter(index) {
       this.$refs.shaders[index].togglePause();
     },
@@ -340,6 +403,7 @@ export default {
     },
     handleTabClick(tab) {
       this.activeTab = tab
+      this.passwordLog = null
     },
     formatDate(date) {
       const _date = new Date(date);
@@ -380,14 +444,14 @@ export default {
     pagesCount() {
       return Math.ceil(this.user.shaders?.length / this.SHADERS_PER_PAGE) || 0;
     },
-    showedShaders(){
+    showedShaders() {
       console.log(this.user.shaders)
       console.log((this.page - 1) * this.SHADERS_PER_PAGE, this.page * this.SHADERS_PER_PAGE)
       return this.user.shaders?.slice((this.page - 1) * this.SHADERS_PER_PAGE, this.page * this.SHADERS_PER_PAGE)
     }
   },
-  watch:{
-    page(newPage){
+  watch: {
+    page(newPage) {
       console.log(`Page changed to ${newPage}`)
       this.page = newPage;
       this.$refs.shaders.forEach(shader => {
@@ -404,7 +468,7 @@ export default {
         credentials: 'include',
       });
       // TODO обработать 409, когда указан несуществующий пользователь
-      if(response.status === 409){
+      if (response.status === 409) {
         this.isNotFound = true;
       }
       this.user = await response.json();
@@ -415,7 +479,7 @@ export default {
     } finally {
       this.isLoading = false;
     }
-    if(this.isStoreUser){
+    if (this.isStoreUser) {
       this.tabs.push('Account');
     }
   }
@@ -451,7 +515,7 @@ export default {
   right: 10px;
   display: flex;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 
@@ -601,7 +665,6 @@ export default {
   border-collapse: separate;
   border-spacing: 0;
   color: lightgray;
-  border-radius: 10px;
   overflow: hidden;
 }
 
@@ -622,22 +685,19 @@ export default {
 }
 
 
+.bottom-left-border-radius {
+  border-bottom-left-radius: 10px;
+}
+
+.bottom-right-border-radius {
+  border-bottom-right-radius: 10px;
+}
+
 .shader-table th:first-child,
 .shader-table td:first-child {
   width: 1%;
   white-space: nowrap;
 }
-
-
-.icon-btn {
-  width: 36px;
-  height: 36px;
-  padding: 4px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  background: transparent;
-}
-
 
 /* Заголовки таблицы */
 .shader-table th,
@@ -645,6 +705,7 @@ export default {
   padding: 12px 16px;
   border: 1px solid #444;
   text-align: left;
+
 }
 
 .shader-table th {
@@ -689,6 +750,17 @@ export default {
   margin: 10px 0 0;
 }
 
+
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+}
+
 .simple-btn {
   background: transparent;
   border-radius: 8px;
@@ -702,7 +774,7 @@ export default {
   justify-content: center;
 }
 
-.action-btn{
+.action-btn {
   transition: all 0.3s ease;
 }
 
@@ -793,6 +865,7 @@ export default {
 .invisible {
   visibility: hidden;
 }
+
 .error-page-block {
   display: flex;
   flex-direction: column;
@@ -800,6 +873,67 @@ export default {
   justify-content: center;
   height: 250px;
   margin-top: 100px;
+  color: #282C34;
+}
+
+
+
+
+.change-password-wrapper {
+  max-width: 400px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.change-password-wrapper h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.change-password-wrapper input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.change-password-wrapper input:focus {
+  outline: none;
+  border-color: #282C34;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.change-password-wrapper .submit-btn {
+  padding: 0.75rem 1rem;
+  background-color: #282C34;
+  color: white;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.change-password-wrapper .submit-btn:hover {
+  background-color: #3a3f4b;
+}
+
+.change-password-wrapper label {
+  color: #ef4444;
+  font-size: 0.875rem;
+  text-align: center;
+}
+.change-password-wrapper label.success {
+  color: green;
 }
 
 </style>
