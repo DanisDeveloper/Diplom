@@ -3,11 +3,11 @@
 
     <div class="auth-container">
       <div class="tabs">
-        <button :class="{ active: isLoginForm }" @click="isLoginForm = true">Login</button>
-        <button :class="{ active: !isLoginForm }" @click="isLoginForm = false">Registration</button>
+        <button class="left-tab" :class="{ active: isLoginForm }" @click="isLoginForm = true">Login</button>
+        <button class="right-tab" :class="{ active: !isLoginForm }" @click="isLoginForm = false">Registration</button>
       </div>
 
-      <form @submit.prevent="handleSubmit">
+      <form @submit.prevent="handleSubmit" class="form">
         <div v-if="!isLoginForm" class="input-group">
           <input maxlength="20" type="text" placeholder="Name" v-model="form.name" required/>
         </div>
@@ -21,13 +21,13 @@
         </div>
 
         <div v-if="!isLoginForm" class="input-group">
-          <input maxlength="254" type="password" placeholder="Confirm password" v-model.trim="form.confirmPassword" required/>
+          <input maxlength="254" type="password" placeholder="Confirm password" v-model.trim="form.confirmPassword"
+                 required/>
         </div>
 
         <button class="submit-btn" type="submit">{{ isLoginForm ? "Sign in" : "Sign up" }}</button>
+        <label>{{ errorMessage }}</label>
       </form>
-
-      <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     </div>
   </div>
 </template>
@@ -75,7 +75,21 @@ export default {
           });
 
           const data = await response.json();
-          if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
+
+          switch (response.status) {
+            case 401:
+              this.errorMessage = "Wrong email or password";
+              return;
+            case 409:
+              this.errorMessage = "User already exists";
+              return;
+            case 422:
+              this.errorMessage = "Validation error. Please check the form.";
+              return;
+            case 500:
+              this.errorMessage = "Server error";
+              return;
+          }
           this.$router.push("/");
         } catch (error) {
           this.errorMessage = error.message;
@@ -96,7 +110,21 @@ export default {
           credentials: "include", // Для работы с куками
         });
         const data = await response.json();
-        if (!response.ok) throw new Error(data.detail || "Ошибка сервера");
+        switch (response.status) {
+          case 401:
+            this.errorMessage = "Wrong email or password";
+            break;
+          case 409:
+            this.errorMessage = "User already exists";
+            break;
+          case 422:
+            this.errorMessage = "Validation error. Please check the form.";
+            break;
+          case 500:
+            this.errorMessage = "Server error";
+            break;
+        }
+
         await checkAuth(this.$store);
         this.$router.push("/");
       } catch (error) {
@@ -109,87 +137,108 @@ export default {
 
 <style scoped>
 
-/* Стили для центрирования */
-.outer-container {
-  margin: 8rem auto 0;
-}
-
 .auth-container {
-  min-width: 30vw;
-  padding: 20px;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-  background: white;
+  max-width: 400px;
+  margin: 6rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  font-family: sans-serif;
 }
 
 .tabs {
   display: flex;
-  justify-content: space-around;
-  margin-bottom: 25px;
+  justify-content: center;
 }
 
 .tabs button {
   flex: 1;
-  padding: 10px;
+  padding: 0.75rem;
+  background: none;
+  border: 1px solid #ddd;
+  font-size: 1rem;
   cursor: pointer;
-  transition: background 0.3s, color 0.3s;
-  border: 1px solid transparent;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-.tabs button.active {
-  background: #282C34;
-  color: white;
+.left-tab {
+  border-bottom-left-radius: 0.5rem;
+  border-top-left-radius: 0.5rem;
 }
 
-.tabs button:not(.active) {
-  background: #ccc;
-  color: #282C34;
+.right-tab {
+  border-bottom-right-radius: 0.5rem;
+  border-top-right-radius: 0.5rem;
 }
 
 .tabs button:hover {
-  background: #282C34;
-  color: white;
+  background-color: #f5f5f5;
+}
+
+.tabs button.active {
+  background-color: #282C34;
+  color: #fff;
+  border-color: #282C34;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .input-group {
-  margin-bottom: 15px;
-  display: block;
+  display: flex;
+  flex-direction: column;
 }
-
 
 .input-group input {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: large;
+  padding: 0.75rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-button {
-  width: 100%;
-  padding: 10px;
+.input-group input:focus {
+  outline: none;
+  border-color: #282C34;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.submit-btn {
+  padding: 0.75rem 1rem;
+  background-color: #282C34;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.5rem;
   cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.3s, color 0.3s;
-  background: #282C34;
-  color: white;
-  border: 1px solid transparent;
-  font-size: large;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
-button:hover {
-  background: #ccc;
-  color: #282C34;
-  border: 1px solid #282C34;
-}
-.submit-btn{
-  margin-top: 10px;
+.submit-btn:hover {
+  background-color: #3a3f4b;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
 }
 
-.error {
-  color: red;
-  margin-top: 10px;
+.submit-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
+.auth-container label {
+  color: #ef4444;
+  font-size: 0.875rem;
+  text-align: center;
+  min-height: 1em;
+}
+
+
+
+
 </style>
