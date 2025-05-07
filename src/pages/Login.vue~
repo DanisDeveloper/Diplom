@@ -1,39 +1,64 @@
 <template>
   <div class="outer-container">
-
     <div class="auth-container">
+      <!-- Tabs with sliding underline -->
       <div class="tabs">
-        <button class="left-tab" :class="{ active: isLoginForm }" @click="handleLoginTabClick">Login</button>
-        <button class="right-tab" :class="{ active: !isLoginForm }" @click="handleRegisterTabClick">Registration
+        <button class="tab left-tab" :class="{ active: isLoginForm }" @click="handleLoginTabClick">Login</button>
+        <button class="tab right-tab" :class="{ active: !isLoginForm }" @click="handleRegisterTabClick">Registration
         </button>
+        <div class="slider" :class="{ right: !isLoginForm }"></div>
       </div>
 
-      <form @submit.prevent="handleSubmit" class="form">
-        <div v-if="!isLoginForm" class="input-group">
-          <input maxlength="20" type="text" placeholder="Name" v-model="form.name" required/>
-        </div>
+      <!-- Animated form container -->
+      <transition name="form-height" mode="out-in">
+        <form
+            :key="isLoginForm ? 'login' : 'reg'"
+            @submit.prevent="handleSubmit"
+            class="form"
+        >
+          <!-- Fields appear with fade -->
+          <transition-group name="field-fade" tag="div">
+            <div
+                v-if="!isLoginForm"
+                class="input-group"
+                key="name"
+            >
+              <input maxlength="20" type="text" placeholder="Name" v-model="form.name" required/>
+            </div>
 
-        <div class="input-group">
-          <input maxlength="254" type="email" placeholder="Email" v-model="form.email" required/>
-        </div>
+            <div class="input-group" key="email">
+              <input maxlength="254" type="email" placeholder="Email" v-model="form.email" required/>
+            </div>
 
-        <div class="input-group">
-          <input maxlength="254" type="password" placeholder="Password" v-model.trim="form.password" required/>
-        </div>
+            <div class="input-group" key="password">
+              <input maxlength="254" type="password" placeholder="Password" v-model.trim="form.password" required/>
+            </div>
 
-        <div v-if="!isLoginForm" class="input-group">
-          <input maxlength="254" type="password" placeholder="Confirm password" v-model.trim="form.confirmPassword"
-                 required/>
-        </div>
+            <div
+                v-if="!isLoginForm"
+                class="input-group"
+                key="confirm"
+            >
+              <input
+                  maxlength="254"
+                  type="password"
+                  placeholder="Confirm password"
+                  v-model.trim="form.confirmPassword"
+                  required
+              />
+            </div>
+          </transition-group>
 
-        <button class="submit-btn" :disabled="isLoading">
-          <span v-if="!isLoading">{{ isLoginForm ? 'Sign in' : 'Sign up' }}</span>
-          <spinner v-else></spinner>
-        </button>
-        <transition name="shake">
-          <label v-if="errorMessage">{{ errorMessage }}</label>
-        </transition>
-      </form>
+          <button class="submit-btn" :disabled="isLoading">
+            <span v-if="!isLoading">{{ isLoginForm ? 'Sign in' : 'Sign up' }}</span>
+            <spinner class="loading-spinner" v-else/>
+          </button>
+
+          <transition name="shake">
+            <label v-if="errorMessage" :key="errorMessageKey" class="error-label">{{ errorMessage }}</label>
+          </transition>
+        </form>
+      </transition>
     </div>
   </div>
 </template>
@@ -55,23 +80,22 @@ export default {
       },
       isLoading: false,
       errorMessage: "",
+      errorMessageKey: 0, // костыль чтобы обновлять сообщение с ошибкой
       API_URL: import.meta.env.VITE_API_URL
     };
   },
   methods: {
     handleLoginTabClick() {
       this.isLoginForm = true;
-      this.errorMessage = null;
+      this.errorMessage = "";
     },
     handleRegisterTabClick() {
       this.isLoginForm = false;
-      this.errorMessage = null;
+      this.errorMessage = "";
     },
     async handleSubmit() {
       // TODO переделать, чтобы сервер работал с формой
       this.errorMessage = "";
-      this.isLoading = true;
-      await new Promise(resolve => setTimeout(() => resolve(), 1000));
 
       // Registration
       if (!this.isLoginForm) {
@@ -80,20 +104,20 @@ export default {
           return;
         }
 
-        const payload = {
-          name: this.form.name,
-          email: this.form.email,
-          password: this.form.password,
-        };
         try {
+          const payload = {
+            name: this.form.name,
+            email: this.form.email,
+            password: this.form.password,
+          };
+
+          this.isLoading = true;
           const response = await fetch(this.API_URL + "/auth/register", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(payload),
             credentials: "include", // Для работы с куками
           });
-
-          const data = await response.json();
 
           switch (response.status) {
             case 401:
@@ -125,6 +149,7 @@ export default {
             email: this.form.email,
             password: this.form.password,
           };
+          this.isLoading = true;
           console.log(payload)
           const response = await fetch(this.API_URL + "/auth/login", {
             method: "POST",
@@ -132,7 +157,7 @@ export default {
             body: JSON.stringify(payload),
             credentials: "include", // Для работы с куками
           });
-          const data = await response.json();
+
           switch (response.status) {
             case 401:
               this.errorMessage = "Wrong email or password";
@@ -160,70 +185,105 @@ export default {
     },
   },
 };
+
 </script>
 
 <style scoped>
+.outer-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 6rem
+}
 
 .auth-container {
+  width: 100%;
   max-width: 400px;
-  margin: 6rem auto;
   padding: 2rem;
-  background-color: #ffffff;
+  background: #fff;
   border-radius: 1rem;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
   font-family: sans-serif;
 }
 
+/* Tabs */
 .tabs {
+  position: relative;
   display: flex;
-  justify-content: center;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  overflow: hidden;
 }
 
-.tabs button {
+.tab {
   flex: 1;
   padding: 0.75rem;
-  background: none;
-  border: 1px solid #ddd;
-  font-size: 1rem;
+  background: transparent;
+  border: none;
+  text-align: center;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: color 0.3s;
+  font-size: 1rem;
 }
 
-.left-tab {
-  border-bottom-left-radius: 0.5rem;
-  border-top-left-radius: 0.5rem;
+.tab:hover {
+  background: #f5f5f5;
 }
 
-.right-tab {
-  border-bottom-right-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
+.left-tab.active {
+  background-color: transparent;
 }
 
-.tabs button:hover {
-  background-color: #f5f5f5;
+.right-tab.active {
+  background-color: transparent;
 }
 
-.tabs button.active {
-  background-color: #282C34;
-  color: #fff;
-  border-color: #282C34;
+.slider {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  height: 3px;
+  background: #282c34;
+  transition: left 0.3s ease;
 }
 
+.slider.right {
+  left: 50%;
+}
+
+/* Form container height animation */
 .form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  overflow: hidden;
 }
 
+.form-height-enter-active,
+.form-height-leave-active {
+  transition: all 0.3s ease;
+}
+
+.form-height-enter-from,
+.form-height-leave-to {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.form-height-enter-to,
+.form-height-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Input groups */
 .input-group {
   display: flex;
   flex-direction: column;
 }
 
 .input-group input {
+  width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid #ddd;
   border-radius: 0.5rem;
@@ -231,43 +291,39 @@ export default {
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.input-group input:focus {
-  outline: none;
-  border-color: #282C34;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+.form .input-group {
+  margin-top: 1rem
 }
 
-/* Кнопка отправки */
+.input-group input:focus {
+  outline: none;
+  border-color: #282c34;
+  box-shadow: 0 0 0 2px rgba(40, 44, 52, 0.2);
+}
+
+/* Submit button */
 .submit-btn {
-  padding: 0.75rem 1rem;
-  background-color: #282C34;
+  background: #282c34;
   color: #fff;
-  font-weight: 500;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease, transform 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  transition: transform 0.2s ease, background-color 0.2s ease;
   min-height: 2.5rem;
 }
 
-
-
-.submit-btn:hover {
-  background-color: #3a3f4b;
+.submit-btn:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  background-color: #3a3f4b;
 }
 
-.submit-btn:active {
-  transform: translateY(0);
-  box-shadow: none;
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* Ошибка запроса */
-.auth-container label {
+/* Shake on error */
+.error-label {
   color: #ef4444;
   font-size: 0.875rem;
   text-align: center;
@@ -290,12 +346,8 @@ export default {
   }
 }
 
-
-
-.spinner {
-  width: 1rem; height: 1rem;
+.loading-spinner {
+  width: 1rem;
+  height: 1rem;
 }
-
-
-
 </style>
