@@ -154,7 +154,7 @@
                 <span class="info-label">Forked:</span> <span
                   class="info-value">{{ truncate(shader.forked_shader ? shader.forked_shader.title : "", 17) }}</span>
               </div>
-              <div style="position: absolute; bottom: 10px; right: 10px">
+              <div class="right-icons">
                 <delete-icon
                     v-if="isStoreUser"
                     class="icon-btn action-btn"
@@ -213,12 +213,14 @@
               placeholder="Confirm password"
               v-model="confirmPassword"
               required/>
-          <button  class="submit-btn" type="submit" @click="changePassword">
+          <button class="submit-btn" type="submit" @click="changePassword">
             <span v-if="!this.isPatchingPassword">Change password</span>
             <spinner v-else/>
           </button>
           <transition name="shake">
-            <label v-if="this.passwordLog" :class="{'success' : this.successedPasswordChange}">{{ this.passwordLog }}</label>
+            <label v-if="this.passwordLog" :class="{'success' : this.successedPasswordChange}">{{
+                this.passwordLog
+              }}</label>
           </transition>
         </div>
       </div>
@@ -471,7 +473,7 @@ export default {
       }
     },
     handleCancelClick() {
-      if(this.isPatchingBiography) return;
+      if (this.isPatchingBiography) return;
       this.isEditing = false;
       this.biography_edit = this.user.biography;
     },
@@ -667,7 +669,7 @@ export default {
   font-weight: bold;
 }
 
-.user-info .biography{
+.user-info .biography {
   font-weight: normal;
 }
 
@@ -675,7 +677,7 @@ export default {
   font-size: 1rem;
 }
 
-.user-info .biography input{
+.user-info .biography input {
   outline: none;
   border: 1px solid #282C34;
   border-radius: 0.3rem;
@@ -951,6 +953,11 @@ export default {
   text-overflow: ellipsis;
 }
 
+.shader-cell__info .right-icons {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+}
 
 .invisible {
   visibility: hidden;
@@ -1025,6 +1032,7 @@ export default {
   transform: translateY(0);
   box-shadow: none;
 }
+
 .change-password-wrapper label {
   color: #ef4444;
   font-size: 0.875rem;
@@ -1053,6 +1061,7 @@ export default {
 }
 
 .spinner {
-  width: 1rem; height: 1rem;
+  width: 1rem;
+  height: 1rem;
 }
 </style>

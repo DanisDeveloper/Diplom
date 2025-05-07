@@ -103,7 +103,7 @@
       </div>
 
       <div v-if="activeTab === 'Shaders'" class="shaders-wrapper">
-        <h1 v-if="shadersCount === 0">Shaders not found</h1>
+        <h1 v-if="shadersCount === 0">User has no shaders</h1>
         <pagination
             v-if="pagesCount > this.SHADERS_PER_PAGE"
             v-model:page="page"
@@ -154,7 +154,7 @@
                 <span class="info-label">Forked:</span> <span
                   class="info-value">{{ truncate(shader.forked_shader ? shader.forked_shader.title : "", 17) }}</span>
               </div>
-              <div style="position: absolute; bottom: 10px; right: 10px">
+              <div class="right-icons">
                 <delete-icon
                     v-if="isStoreUser"
                     class="icon-btn action-btn"
@@ -949,6 +949,12 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.shader-cell__info .right-icons{
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
 }
 
 
