@@ -103,6 +103,7 @@
       </div>
 
       <div v-if="activeTab === 'Shaders'" class="shaders-wrapper">
+        <h1 v-if="shadersCount === 0">User has no shaders</h1>
         <pagination
             v-if="pagesCount > this.SHADERS_PER_PAGE"
             v-model:page="page"
@@ -212,11 +213,13 @@
               placeholder="Confirm password"
               v-model="confirmPassword"
               required/>
-          <button class="submit-btn" type="submit" @click="changePassword">Change password</button>
+          <button  class="submit-btn" type="submit" @click="changePassword">
+            <span v-if="!this.isPatchingPassword">Change password</span>
+            <spinner v-else/>
+          </button>
           <transition name="shake">
             <label v-if="this.passwordLog" :class="{'success' : this.successedPasswordChange}">{{ this.passwordLog }}</label>
           </transition>
-<!--          <label :class="{'success' : this.successedPasswordChange}">{{ this.passwordLog }}</label>-->
         </div>
       </div>
 
@@ -281,6 +284,7 @@ export default {
       confirmPassword: '',
       passwordLog: "",
       successedPasswordChange: false,
+      isPatchingPassword: false,
 
       API_URL: import.meta.env.VITE_API_URL
     }
@@ -300,6 +304,8 @@ export default {
       };
 
       try {
+        this.isPatchingPassword = true;
+
         const response = await fetch(this.API_URL + '/auth/password', {
           method: 'PATCH',
           headers: {'Content-Type': 'application/json'},
@@ -320,7 +326,7 @@ export default {
         console.log(error);
         // TODO сделать обработку ошибок
       } finally {
-        // TODO сделать spinner
+        this.isPatchingPassword = false;
       }
     },
     handleMouseEnter(index) {
@@ -1044,5 +1050,9 @@ export default {
   40%, 80% {
     transform: translateX(8px);
   }
+}
+
+.spinner {
+  width: 1rem; height: 1rem;
 }
 </style>

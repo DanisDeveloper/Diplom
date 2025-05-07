@@ -78,11 +78,7 @@
                 :class="{ 'editable': !isPatchingBiography }"
                 @click="handleCancelClick"/>
             <span v-if="!this.isEditing">{{ this.user.biography }}</span>
-            <input
-                v-else
-                maxlength="140"
-                type="text"
-                v-model="this.biography_edit">
+            <input size="140" maxlength="140" v-else type="text" v-model="this.biography_edit">
           </span>
 
           <span class="icon">
@@ -107,6 +103,7 @@
       </div>
 
       <div v-if="activeTab === 'Shaders'" class="shaders-wrapper">
+        <h1 v-if="shadersCount === 0">Shaders not found</h1>
         <pagination
             v-if="pagesCount > this.SHADERS_PER_PAGE"
             v-model:page="page"
@@ -216,8 +213,13 @@
               placeholder="Confirm password"
               v-model="confirmPassword"
               required/>
-          <button class="submit-btn" type="submit" @click="changePassword">Change password</button>
-          <label :class="{'success' : this.successedPasswordChange}">{{ this.passwordLog }}</label>
+          <button  class="submit-btn" type="submit" @click="changePassword">
+            <span v-if="!this.isPatchingPassword">Change password</span>
+            <spinner v-else/>
+          </button>
+          <transition name="shake">
+            <label v-if="this.passwordLog" :class="{'success' : this.successedPasswordChange}">{{ this.passwordLog }}</label>
+          </transition>
         </div>
       </div>
 
@@ -280,8 +282,9 @@ export default {
       oldPassword: '',
       newPassword: '',
       confirmPassword: '',
-      passwordLog: null,
+      passwordLog: "",
       successedPasswordChange: false,
+      isPatchingPassword: false,
 
       API_URL: import.meta.env.VITE_API_URL
     }
@@ -289,6 +292,7 @@ export default {
   methods: {
     truncate,
     async changePassword() {
+      this.passwordLog = "";
       if (this.newPassword !== this.confirmPassword) {
         this.passwordLog = "Passwords don't match";
         return;
@@ -300,6 +304,8 @@ export default {
       };
 
       try {
+        this.isPatchingPassword = true;
+
         const response = await fetch(this.API_URL + '/auth/password', {
           method: 'PATCH',
           headers: {'Content-Type': 'application/json'},
@@ -320,7 +326,7 @@ export default {
         console.log(error);
         // TODO сделать обработку ошибок
       } finally {
-        // TODO сделать spinner
+        this.isPatchingPassword = false;
       }
     },
     handleMouseEnter(index) {
@@ -465,13 +471,13 @@ export default {
       }
     },
     handleCancelClick() {
-      if (this.isPatchingBiography) return;
+      if(this.isPatchingBiography) return;
       this.isEditing = false;
       this.biography_edit = this.user.biography;
     },
     handleTabClick(tab) {
       this.activeTab = tab
-      this.passwordLog = null
+      this.passwordLog = ""
     },
     formatDate(date) {
       const _date = new Date(date);
@@ -661,7 +667,7 @@ export default {
   font-weight: bold;
 }
 
-.user-info .biography {
+.user-info .biography{
   font-weight: normal;
 }
 
@@ -669,7 +675,7 @@ export default {
   font-size: 1rem;
 }
 
-.user-info .biography input {
+.user-info .biography input{
   outline: none;
   border: 1px solid #282C34;
   border-radius: 0.3rem;
@@ -997,18 +1003,28 @@ export default {
 .change-password-wrapper .submit-btn {
   padding: 0.75rem 1rem;
   background-color: #282C34;
-  color: white;
+  color: #fff;
   font-weight: 500;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
 }
 
 .change-password-wrapper .submit-btn:hover {
   background-color: #3a3f4b;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
+.change-password-wrapper .submit-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
 .change-password-wrapper label {
   color: #ef4444;
   font-size: 0.875rem;
@@ -1019,4 +1035,24 @@ export default {
   color: green;
 }
 
+
+.shake-enter-active {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-8px);
+  }
+  40%, 80% {
+    transform: translateX(8px);
+  }
+}
+
+.spinner {
+  width: 1rem; height: 1rem;
+}
 </style>
