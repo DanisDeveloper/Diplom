@@ -765,4 +765,8 @@ hr {
 h1, h3{
   color: #282C34;
 }
+
+input, textarea{
+  outline: none;
+}
 </style>
