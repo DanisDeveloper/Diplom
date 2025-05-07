@@ -213,7 +213,10 @@
               v-model="confirmPassword"
               required/>
           <button class="submit-btn" type="submit" @click="changePassword">Change password</button>
-          <label :class="{'success' : this.successedPasswordChange}">{{ this.passwordLog }}</label>
+          <transition name="shake">
+            <label v-if="this.passwordLog" :class="{'success' : this.successedPasswordChange}">{{ this.passwordLog }}</label>
+          </transition>
+<!--          <label :class="{'success' : this.successedPasswordChange}">{{ this.passwordLog }}</label>-->
         </div>
       </div>
 
@@ -276,7 +279,7 @@ export default {
       oldPassword: '',
       newPassword: '',
       confirmPassword: '',
-      passwordLog: null,
+      passwordLog: "",
       successedPasswordChange: false,
 
       API_URL: import.meta.env.VITE_API_URL
@@ -285,6 +288,7 @@ export default {
   methods: {
     truncate,
     async changePassword() {
+      this.passwordLog = "";
       if (this.newPassword !== this.confirmPassword) {
         this.passwordLog = "Passwords don't match";
         return;
@@ -467,7 +471,7 @@ export default {
     },
     handleTabClick(tab) {
       this.activeTab = tab
-      this.passwordLog = null
+      this.passwordLog = ""
     },
     formatDate(date) {
       const _date = new Date(date);
@@ -993,18 +997,28 @@ export default {
 .change-password-wrapper .submit-btn {
   padding: 0.75rem 1rem;
   background-color: #282C34;
-  color: white;
+  color: #fff;
   font-weight: 500;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.5rem;
 }
 
 .change-password-wrapper .submit-btn:hover {
   background-color: #3a3f4b;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
+.change-password-wrapper .submit-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
 .change-password-wrapper label {
   color: #ef4444;
   font-size: 0.875rem;
@@ -1015,4 +1029,20 @@ export default {
   color: green;
 }
 
+
+.shake-enter-active {
+  animation: shake 0.5s;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20%, 60% {
+    transform: translateX(-8px);
+  }
+  40%, 80% {
+    transform: translateX(8px);
+  }
+}
 </style>
