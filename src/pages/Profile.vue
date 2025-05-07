@@ -56,9 +56,32 @@
           >
         </div>
         <div class="user-info">
-          <span>{{ this.user.name }}</span>
-          <span>{{ this.user.biography }}</span>
-          <span>
+          <span class="title">{{ this.user.name }}</span>
+          <span class="biography">
+            <edit-icon
+                v-if="isStoreUser && !this.isEditing && !isPatchingBiography"
+                :color="'#282C34'"
+                class="user-info__icon editable"
+                @click="handleEditClick"/>
+            <check-icon
+                v-if="this.isEditing && !isPatchingBiography"
+                :color="'#282C34'"
+                class="user-info__icon editable"
+                @click="handleOkClick"></check-icon>
+            <spinner
+                v-else v-if="isPatchingBiography"
+                class="user-info__icon"/>
+            <cancel-icon
+                v-if="this.isEditing"
+                :color="'#282C34'"
+                class="user-info__icon"
+                :class="{ 'editable': !isPatchingBiography }"
+                @click="handleCancelClick"/>
+            <span v-if="!this.isEditing">{{ this.user.biography }}</span>
+            <input size="140" maxlength="140" v-else type="text" v-model="this.biography_edit">
+          </span>
+
+          <span class="icon">
             <code-icon :color="'#282C34'" class="user-info__icon"></code-icon> {{ this.shadersCount }}
             <like-icon :color="'#282C34'" class="user-info__icon"></like-icon> {{ this.likesCount }}
             <comment-icon :color="'#282C34'" class="user-info__icon"></comment-icon> {{ this.commentsCount }}
@@ -215,9 +238,15 @@ import ShaderWindow from "@/components/ShaderWindow.vue";
 import Pagination from "@/components/pagination.vue";
 import truncate from "../utils/truncate.js";
 import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
+import EditIcon from "@/components/UI/Icons/EditIcon.vue";
+import CancelIcon from "@/components/UI/Icons/CancelIcon.vue";
+import Spinner from "@/components/UI/Spinner.vue";
 
 export default {
   components: {
+    Spinner,
+    CancelIcon,
+    EditIcon,
     ForbiddenIcon,
     Pagination,
     ShaderWindow,
@@ -240,6 +269,9 @@ export default {
       page: 1,
       SHADERS_PER_PAGE: 8,
       isNotFound: false,
+      isEditing: false,
+      biography_edit: null,
+      isPatchingBiography: false,
 
       oldPassword: '',
       newPassword: '',
@@ -271,7 +303,7 @@ export default {
           body: JSON.stringify(payload)
         });
         console.log(response.status);
-        if(response.status === 401){
+        if (response.status === 401) {
           this.passwordLog = "Wrong old password";
           return;
         }
@@ -284,6 +316,7 @@ export default {
         console.log(error);
         // TODO сделать обработку ошибок
       } finally {
+        // TODO сделать spinner
       }
     },
     handleMouseEnter(index) {
@@ -401,6 +434,37 @@ export default {
         // TODO возможно стоит сделать лоадер
       }
     },
+    handleEditClick() {
+      this.isEditing = true;
+    },
+    async handleOkClick() {
+      if (this.biography_edit === this.user.biography) {
+        this.isEditing = false;
+        return;
+      }
+      this.isPatchingBiography = true;
+      try {
+        const response = await fetch(this.API_URL + '/profile/biography', {
+          method: 'PATCH',
+          headers: {'Content-Type': 'application/json'},
+          credentials: 'include',
+          body: JSON.stringify({biography: this.biography_edit})
+        });
+        if (response.ok) {
+          this.user.biography = this.biography_edit;
+          this.isEditing = false;
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        this.isPatchingBiography = false;
+      }
+    },
+    handleCancelClick() {
+      if(this.isPatchingBiography) return;
+      this.isEditing = false;
+      this.biography_edit = this.user.biography;
+    },
     handleTabClick(tab) {
       this.activeTab = tab
       this.passwordLog = null
@@ -472,6 +536,7 @@ export default {
         this.isNotFound = true;
       }
       this.user = await response.json();
+      this.biography_edit = this.user.biography;
       console.log(this.user);
       // TODO доделать
     } catch (error) {
@@ -587,21 +652,39 @@ export default {
   color: #282C34;
 }
 
-.user-info span:first-child {
+.user-info .title {
   font-size: 1.8rem;
   font-weight: bold;
-  line-height: 1.2;
 }
 
-.user-info span:last-child {
+.user-info .biography{
+  font-weight: normal;
+}
+
+.user-info .icon {
   font-size: 1rem;
-  margin-top: 4px;
+}
+
+.user-info .biography input{
+  outline: none;
+  border: 1px solid #282C34;
+  border-radius: 0.3rem;
+  padding: 2px;
+  background-color: transparent;
+  color: #282C34;
 }
 
 .user-info__icon {
-  height: 20px;
-  width: 20px;
+  height: 24px;
+  width: 24px;
   vertical-align: middle;
+  padding: 2px;
+}
+
+.user-info__icon.editable:hover {
+  cursor: pointer;
+  border: 1px solid #282C34;
+  border-radius: 4px;
 }
 
 /* Основной контейнер приложения */
@@ -751,7 +834,6 @@ export default {
 }
 
 
-
 .icon-btn {
   width: 36px;
   height: 36px;
@@ -845,7 +927,6 @@ export default {
   align-items: center;
 }
 
-/* Метка (label) */
 .shader-cell__info .info-label {
   flex-shrink: 0;
   margin-right: 6px;
@@ -853,7 +934,6 @@ export default {
   color: #a0a0ff;
 }
 
-/* Значение */
 .shader-cell__info .info-value {
   flex-grow: 1;
   white-space: nowrap;
@@ -875,8 +955,6 @@ export default {
   margin-top: 100px;
   color: #282C34;
 }
-
-
 
 
 .change-password-wrapper {
@@ -932,6 +1010,7 @@ export default {
   font-size: 0.875rem;
   text-align: center;
 }
+
 .change-password-wrapper label.success {
   color: green;
 }
