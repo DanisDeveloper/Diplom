@@ -9,6 +9,7 @@
     <h1>Shader was deleted or never existed</h1>
   </div>
   <div v-else class="main">
+    <error-toast :message="this.errorToastMessage" ref="toast"/>
     <div class="canvas-container">
       <shader-window
           class="shader-window"
@@ -31,7 +32,7 @@
         <hr>
         <div class="btns">
           <button class="action-icon-btn" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
-            <upload-icon :color="compileFailed? 'red' : 'lightgrey'"></upload-icon>
+            <upload-icon :color="compileFailed? '#f44336' : 'lightgrey'"></upload-icon>
           </button>
           <button v-if="isPaused" class="action-icon-btn" @click="togglePause">
             <play-icon></play-icon>
@@ -52,16 +53,15 @@
             </button>
             <button v-else v-if="this.$store.state.isAuth && this.id" class="action-icon-btn">
               <like-icon
-                  :color="isLiked ? 'red' : 'lightgrey'"
+                  :color="isLiked ? '#f44336' : 'lightgrey'"
                   @click="handleLikeButtonClick"
               ></like-icon>
             </button>
-
             <button v-if="isSavingShader" class="action-icon-btn btn-saving" disabled>
               <div class="spinner"></div>
             </button>
-            <button v-else v-if="this.$store.state.isAuth" class="action-icon-btn" @click="handleSaveOrForkButtonClick">
-              <save-icon v-if="isStoreUser || this.id === null"></save-icon>
+            <button v-else v-if="this.$store.state.isAuth" :class="{'btn-border-error': titleEmpty}" class="action-icon-btn" @click="handleSaveOrForkButtonClick">
+              <save-icon :color="titleEmpty? '#f44336' : 'lightgrey'" v-if="isStoreUser || this.id === null"></save-icon>
               <fork-icon v-else></fork-icon>
             </button>
           </div>
@@ -189,10 +189,12 @@ import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
 import HideIcon from "@/components/UI/Icons/HideIcon.vue";
 import UnhideIcon from "@/components/UI/Icons/UnhideIcon.vue";
 import truncate from "@/utils/truncate.js";
+import ErrorToast from "@/components/ErrorToast.vue";
 
 
 export default {
   components: {
+    ErrorToast,
     UnhideIcon,
     HideIcon,
     LikeIcon,
@@ -223,6 +225,7 @@ export default {
       canvasHeight: 0,
       compileFailed: false,
       errorLog: [],
+      errorToastMessage: '',
 
       // TODO перенести все это в один объект (это все информация о шейдере)
       id: null,
@@ -270,7 +273,15 @@ export default {
       this.canvasHeight = height;
     },
     compileFailedWatch(failed) {
-      this.compileFailed = failed;
+      if(failed){
+        this.errorToastMessage = 'Shader compilation failed'
+        this.$refs.toast.show()
+        this.compileFailed = true;
+        clearTimeout(this.updloadErrorTimeoutId);
+        this.updloadErrorTimeoutId = setTimeout(() => {
+          this.compileFailed = false;
+        }, 1000);
+      }
     },
     errorLogWatch(log) {
       this.errorLog = log;
@@ -293,8 +304,10 @@ export default {
       // Проверка, что название не пустое
       if (this.title.length === 0) {
         this.titleEmpty = true;
-        clearTimeout(this.timeoutId)
-        this.timeoutId = setTimeout(() => {
+        this.errorToastMessage = 'Title must not be empty'
+        this.$refs.toast.show();
+        clearTimeout(this.titleEmptyTimeoutId)
+        this.titleEmptyTimeoutId = setTimeout(() => {
           this.titleEmpty = false;
         }, 1000);
         return;
@@ -541,7 +554,7 @@ export default {
 }
 
 .btn-border-error {
-  border: 1px solid red !important;
+  border: 1px solid #f44336 !important;
 }
 
 hr {
@@ -616,7 +629,7 @@ hr {
 }
 
 .empty-title-error {
-  border: 2px solid red !important;
+  border: 1px solid #f44336 !important;
 }
 
 

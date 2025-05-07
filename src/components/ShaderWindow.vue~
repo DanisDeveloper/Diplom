@@ -83,6 +83,9 @@ export default {
     canvasHeight() {
       this.$emit('canvasHeightWatch', this.canvasHeight);
     },
+    compileFailed() {
+      this.$emit('compileFailedWatch', this.compileFailed);
+    },
     errorLog() {
       this.$emit('errorLogWatch', this.errorLog);
     },
