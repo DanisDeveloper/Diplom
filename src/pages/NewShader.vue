@@ -548,6 +548,7 @@ hr {
   margin-top: 10px;
   width: 100%;
   color: lightgray;
+  border: 1px solid lightgray;
 }
 
 .description-area {
