@@ -84,9 +84,10 @@
           </span>
 
           <span class="icon">
-            <code-icon :color="'#282C34'" class="user-info__icon"></code-icon> {{ this.shadersCount }}
-            <like-icon :color="'#282C34'" class="user-info__icon"></like-icon> {{ this.likesCount }}
-            <comment-icon :color="'#282C34'" class="user-info__icon"></comment-icon> {{ this.commentsCount }}
+            <code-icon :color="'#282C34'" class="user-info__icon"></code-icon> {{ this.user.shaders?.length || 0 }}
+            <fork-icon :color="'#282C34'" class="user-info__icon"></fork-icon> {{ this.user.total_forks }}
+            <like-icon :color="'#282C34'" class="user-info__icon"></like-icon> {{ this.user.total_likes }}
+            <comment-icon :color="'#282C34'" class="user-info__icon"></comment-icon> {{ this.user.total_comments }}
           </span>
         </div>
       </div>
@@ -105,7 +106,7 @@
       </div>
 
       <div v-if="activeTab === 'Shaders'" class="shaders-wrapper">
-        <h1 v-if="shadersCount === 0">User has no shaders</h1>
+        <h1 v-if="this.user.shaders?.length === 0 || false">User has no shaders</h1>
         <pagination
             v-if="pagesCount > this.SHADERS_PER_PAGE"
             v-model:page="page"
@@ -419,6 +420,8 @@ export default {
 
         const data = await response.json();
         this.user.avatar_url = data.avatar_url;
+        this.generalToastMessage = 'Successfully uploaded avatar';
+        this.$refs.generalToast.show();
 
       } catch (error) {
         this.errorToastMessage = 'Error uploading avatar';
@@ -445,7 +448,8 @@ export default {
 
         const data = await response.json();
         this.user.background_url = data.background_url;
-
+        this.generalToastMessage = 'Successfully uploaded background';
+        this.$refs.generalToast.show();
       } catch (error) {
         this.errorToastMessage = 'Error uploading background';
         this.$refs.errorToast.show();
@@ -531,15 +535,6 @@ export default {
   computed: {
     isStoreUser() {
       return this.user.id === this.$store.state.user.id && this.$store.state.isAuth;
-    },
-    commentsCount() {
-      return this.user.activities?.filter(activity => activity.type === 'comment').length;
-    },
-    likesCount() {
-      return this.user.activities?.filter(activity => activity.type === 'like').length;
-    },
-    shadersCount() {
-      return this.user.shaders?.length;
     },
     pagesCount() {
       return Math.ceil(this.user.shaders?.length / this.SHADERS_PER_PAGE) || 0;
