@@ -33,16 +33,25 @@ export default {
   left: 0;
   position: fixed;
   display: flex;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6); /* затемнение посильнее */
   z-index: 999;
   justify-content: center;
   align-items: center;
+  backdrop-filter: blur(4px); /* размытие заднего фона */
 }
-.dialog__content{
+
+.dialog__content {
   margin: auto;
-  background: #282C34;
-  border-radius: 8px;
-  padding: 20px;
-  color: lightgray;
+  background: #1e1e2f; /* чуть темнее и насыщеннее */
+  border-radius: 12px;
+  padding: 24px 32px;
+  color: #f0f0f0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6); /* тень вокруг окна */
+  transform: scale(1);
+  transition: all 0.3s ease;
+  max-width: 90%;
+  max-height: 90%;
+  overflow-y: auto;
 }
+
 </style>
