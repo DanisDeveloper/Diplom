@@ -1,15 +1,15 @@
 <template>
   <loader v-if="this.isLoading"></loader>
   <div v-else-if="this.isForbidden" class="error-page-block">
-    <forbidden-icon></forbidden-icon>
+    <forbidden-icon/>
     <h1>You are not allowed to access this page</h1>
   </div>
   <div v-else-if="this.isNotFound" class="error-page-block">
-    <status-code-icon :text="'404'" :color="'#282C34'"></status-code-icon>
+    <status-code-icon :text="'404'" :color="'#282C34'"/>
     <h1>Shader was deleted or never existed</h1>
   </div>
   <div v-else-if="this.serverError" class="error-page-block">
-    <status-code-icon :text="'500'" :color="'#282C34'"></status-code-icon>
+    <status-code-icon :text="'500'" :color="'#282C34'"/>
     <h1>Server error</h1>
   </div>
 
@@ -27,7 +27,7 @@
           @canvasHeightWatch="canvasHeightWatch"
           @compileFailedWatch="compileFailedWatch"
           @errorLogWatch="errorLogWatch"
-      ></shader-window>
+      />
 
       <div class="canvas-footer">
         <div class="shader-info">
@@ -38,19 +38,19 @@
         <hr>
         <div class="btns">
           <button class="action-icon-btn" v-tooltip="'Upload shader'" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
-            <upload-icon :color="compileFailed? '#f44336' : 'lightgrey'"></upload-icon>
+            <upload-icon :color="compileFailed? '#f44336' : 'lightgrey'"/>
           </button>
           <button v-if="isPaused" v-tooltip="'Start shader'" class="action-icon-btn" @click="togglePause">
-            <play-icon></play-icon>
+            <play-icon/>
           </button>
-          <button v-else v-tooltip="'Upload shader'" class="action-icon-btn" @click="togglePause">
-            <pause-icon></pause-icon>
+          <button v-else v-tooltip="'Stop shader'" class="action-icon-btn" @click="togglePause">
+            <pause-icon/>
           </button>
           <button v-tooltip="'Reset time'" class="action-icon-btn" @click="resetTime">
-            <restart-icon></restart-icon>
+            <restart-icon/>
           </button>
           <button v-tooltip="'Expand screen'" class="action-icon-btn" @click="expandScreen">
-            <expand-icon></expand-icon>
+            <expand-icon/>
           </button>
 
           <div class="right-btns">
@@ -62,14 +62,14 @@
                   v-tooltip="'Like shader'"
                   :color="isLiked ? '#f44336' : 'lightgrey'"
                   @click="handleLikeButtonClick"
-              ></like-icon>
+              />
             </button>
             <button v-if="isSavingShader" v-tooltip="'Saving shader'" class="action-icon-btn btn-saving" disabled>
               <div class="spinner"></div>
             </button>
             <button v-else v-if="this.$store.state.isAuth" :class="{'btn-border-error': titleEmpty}" class="action-icon-btn" @click="handleSaveOrForkButtonClick">
-              <save-icon v-tooltip="'Save shader'" :color="titleEmpty? '#f44336' : 'lightgrey'" v-if="isStoreUser || this.id === null"></save-icon>
-              <fork-icon v-tooltip="'Fork shader'" v-else></fork-icon>
+              <save-icon v-tooltip="'Save shader'" :color="titleEmpty? '#f44336' : 'lightgrey'" v-if="isStoreUser || this.id === null"/>
+              <fork-icon v-tooltip="'Fork shader'" v-else/>
             </button>
           </div>
         </div>
@@ -150,8 +150,8 @@
             <div class="spinner"></div>
           </button>
           <div v-else v-if="this.$store.state.user.id === comment['user_id']" class="comment__hide">
-            <unhide-icon :width="24" :height="24" v-if="comment['hidden']" @click="handleHideButton(comment)"></unhide-icon>
-            <hide-icon :width="24" :height="24" v-else @click="handleHideButton(comment)"></hide-icon>
+            <unhide-icon v-tooltip="'Hide comment'" :width="24" :height="24" v-if="comment['hidden']" @click="handleHideButton(comment)"></unhide-icon>
+            <hide-icon v-tooltip="'Unhide comment'" :width="24" :height="24" v-else @click="handleHideButton(comment)"></hide-icon>
           </div>
           <div class="comment__header">
             <span @click="$router.push(`/profile/${comment['user_id']}`)" class="link">
