@@ -9,7 +9,8 @@
     <h1>Shader was deleted or never existed</h1>
   </div>
   <div v-else class="main">
-    <error-toast :message="this.errorToastMessage" ref="toast"/>
+    <toast :message="this.errorToastMessage" ref="errorToast"/>
+    <toast :message="this.generalToastMessage" :background="'#282C34'" ref="generalToast"/>
     <div class="canvas-container">
       <shader-window
           class="shader-window"
@@ -189,12 +190,12 @@ import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
 import HideIcon from "@/components/UI/Icons/HideIcon.vue";
 import UnhideIcon from "@/components/UI/Icons/UnhideIcon.vue";
 import truncate from "@/utils/truncate.js";
-import ErrorToast from "@/components/ErrorToast.vue";
+import toast from "@/components/Toast.vue";
 
 
 export default {
   components: {
-    ErrorToast,
+    toast,
     UnhideIcon,
     HideIcon,
     LikeIcon,
@@ -226,6 +227,7 @@ export default {
       compileFailed: false,
       errorLog: [],
       errorToastMessage: '',
+      generalToastMessage: '',
 
       // TODO перенести все это в один объект (это все информация о шейдере)
       id: null,
@@ -275,7 +277,7 @@ export default {
     compileFailedWatch(failed) {
       if(failed){
         this.errorToastMessage = 'Shader compilation failed'
-        this.$refs.toast.show()
+        this.$refs.errorToast.show()
         this.compileFailed = true;
         clearTimeout(this.updloadErrorTimeoutId);
         this.updloadErrorTimeoutId = setTimeout(() => {
@@ -305,7 +307,7 @@ export default {
       if (this.title.length === 0) {
         this.titleEmpty = true;
         this.errorToastMessage = 'Title must not be empty'
-        this.$refs.toast.show();
+        this.$refs.errorToast.show();
         clearTimeout(this.titleEmptyTimeoutId)
         this.titleEmptyTimeoutId = setTimeout(() => {
           this.titleEmpty = false;
@@ -342,13 +344,17 @@ export default {
           credentials: 'include',
           body: JSON.stringify(requestBody)
         });
+        if(response.ok){
+          this.generalToastMessage = 'Shader was saved';
+          this.$refs.generalToast.show();
+        }
         const body = await response.json();
         if (!this.isStoreUser || this.id === null) {
           this.$router.push(`/new/${body.id}/`);
         }
       } catch (error) {
-        // TODO сделать вывод ошибки на экран
-        console.log(error);
+        this.errorToastMessage = 'Error saving shader';
+        this.$refs.errorToast.show();
       } finally {
         this.isSavingShader = false;
       }
@@ -365,7 +371,8 @@ export default {
           this.isLiked = !this.isLiked;
         }
       } catch (error) {
-        console.log(error);
+        this.errorToastMessage = 'Error saving like';
+        this.$refs.errorToast.show();
       } finally {
         this.isSavingLike = false;
       }
@@ -384,7 +391,8 @@ export default {
         this.comments.unshift(body);
         this.comment = '';
       } catch (error) {
-        console.log(error);
+        this.errorToastMessage = 'Error posting comment';
+        this.$refs.errorToast.show();
       } finally {
         this.isCommentPosting = false;
       }
@@ -405,7 +413,8 @@ export default {
         console.log(body);
         Object.assign(comment, body);
       } catch (error) {
-        console.log(error);
+        this.errorToastMessage = 'Error hiding comment';
+        this.$refs.errorToast.show();
       }finally{
         this.isSavingHiddenState = false;
         this.commentToHide = null;
