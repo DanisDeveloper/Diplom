@@ -88,10 +88,10 @@
           </span>
 
           <span class="icon">
-            <code-icon :color="'#282C34'" class="user-info__icon"></code-icon> {{ this.user.shaders?.length || 0 }}
-            <fork-icon :color="'#282C34'" class="user-info__icon"></fork-icon> {{ this.user.total_forks }}
-            <like-icon :color="'#282C34'" class="user-info__icon"></like-icon> {{ this.user.total_likes }}
-            <comment-icon :color="'#282C34'" class="user-info__icon"></comment-icon> {{ this.user.total_comments }}
+            <code-icon v-tooltip="'Number of user\'s shaders'"  :color="'#282C34'" class="user-info__icon"></code-icon> {{ this.user.shaders?.length || 0 }}
+            <fork-icon v-tooltip="'Number of forks on user\'s shaders'" :color="'#282C34'" class="user-info__icon"></fork-icon> {{ this.user.total_forks }}
+            <like-icon v-tooltip="'Number of likes on user\'s shaders'"  :color="'#282C34'" class="user-info__icon"></like-icon> {{ this.user.total_likes }}
+            <comment-icon v-tooltip="'Number of comments on user\'s shaders'"  :color="'#282C34'" class="user-info__icon"></comment-icon> {{ this.user.total_comments }}
           </span>
         </div>
       </div>

@@ -48,5 +48,16 @@ html {
   flex-direction: column;
 }
 
-
+.v-tooltip {
+  position: absolute;
+  background: #282c34;
+  color: lightgray;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
 </style>
