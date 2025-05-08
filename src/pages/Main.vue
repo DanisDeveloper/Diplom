@@ -78,6 +78,7 @@ export default {
   display: flex;
   justify-content: space-between;
   margin: 10px;
+  cursor: pointer;
 }
 
 .half {
@@ -97,6 +98,7 @@ export default {
 
 .feature-shader {
   flex: 1;
+  cursor: pointer;
 }
 
 .shader-window :deep(canvas) {

@@ -85,7 +85,7 @@ export default {
 }
 
 .featured-shaders-wrapper {
-  margin: 50px 10px 50px;
+  margin: 50px 10px 30px;
 }
 
 .featured-shaders {

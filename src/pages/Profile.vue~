@@ -167,12 +167,12 @@
               <div class="right-icons">
                 <delete-icon
                     v-if="isStoreUser"
-                    v-tooltip="'Delete shader'"
+                    v-tooltip.prevent="'Delete shader'"
                     class="icon-btn action-btn"
                     @click.stop="handleDeleteShaderClick(shader.id)"/>
                 <share-icon
                     v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"
-                    v-tooltip="'Share shader'"
+                    v-tooltip="'Copy link'"
                     class="icon-btn action-btn"
                     @click.stop="shareShader(shader.id)"/>
                 <check-icon v-else class="icon-btn"/>
