@@ -5,12 +5,12 @@
     <h1>You are not allowed to access this page</h1>
   </div>
   <div v-else-if="this.isNotFound" class="error-page-block">
-    <not-found-page :color="'#282C34'"></not-found-page>
+    <status-code-icon :text="'404'" :color="'#282C34'"></status-code-icon>
     <h1>Shader was deleted or never existed</h1>
   </div>
   <div v-else-if="this.serverError" class="error-page-block">
-    <forbidden-icon></forbidden-icon>
-    <h1>Status 500 - Server error</h1>
+    <status-code-icon :text="'500'" :color="'#282C34'"></status-code-icon>
+    <h1>Server error</h1>
   </div>
 
   <div v-else class="main">
@@ -196,11 +196,13 @@ import HideIcon from "@/components/UI/Icons/HideIcon.vue";
 import UnhideIcon from "@/components/UI/Icons/UnhideIcon.vue";
 import truncate from "@/utils/truncate.js";
 import toast from "@/components/Toast.vue";
-import NotFoundPage from "@/components/UI/Icons/NotFoundPage.vue";
+import NotFoundPage from "@/components/UI/Icons/StatusCodeIcon.vue";
+import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
 
 
 export default {
   components: {
+    StatusCodeIcon,
     NotFoundPage,
     toast,
     UnhideIcon,

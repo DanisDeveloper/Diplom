@@ -163,7 +163,7 @@ export default {
               break;
           }
         } catch (error) {
-          this.errorMessage = error.message;
+          this.errorMessage = "Server error";
         } finally {
           this.isLoading = false;
         }
@@ -202,7 +202,7 @@ export default {
               break;
           }
         } catch (error) {
-          this.errorMessage = error.message;
+          this.errorMessage = "Server error";
         } finally {
           this.isLoading = false;
         }

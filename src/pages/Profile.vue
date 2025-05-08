@@ -4,6 +4,10 @@
     <forbidden-icon></forbidden-icon>
     <h1>User does not exist</h1>
   </div>
+  <div v-else-if="this.serverError" class="error-page-block">
+    <status-code-icon :text="'500'" :color="'#282C34'"></status-code-icon>
+    <h1>Server error</h1>
+  </div>
   <div v-else>
     <toast :message="this.generalToastMessage" ref="generalToast" :background="'#282C34'"></toast>
     <toast :message="this.errorToastMessage" ref="errorToast"></toast>
@@ -256,9 +260,11 @@ import EditIcon from "@/components/UI/Icons/EditIcon.vue";
 import CancelIcon from "@/components/UI/Icons/CancelIcon.vue";
 import Spinner from "@/components/UI/Spinner.vue";
 import Toast from "@/components/Toast.vue";
+import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
 
 export default {
   components: {
+    StatusCodeIcon,
     Toast,
     Spinner,
     CancelIcon,
@@ -273,6 +279,7 @@ export default {
   },
   data() {
     return {
+      serverError: false,
       user: {},
       isLoading: false,
       tabs: ['Shaders', 'Activity'], // Account добавляется в mounted
@@ -571,6 +578,7 @@ export default {
         console.log(this.user);
     } catch (error) {
       console.log(error);
+      this.serverError = true;
     } finally {
       this.isLoading = false;
     }

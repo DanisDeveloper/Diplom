@@ -1,6 +1,9 @@
 <template>
   <loader v-if="isLoading"/>
-  <!--  TODO Сделать обработку, когда сервер недоступен-->
+  <div v-else-if="this.serverError" class="error-page-block">
+    <status-code-icon :text="'500'" :color="'#282C34'"></status-code-icon>
+    <h1>Server error</h1>
+  </div>
   <div v-else>
     <div class="header">
       <sort-radio-buttons
@@ -62,11 +65,13 @@ import SortRadioButtons from "@/components/RadioButtons.vue";
 import CommentIcon from "@/components/UI/Icons/CommentIcon.vue";
 import Pagination from "@/components/pagination.vue";
 import truncate from "@/utils/truncate.js";
+import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
 
 export default {
-  components: {Pagination, CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},
+  components: {StatusCodeIcon, Pagination, CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},
   data() {
     return {
+      serverError: false,
       isLoading: false,
       totalPages: null,
       page: this.$route.query.page || 1,
@@ -121,6 +126,7 @@ export default {
       this.totalPages = parseInt(response.headers.get('x-total-count'));
 
     } catch (error) {
+      this.serverError = true;
       console.log(error);
     } finally {
       this.isLoading = false;
@@ -206,5 +212,15 @@ export default {
 .like-icon, .comment-icon {
   vertical-align: middle;
   padding-bottom: 2px;
+}
+
+.error-page-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  margin-top: 100px;
+  color: #282C34;
 }
 </style>
