@@ -260,7 +260,7 @@ export default {
 
         // Передаём в текущий кадр
         gl.uniform1f(location.iTime, this.accumulatedTime);
-        gl.uniform2f(location.iResolution, this.$refs.canvas.width, this.$refs.canvas.height);
+        gl.uniform2f(location.iResolution, this.$refs.canvas?.width || 0, this.$refs.canvas?.height || 0);
         gl.uniform3f(location.iMouse, this.mouseX, this.mouseY, this.mouseDown);
         gl.uniform1f(location.deltaTime, deltaTime);
         gl.uniform1i(location.iFrame, this.frame);

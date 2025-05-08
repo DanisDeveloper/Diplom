@@ -1,15 +1,16 @@
 <template>
   <div class="not-found">
-    <forbidden-icon></forbidden-icon>
-    <h1>Error <span style="color: #E84849">404</span> - Page not found</h1>
+    <status-code-icon></status-code-icon>
+    <h1>Page not found</h1>
   </div></template>
 
 <script>
 import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
+import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
 
 export default {
   name: "NotFound",
-  components: {ForbiddenIcon}
+  components: {StatusCodeIcon, ForbiddenIcon}
 }
 </script>
 

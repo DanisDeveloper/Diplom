@@ -36,13 +36,6 @@ export default {
         el._tooltip = tooltip
     },
 
-    updated(el, binding) {
-        // Обновляем текст при изменении значения
-        if (binding.value !== binding.oldValue) {
-            el._tooltip.textContent = binding.value
-        }
-    },
-
     unmounted(el) {
         // Удаляем элемент при размонтировании
         if (el._tooltip) {

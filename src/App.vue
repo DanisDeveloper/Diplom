@@ -50,14 +50,37 @@ html {
 
 .v-tooltip {
   position: absolute;
-  background: #282c34;
-  color: lightgray;
-  padding: 8px 12px;
-  border-radius: 4px;
-  font-size: 14px;
+  background: rgba(50, 50, 50, 0.95); /* чуть светлее, почти непрозрачный */
+  color: #fff;                         /* чистый белый текст */
+  padding: 10px 16px;                  /* больше внутренних отступов */
+  border-radius: 6px;                  /* более закруглённые углы */
+  font-size: 15px;                     /* чуть больше шрифт */
+  font-weight: 500;                    /* полужирный для контрастности */
   white-space: nowrap;
   z-index: 1000;
   pointer-events: none;
-  transition: opacity 0.3s;
+  opacity: 0;                          /* по умолчанию скрыта */
+  transform: translateY(4px);          /* чтобы анимация выглядела плавнее */
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* объёмная тень */
+  border: 1px solid rgba(255,255,255,0.2);
 }
+
+/* Псевдо‑стрелочка сверху */
+.v-tooltip::after {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: 12px;   /* можно подкорректировать по центру элемента */
+  border-width: 6px;
+  border-style: solid;
+  border-color: transparent transparent rgba(50, 50, 50, 0.95) transparent;
+}
+
+/* При показе (в директиве нужно просто менять opacity и transform) */
+.v-tooltip.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 </style>

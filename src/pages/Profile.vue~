@@ -172,7 +172,7 @@
                     @click.stop="handleDeleteShaderClick(shader.id)"/>
                 <share-icon
                     v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"
-                    v-tooltip="'Copy link'"
+                    v-tooltip="'Share shader'"
                     class="icon-btn action-btn"
                     @click.stop="shareShader(shader.id)"/>
                 <check-icon v-else class="icon-btn"/>

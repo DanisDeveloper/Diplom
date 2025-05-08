@@ -37,38 +37,39 @@
         </div>
         <hr>
         <div class="btns">
-          <button class="action-icon-btn" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
+          <button class="action-icon-btn" v-tooltip="'Upload shader'" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
             <upload-icon :color="compileFailed? '#f44336' : 'lightgrey'"></upload-icon>
           </button>
-          <button v-if="isPaused" class="action-icon-btn" @click="togglePause">
+          <button v-if="isPaused" v-tooltip="'Start shader'" class="action-icon-btn" @click="togglePause">
             <play-icon></play-icon>
           </button>
-          <button v-else class="action-icon-btn" @click="togglePause">
+          <button v-else v-tooltip="'Stop shader'" class="action-icon-btn" @click="togglePause">
             <pause-icon></pause-icon>
           </button>
-          <button class="action-icon-btn" @click="resetTime">
+          <button v-tooltip="'Reset time'" class="action-icon-btn" @click="resetTime">
             <restart-icon></restart-icon>
           </button>
-          <button class="action-icon-btn" @click="expandScreen">
+          <button v-tooltip="'Expand screen'" class="action-icon-btn" @click="expandScreen">
             <expand-icon></expand-icon>
           </button>
 
           <div class="right-btns">
-            <button v-if="isSavingLike" class="action-icon-btn btn-saving" disabled>
+            <button v-if="isSavingLike" v-tooltip="'Saving like'" class="action-icon-btn btn-saving" disabled>
               <div class="spinner"></div>
             </button>
             <button v-else v-if="this.$store.state.isAuth && this.id" class="action-icon-btn">
               <like-icon
+                  v-tooltip="'Like shader'"
                   :color="isLiked ? '#f44336' : 'lightgrey'"
                   @click="handleLikeButtonClick"
               ></like-icon>
             </button>
-            <button v-if="isSavingShader" class="action-icon-btn btn-saving" disabled>
+            <button v-if="isSavingShader" v-tooltip="'Saving shader'" class="action-icon-btn btn-saving" disabled>
               <div class="spinner"></div>
             </button>
             <button v-else v-if="this.$store.state.isAuth" :class="{'btn-border-error': titleEmpty}" class="action-icon-btn" @click="handleSaveOrForkButtonClick">
-              <save-icon :color="titleEmpty? '#f44336' : 'lightgrey'" v-if="isStoreUser || this.id === null"></save-icon>
-              <fork-icon v-else></fork-icon>
+              <save-icon v-tooltip="'Save shader'" :color="titleEmpty? '#f44336' : 'lightgrey'" v-if="isStoreUser || this.id === null"></save-icon>
+              <fork-icon v-tooltip="'Fork shader'" v-else></fork-icon>
             </button>
           </div>
         </div>
@@ -301,7 +302,7 @@ export default {
     },
 
     uploadShader() {
-      this.$refs.shaderWindow.uploadShader();
+      this.$refs.shaderWindow?.uploadShader();
     },
     togglePause() {
       this.isPaused = !this.isPaused;
@@ -487,6 +488,7 @@ export default {
       this.uploadShader();
     } catch (error) {
       this.serverError = true;
+      console.log(error);
     } finally {
       this.isLoading = false
     }
