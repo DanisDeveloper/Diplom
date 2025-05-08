@@ -50,48 +50,37 @@ html {
 
 .v-tooltip {
   position: absolute;
-  background: rgba(50, 50, 50, 0.95);
-  color: #fff;
-  padding: 10px 16px;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 500;
+  background: rgba(50, 50, 50, 0.95); /* чуть светлее, почти непрозрачный */
+  color: #fff;                         /* чистый белый текст */
+  padding: 10px 16px;                  /* больше внутренних отступов */
+  border-radius: 6px;                  /* более закруглённые углы */
+  font-size: 15px;                     /* чуть больше шрифт */
+  font-weight: 500;                    /* полужирный для контрастности */
   white-space: nowrap;
   z-index: 1000;
   pointer-events: none;
-  opacity: 0;
-  transform: translateY(8px) scale(0.95);
-  /* вместо transition используем animation */
-  animation: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  opacity: 0;                          /* по умолчанию скрыта */
+  transform: translateY(4px);          /* чтобы анимация выглядела плавнее */
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* объёмная тень */
   border: 1px solid rgba(255,255,255,0.2);
 }
 
-/* Стрелочка сверху */
+/* Псевдо‑стрелочка сверху */
 .v-tooltip::after {
   content: "";
   position: absolute;
   top: -6px;
-  left: 12px;
+  left: 12px;   /* можно подкорректировать по центру элемента */
   border-width: 6px;
   border-style: solid;
   border-color: transparent transparent rgba(50, 50, 50, 0.95) transparent;
 }
 
-/* Ключевые кадры для анимации появления */
-@keyframes tooltipFadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-/* При добавлении класса .show запускаем анимацию */
+/* При показе (в директиве нужно просто менять opacity и transform) */
 .v-tooltip.show {
-  animation: tooltipFadeIn 0.25s ease-out forwards;
+  opacity: 1;
+  transform: translateY(0);
 }
-
 
 </style>
