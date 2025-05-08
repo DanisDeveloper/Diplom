@@ -1,0 +1,60 @@
+<template>
+  <canvas ref="canvas" class="mandelbulb-canvas"></canvas>
+</template>
+
+<script setup>
+import { onMounted, ref } from 'vue'
+import * as THREE from 'three'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
+
+const canvas = ref(null)
+
+onMounted(() => {
+  const scene = new THREE.Scene()
+  const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100)
+  camera.position.z = 5
+
+  const renderer = new THREE.WebGLRenderer({canvas: canvas.value, alpha: true})
+  renderer.setSize(window.innerWidth, window.innerHeight)
+
+  // Освещение
+  const light = new THREE.DirectionalLight(0xffffff, 1)
+  light.position.set(5, 5, 5)
+  scene.add(light)
+
+  const ambient = new THREE.AmbientLight(0x404040)
+  scene.add(ambient)
+
+  // Загрузка фрактала
+  const loader = new GLTFLoader()
+  let model = null
+
+  loader.load('/models/mandelbulb.glb', gltf => {
+    model = gltf.scene
+    scene.add(model)
+  })
+
+  // Анимация
+  function animate() {
+    requestAnimationFrame(animate)
+    if (model) {
+      model.rotation.y += 0.005
+      model.rotation.x += 0.002
+    }
+    renderer.render(scene, camera)
+  }
+
+  animate()
+})
+</script>
+
+<style scoped>
+.mandelbulb-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+</style>

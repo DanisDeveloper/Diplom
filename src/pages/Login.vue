@@ -23,15 +23,33 @@
                 class="input-group"
                 key="name"
             >
-              <input maxlength="20" type="text" placeholder="Name" v-model="form.name" required/>
+              <input
+                  maxlength="20"
+                  type="text"
+                  placeholder="Name"
+                  v-model="form.name"
+                  @keydown="preventWhitespace"
+                  required/>
             </div>
 
             <div class="input-group" key="email">
-              <input maxlength="254" type="email" placeholder="Email" v-model="form.email" required/>
+              <input
+                  maxlength="254"
+                  type="email"
+                  placeholder="Email"
+                  v-model="form.email"
+                  @keydown="preventWhitespace"
+                  required/>
             </div>
 
             <div class="input-group" key="password">
-              <input maxlength="254" type="password" placeholder="Password" v-model.trim="form.password" required/>
+              <input
+                  maxlength="254"
+                  type="password"
+                  placeholder="Password"
+                  v-model.trim="form.password"
+                  @keydown="preventWhitespace"
+                  required/>
             </div>
 
             <div
@@ -44,6 +62,7 @@
                   type="password"
                   placeholder="Confirm password"
                   v-model.trim="form.confirmPassword"
+                  @keydown="preventWhitespace"
                   required
               />
             </div>
@@ -85,6 +104,11 @@ export default {
     };
   },
   methods: {
+    preventWhitespace(event) {
+      if (event.key.match(/\s/)) {
+        event.preventDefault();
+      }
+    },
     handleLoginTabClick() {
       this.isLoginForm = true;
       this.errorMessage = "";

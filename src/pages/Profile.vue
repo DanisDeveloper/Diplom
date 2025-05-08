@@ -201,17 +201,20 @@
           <input
               type="password"
               placeholder="Old password"
-              v-model="oldPassword"
+              v-model.trim="oldPassword"
+              @keydown="preventWhitespace"
               required/>
           <input
               type="password"
               placeholder="New password"
-              v-model="newPassword"
+              v-model.trim="newPassword"
+              @keydown="preventWhitespace"
               required/>
           <input
               type="password"
               placeholder="Confirm password"
-              v-model="confirmPassword"
+              v-model.trim="confirmPassword"
+              @keydown="preventWhitespace"
               required/>
           <button class="submit-btn" type="submit" @click="changePassword">
             <span v-if="!this.isPatchingPassword">Change password</span>
@@ -293,7 +296,17 @@ export default {
   },
   methods: {
     truncate,
+    preventWhitespace(event) {
+      if (event.key.match(/\s/)) {
+        event.preventDefault();
+      }
+    },
     async changePassword() {
+      if(this.oldPassword === "" || this.newPassword === "" || this.confirmPassword === "") {
+        this.passwordLog = "All fields are required";
+        return;
+      }
+
       this.passwordLog = "";
       if (this.newPassword !== this.confirmPassword) {
         this.passwordLog = "Passwords don't match";

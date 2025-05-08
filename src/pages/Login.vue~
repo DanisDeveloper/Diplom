@@ -96,6 +96,7 @@ export default {
     async handleSubmit() {
       // TODO переделать, чтобы сервер работал с формой
       this.errorMessage = "";
+      this.errorMessageKey++;
 
       // Registration
       if (!this.isLoginForm) {

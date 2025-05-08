@@ -201,24 +201,29 @@
           <input
               type="password"
               placeholder="Old password"
-              v-model="oldPassword"
+              v-model.trim="oldPassword"
+              @keydown="preventWhitespace"
               required/>
           <input
               type="password"
               placeholder="New password"
-              v-model="newPassword"
+              v-model.trim="newPassword"
+              @keydown="preventWhitespace"
               required/>
           <input
               type="password"
               placeholder="Confirm password"
-              v-model="confirmPassword"
+              v-model.trim="confirmPassword"
+              @keydown="preventWhitespace"
               required/>
-          <button  class="submit-btn" type="submit" @click="changePassword">
+          <button class="submit-btn" type="submit" @click="changePassword">
             <span v-if="!this.isPatchingPassword">Change password</span>
             <spinner v-else/>
           </button>
           <transition name="shake">
-            <label v-if="this.passwordLog" :class="{'success' : this.successedPasswordChange}">{{ this.passwordLog }}</label>
+            <label v-if="this.passwordLog" :class="{'success' : this.successedPasswordChange}">{{
+                this.passwordLog
+              }}</label>
           </transition>
         </div>
       </div>
@@ -291,7 +296,17 @@ export default {
   },
   methods: {
     truncate,
+    preventWhitespace(event) {
+      if (event.key.match(/\s/)) {
+        event.preventDefault();
+      }
+    } ,
     async changePassword() {
+      if(this.oldPassword === "" || this.newPassword === "" || this.confirmPassword === "") {
+        this.passwordLog = "All fields are required";
+        return;
+      }
+
       this.passwordLog = "";
       if (this.newPassword !== this.confirmPassword) {
         this.passwordLog = "Passwords don't match";
@@ -471,7 +486,7 @@ export default {
       }
     },
     handleCancelClick() {
-      if(this.isPatchingBiography) return;
+      if (this.isPatchingBiography) return;
       this.isEditing = false;
       this.biography_edit = this.user.biography;
     },
@@ -667,7 +682,7 @@ export default {
   font-weight: bold;
 }
 
-.user-info .biography{
+.user-info .biography {
   font-weight: normal;
 }
 
@@ -675,7 +690,7 @@ export default {
   font-size: 1rem;
 }
 
-.user-info .biography input{
+.user-info .biography input {
   outline: none;
   border: 1px solid #282C34;
   border-radius: 0.3rem;
@@ -951,12 +966,11 @@ export default {
   text-overflow: ellipsis;
 }
 
-.shader-cell__info .right-icons{
+.shader-cell__info .right-icons {
   position: absolute;
   bottom: 10px;
   right: 10px;
 }
-
 
 .invisible {
   visibility: hidden;
@@ -1031,6 +1045,7 @@ export default {
   transform: translateY(0);
   box-shadow: none;
 }
+
 .change-password-wrapper label {
   color: #ef4444;
   font-size: 0.875rem;
@@ -1059,6 +1074,7 @@ export default {
 }
 
 .spinner {
-  width: 1rem; height: 1rem;
+  width: 1rem;
+  height: 1rem;
 }
 </style>
