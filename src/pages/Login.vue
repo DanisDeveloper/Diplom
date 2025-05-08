@@ -323,7 +323,6 @@ export default {
 .input-group input:focus {
   outline: none;
   border-color: #282c34;
-  box-shadow: 0 0 0 2px rgba(40, 44, 52, 0.2);
 }
 
 /* Submit button */
