@@ -5,6 +5,8 @@
     <h1>User does not exist</h1>
   </div>
   <div v-else>
+    <toast :message="this.generalToastMessage" ref="generalToast" :background="'#282C34'"></toast>
+    <toast :message="this.errorToastMessage" ref="errorToast"></toast>
     <dialog-window v-model:show="this.showDialog">
       <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingShader"></loader>
       <div v-else>
@@ -252,9 +254,11 @@ import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
 import EditIcon from "@/components/UI/Icons/EditIcon.vue";
 import CancelIcon from "@/components/UI/Icons/CancelIcon.vue";
 import Spinner from "@/components/UI/Spinner.vue";
+import Toast from "@/components/Toast.vue";
 
 export default {
   components: {
+    Toast,
     Spinner,
     CancelIcon,
     EditIcon,
@@ -290,6 +294,9 @@ export default {
       passwordLog: "",
       successedPasswordChange: false,
       isPatchingPassword: false,
+
+      generalToastMessage: '',
+      errorToastMessage: '',
 
       API_URL: import.meta.env.VITE_API_URL
     }
@@ -338,8 +345,7 @@ export default {
         this.newPassword = '';
         this.confirmPassword = '';
       } catch (error) {
-        console.log(error);
-        // TODO сделать обработку ошибок
+        this.passwordLog = "Error changing password";
       } finally {
         this.isPatchingPassword = false;
       }
@@ -377,11 +383,12 @@ export default {
           this.user.shaders = this.user.shaders.filter(shader => shader.id !== this.shaderForDelete);
           this.user.activities = this.user.activities.filter(activity => activity.shader_id !== this.shaderForDelete);
           this.shaderForDelete = null;
-          // TODO сделать окно с подтверждением удаления
+          this.generalToastMessage = 'Successfully deleted shader';
+          this.$refs.generalToast.show();
         }
       } catch (error) {
-        console.error('Ошибка при удалении шейдера:', error);
-        // TODO тут можно добавить всплывающее сообщение или визуальное уведомление
+        this.errorToastMessage = 'Error deleting shader';
+        this.$refs.errorToast.show();
       } finally {
         this.isDeletingShader = false
         this.showDialog = false;
@@ -396,7 +403,8 @@ export default {
     async avatarLoadHandler(event) {
       const file = event.target.files[0];
       if (!file) {
-        // TODO открыть модальное окно с ошибкой
+        this.errorToastMessage = 'Error uploading avatar';
+        this.$refs.errorToast.show();
       }
 
       const formData = new FormData();
@@ -413,14 +421,16 @@ export default {
         this.user.avatar_url = data.avatar_url;
 
       } catch (error) {
-        console.error('Ошибка при загрузке:', error);
-        // TODO тут можно добавить всплывающее сообщение или визуальное уведомление
+        this.errorToastMessage = 'Error uploading avatar';
+        this.$refs.errorToast.show();
       }
     },
     async backgroundLoadHandler(event) {
       const file = event.target.files[0];
       if (!file) {
-        // TODO открыть модальное окно с ошибкой
+        this.errorToastMessage = 'Error uploading background';
+        this.$refs.errorToast.show();
+
       }
 
       const formData = new FormData();
@@ -437,8 +447,8 @@ export default {
         this.user.background_url = data.background_url;
 
       } catch (error) {
-        console.error('Ошибка при загрузке:', error);
-        // TODO тут можно добавить всплывающее сообщение или визуальное уведомление
+        this.errorToastMessage = 'Error uploading background';
+        this.$refs.errorToast.show();
       }
     },
     async handleClearBackground() {
@@ -453,8 +463,8 @@ export default {
           this.user.background_url = null;
         }
       } catch (error) {
-        console.error('Ошибка при загрузке:', error);
-        // TODO тут можно добавить всплывающее сообщение или уведомление
+        this.errorToastMessage = 'Error clearing background';
+        this.$refs.errorToast.show();
       } finally {
         // TODO возможно стоит сделать лоадер
       }
@@ -480,7 +490,8 @@ export default {
           this.isEditing = false;
         }
       } catch (error) {
-        console.log(error);
+        this.errorToastMessage = 'Error updating biography';
+        this.$refs.errorToast.show();
       } finally {
         this.isPatchingBiography = false;
       }
@@ -562,8 +573,7 @@ export default {
       }
       this.user = await response.json();
       this.biography_edit = this.user.biography;
-      console.log(this.user);
-      // TODO доделать
+        console.log(this.user);
     } catch (error) {
       console.log(error);
     } finally {
