@@ -9,7 +9,7 @@
 
 <script>
 export default {
-  name: 'ErrorToast',
+  name: 'toast',
   props: {
     message: {
       type: String,
@@ -19,6 +19,10 @@ export default {
       type: Number,
       default: 5000,
     },
+    background:{
+      type: String,
+      default: '#f44336'
+    }
   },
   data() {
     return {
@@ -62,7 +66,7 @@ export default {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  background-color: #f44336;
+  background-color: v-bind(background);
   color: white;
   padding: 16px 24px;
   border-radius: 8px;
