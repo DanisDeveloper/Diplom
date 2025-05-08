@@ -5,9 +5,14 @@
     <h1>You are not allowed to access this page</h1>
   </div>
   <div v-else-if="this.isNotFound" class="error-page-block">
-    <forbidden-icon></forbidden-icon>
+    <not-found-page :color="'#282C34'"></not-found-page>
     <h1>Shader was deleted or never existed</h1>
   </div>
+  <div v-else-if="this.serverError" class="error-page-block">
+    <forbidden-icon></forbidden-icon>
+    <h1>Status 500 - Server error</h1>
+  </div>
+
   <div v-else class="main">
     <toast :message="this.errorToastMessage" ref="errorToast"/>
     <toast :message="this.generalToastMessage" :background="'#282C34'" ref="generalToast"/>
@@ -191,10 +196,12 @@ import HideIcon from "@/components/UI/Icons/HideIcon.vue";
 import UnhideIcon from "@/components/UI/Icons/UnhideIcon.vue";
 import truncate from "@/utils/truncate.js";
 import toast from "@/components/Toast.vue";
+import NotFoundPage from "@/components/UI/Icons/NotFoundPage.vue";
 
 
 export default {
   components: {
+    NotFoundPage,
     toast,
     UnhideIcon,
     HideIcon,
@@ -217,6 +224,8 @@ export default {
   },
   data() {
     return {
+      serverError: false,
+
       // Переменные shader-window
       code: this.$route.query.code || exampleShader,
       isPaused: false,
@@ -475,8 +484,7 @@ export default {
       // ждём, пока Vue применит все изменения, и только потом обновляем шейдер
       this.uploadShader();
     } catch (error) {
-      // TODO сделать обработку ошибок
-      console.log(error)
+      this.serverError = true;
     } finally {
       this.isLoading = false
     }

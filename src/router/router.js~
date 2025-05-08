@@ -5,6 +5,8 @@ import Main from "@/pages/Main.vue";
 import Login from "@/pages/Login.vue";
 import Profile from "@/pages/Profile.vue";
 import Browse from "@/pages/Browse.vue";
+import NotFound from "@/pages/NotFound.vue";
+import ServerError from "@/pages/ServerError.vue";
 
 const routes = [
     {
@@ -34,7 +36,17 @@ const routes = [
     {
         path: '/profile/:id',
         component: Profile
-    }
+    },
+    {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: NotFound
+    },
+    {
+        path: '/server-error',
+        name: 'ServerError',
+        component: ServerError
+    },
 ]
 
 const router = createRouter({

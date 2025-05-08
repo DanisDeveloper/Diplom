@@ -1,5 +1,5 @@
 <template>
-  <transition name="slide-fade">
+  <transition name="slide-fade" @after-leave="$emit('hidden')">
     <div v-if="visible" class="toast">
       <div class="message">{{ message }}</div>
       <div class="progress-bar" :style="{ width: progress + '%' }"></div>
@@ -9,7 +9,7 @@
 
 <script>
 export default {
-  name: 'ErrorToast',
+  name: 'toast',
   props: {
     message: {
       type: String,
@@ -17,25 +17,35 @@ export default {
     },
     duration: {
       type: Number,
-      default: 5000, // миллисекунды
+      default: 5000,
     },
+    background:{
+      type: String,
+      default: '#333'
+    }
   },
   data() {
     return {
       visible: false,
       progress: 100,
+      startTime: null,
       intervalId: null,
     };
   },
   methods: {
     show() {
+      clearInterval(this.intervalId); // сбрасываем старый таймер
       this.visible = true;
+      this.startTime = Date.now();
       this.progress = 100;
 
-      const step = 100 / (this.duration / 100);
       this.intervalId = setInterval(() => {
-        this.progress -= step;
-        if (this.progress <= 0) {
+        const elapsed = Date.now() - this.startTime;
+        const remaining = this.duration - elapsed;
+
+        this.progress = Math.max((remaining / this.duration) * 100, 0);
+
+        if (remaining <= 0) {
           this.close();
         }
       }, 100);
@@ -44,9 +54,6 @@ export default {
       clearInterval(this.intervalId);
       this.visible = false;
     },
-  },
-  mounted() {
-    this.show();
   },
   beforeUnmount() {
     clearInterval(this.intervalId);
@@ -59,7 +66,7 @@ export default {
   position: fixed;
   right: 20px;
   bottom: 20px;
-  background-color: #f44336;
+  background-color: v-bind(background);
   color: white;
   padding: 16px 24px;
   border-radius: 8px;
