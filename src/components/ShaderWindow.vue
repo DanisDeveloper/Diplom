@@ -274,9 +274,11 @@ export default {
       this.requestId = requestAnimationFrame(render);
     },
     uploadShader() {
-      this.updateFragmentShader();
+      const isSuccessCompile = this.updateFragmentShader();
       cancelAnimationFrame(this.requestId); // освобождение ресурсов
-      this.startRendering();
+      if(isSuccessCompile) {
+        this.startRendering();
+      }
     },
     togglePause() {
       // При переключении паузы обновляем флаг.
@@ -297,6 +299,12 @@ export default {
       const newFragmentShader = this.compileShader(gl, this.code, gl.FRAGMENT_SHADER);
       if (!newFragmentShader) return;
 
+      if (!this.program) {
+        console.warn("Нет старой программы, пересоздаём целиком");
+        this.createProgram();
+        return true;
+      }
+
       // Отсоединяем старый фрагментный шейдер (предполагается, что он второй)
       const shaders = gl.getAttachedShaders(this.program);
       if (shaders && shaders.length > 1) {
@@ -307,9 +315,10 @@ export default {
 
       if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
         console.error("Ошибка линковки обновленного шейдера:", gl.getProgramInfoLog(this.program));
-        return;
+        return false;
       }
       gl.useProgram(this.program);
+      return true;
     }
   },
 };
