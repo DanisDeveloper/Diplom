@@ -188,7 +188,7 @@ export default {
               this.errorMessage = "Wrong email or password";
               break;
             case 409:
-              this.errorMessage = "User already exists";
+              this.errorMessage = "User does not exist";
               break;
             case 422:
               this.errorMessage = "Validation error. Please check the form.";

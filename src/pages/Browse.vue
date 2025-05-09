@@ -89,7 +89,7 @@ export default {
     },
     handleMouseLeave(index) {
       this.$refs.shaders[index].togglePause()
-    },
+    }
   },
   watch: {
     ordering(newOption) {
@@ -182,8 +182,10 @@ export default {
 
 .shader-window__text {
   display: flex;
-  flex-wrap: wrap;
-  max-width: 100%;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 80%;
 }
 
 .shader-window__text > span {
