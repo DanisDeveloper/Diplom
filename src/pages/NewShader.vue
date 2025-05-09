@@ -374,13 +374,16 @@ export default {
     async handleLikeButtonClick() {
       this.isSavingLike = true;
       try {
-        const response = await fetch(`${this.API_URL}/likes/${this.id}/`, {
+        const response = await fetch(`${this.API_URL}/likes/${this.id}`, {
           method: this.isLiked ? "DELETE" : "POST",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
         });
         if (response.ok) {
           this.isLiked = !this.isLiked;
+        }else{
+          this.errorToastMessage = 'Error saving like';
+          this.$refs.errorToast.show();
         }
       } catch (error) {
         this.errorToastMessage = 'Error saving like';
@@ -413,7 +416,7 @@ export default {
       this.isSavingHiddenState = true;
       this.commentToHide = comment['id'];
       try {
-        const response = await fetch(`${this.API_URL}/comments/${comment.id}/`, {
+        const response = await fetch(`${this.API_URL}/comments/${comment.id}`, {
           method: "PATCH",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
@@ -457,11 +460,13 @@ export default {
     if (this.$route.params.id === undefined) return;
     this.isLoading = true
     try {
+      console.log(`${this.API_URL}/shaders/${this.$route.params.id}/`)
       const response = await fetch(`${this.API_URL}/shaders/${this.$route.params.id}/`, {
         method: "GET",
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
       });
+      console.log("response", response);
       if ([401, 403].includes(response.status)) {
         this.isForbidden = true;
         return;
@@ -469,7 +474,9 @@ export default {
         this.isNotFound = true;
         return;
       }
+
       const {shader, is_liked, username, forked_shader ,comments} = await response.json();
+      console.log(shader)
       this.forked_shader = forked_shader;
       this.id = shader.id;
       this.title = shader.title;
@@ -483,11 +490,12 @@ export default {
       this.isLiked = is_liked;
       this.username = username;
       this.comments = comments;
-      console.log(this.comments);
       // ждём, пока Vue применит все изменения, и только потом обновляем шейдер
+
       this.uploadShader();
+      // this.$refs.shaderWindow.initWebGL()
     } catch (error) {
-      this.serverError = true;
+      // this.serverError = true;
       console.log(error);
     } finally {
       this.isLoading = false
@@ -620,15 +628,16 @@ hr {
 }
 
 .visibility-select {
-  padding: 4px 10px;
-  border-radius: 8px;
+  padding: 4px 8px;
+  border-radius: 0.5rem;
   border: 1px solid #282C34;
   background: transparent;
   color: lightgray;
-  font-size: large;
+  font-size: inherit;
   cursor: pointer;
   appearance: none; /* убираем дефолтные стрелки */
   transition: border 0.2s ease, color 0.2s ease;
+
 }
 
 .visibility-select:hover {
@@ -638,10 +647,10 @@ hr {
 
 .shader-visibility {
   color: lightgray;
-  font-size: large;
-  display: flex;
+  display: block;
   align-items: center;
   width: fit-content;
+  font-family: inherit;
 }
 
 .visibility-select option {
@@ -697,6 +706,7 @@ hr {
   text-overflow: ellipsis;
   max-width: 100%;
   white-space: nowrap;
+  font-size: smaller;
 }
 
 .link {

@@ -24,7 +24,7 @@
     <div class="user-wrapper">
       <div class="user-background">
         <img
-            :src="`${this.API_URL}/public/${this.user.background_url}`"
+            :src="`${this.PUBLIC_API_URL}/${this.user.background_url}`"
             alt=""
         >
         <input
@@ -44,7 +44,7 @@
       <div class="user-info-wrapper">
         <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
           <img
-              :src="`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`"
+              :src="`${this.PUBLIC_API_URL}/${this.user.avatar_url || 'avatars/avatar.png'}`"
               class="avatar-img"
               alt="avatar"
               width="224"
@@ -311,7 +311,8 @@ export default {
       generalToastMessage: '',
       errorToastMessage: '',
 
-      API_URL: import.meta.env.VITE_API_URL
+      API_URL: import.meta.env.VITE_API_URL,
+      PUBLIC_API_URL: import.meta.env.VITE_PUBLIC_API_URL,
     }
   },
   methods: {
@@ -408,7 +409,8 @@ export default {
       }
     },
     triggerAvatarInput() {
-      this.$refs.avatarInput.click()
+      this.$refs.avatarInput.click();
+      console.log(`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`)
     },
     triggerBackgroundInput() {
       this.$refs.backgroundInput.click()
@@ -574,6 +576,7 @@ export default {
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
       });
+      console.log(`${this.API_URL}/profile/${this.$route.params.id}`)
       // TODO обработать 409, когда указан несуществующий пользователь
       if (response.status === 409) {
         this.isNotFound = true;

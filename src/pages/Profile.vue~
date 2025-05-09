@@ -167,7 +167,7 @@
               <div class="right-icons">
                 <delete-icon
                     v-if="isStoreUser"
-                    v-tooltip.prevent="'Delete shader'"
+                    v-tooltip="'Delete shader'"
                     class="icon-btn action-btn"
                     @click.stop="handleDeleteShaderClick(shader.id)"/>
                 <share-icon
@@ -408,7 +408,8 @@ export default {
       }
     },
     triggerAvatarInput() {
-      this.$refs.avatarInput.click()
+      this.$refs.avatarInput.click();
+      console.log(`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`)
     },
     triggerBackgroundInput() {
       this.$refs.backgroundInput.click()
@@ -574,6 +575,7 @@ export default {
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
       });
+      console.log(`${this.API_URL}/profile/${this.$route.params.id}`)
       // TODO обработать 409, когда указан несуществующий пользователь
       if (response.status === 409) {
         this.isNotFound = true;
