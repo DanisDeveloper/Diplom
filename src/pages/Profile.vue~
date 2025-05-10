@@ -16,15 +16,15 @@
       <div v-else>
         <h2 style="text-align: center">Are you sure?</h2>
         <div class="dialog-window__buttons">
-          <button class="simple-btn action-btn" @click="this.showDialog = false">Cancel</button>
-          <button class="simple-btn action-btn" @click="deleteShader">Delete</button>
+          <button class="dialog-btn action-btn" @click="this.showDialog = false">Cancel</button>
+          <button class="dialog-btn action-btn" @click="deleteShader">Delete</button>
         </div>
       </div>
     </dialog-window>
     <div class="user-wrapper">
       <div class="user-background">
         <img
-            :src="`${this.API_URL}/public/${this.user.background_url}`"
+            :src="`${this.PUBLIC_API_URL}/${this.user.background_url}`"
             alt=""
         >
         <input
@@ -44,7 +44,7 @@
       <div class="user-info-wrapper">
         <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
           <img
-              :src="`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`"
+              :src="`${this.PUBLIC_API_URL}/${this.user.avatar_url || 'avatars/avatar.png'}`"
               class="avatar-img"
               alt="avatar"
               width="224"
@@ -182,30 +182,36 @@
         </div>
       </div>
 
-      <table v-else-if="activeTab === 'Activity'" class="shader-table">
-        <thead>
-        <tr>
-          <th :class="{'bottom-left-border-radius': this.user.activities.length === 0}">Activity</th>
-          <th>Shader</th>
-          <th :class="{'bottom-right-border-radius': this.user.activities.length === 0}">Date</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="shader-item" v-for="(activity,index) in user.activities" :key="index">
-          <td class="shader-item__activity">
-            <like-icon class="icon-btn" v-if="activity.type === 'like'"></like-icon>
-            <comment-icon class="icon-btn" v-else-if="activity.type === 'comment'"></comment-icon>
-            <fork-icon class="icon-btn" v-else-if="activity.type=== 'fork'"></fork-icon>
-          </td>
-          <td>
-            <router-link :to="`/new/${activity.shader_id}`" class="shader-link">
-              {{ activity.shader_title }}
-            </router-link>
-          </td>
-          <td>{{ formatDateTime(activity.action_created_at) }}</td>
-        </tr>
-        </tbody>
-      </table>
+      <div v-else-if="activeTab === 'Activity'">
+        <table class="shader-table">
+          <thead>
+          <tr>
+            <th :class="{'bottom-left-border-radius': this.user.activities.length === 0}">Activity</th>
+            <th>Shader</th>
+            <th :class="{'bottom-right-border-radius': this.user.activities.length === 0}">Date</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr class="shader-item" v-for="(activity,index) in user.activities" :key="index">
+            <td class="shader-item__activity">
+              <like-icon class="icon-btn" v-if="activity.type === 'like'"></like-icon>
+              <comment-icon class="icon-btn" v-else-if="activity.type === 'comment'"></comment-icon>
+              <fork-icon class="icon-btn" v-else-if="activity.type=== 'fork'"></fork-icon>
+            </td>
+            <td>
+              <router-link :to="`/new/${activity.shader_id}`" class="shader-link">
+                {{ activity.shader_title }}
+              </router-link>
+            </td>
+            <td>{{ formatDateTime(activity.action_created_at) }}</td>
+          </tr>
+          </tbody>
+        </table>
+        <button v-if="this.totalActivities > this.activity_page * this.ACTIVITIES_PER_PAGE" class="activity-load-btn" @click="loadMoreActivities">
+          <spinner v-if="isLoadingActivities"></spinner>
+          <span v-else>Upload more</span>
+        </button>
+      </div>
 
       <div v-else-if="activeTab === 'Account'">
         <div class="change-password-wrapper">
@@ -300,6 +306,10 @@ export default {
       isEditing: false,
       biography_edit: null,
       isPatchingBiography: false,
+      activity_page: 1,
+      ACTIVITIES_PER_PAGE: 20,
+      totalActivities: 0,
+      isLoadingActivities: false,
 
       oldPassword: '',
       newPassword: '',
@@ -311,7 +321,9 @@ export default {
       generalToastMessage: '',
       errorToastMessage: '',
 
-      API_URL: import.meta.env.VITE_API_URL
+
+      API_URL: import.meta.env.VITE_API_URL,
+      PUBLIC_API_URL: import.meta.env.VITE_PUBLIC_API_URL,
     }
   },
   methods: {
@@ -522,6 +534,26 @@ export default {
       this.activeTab = tab
       this.passwordLog = ""
     },
+    async loadMoreActivities() {
+      try{
+        this.isLoadingActivities = true;
+        const response = await fetch(`${this.API_URL}/profile/${this.$route.params.id}/activities?activity_page=${this.activity_page + 1}&limit=${this.ACTIVITIES_PER_PAGE}`, {
+          method: "GET",
+          headers: {"Content-Type": "application/json"},
+          credentials: 'include',
+        });
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        this.activity_page += 1;
+        const data = await response.json();
+        this.user.activities.push(...data);
+      }catch (error) {
+        console.log(error);
+        this.errorToastMessage = 'Error loading more activities';
+        this.$refs.errorToast.show();
+      }finally {
+        this.isLoadingActivities = false;
+      }
+    },
     formatDate(date) {
       const _date = new Date(date);
 
@@ -582,7 +614,7 @@ export default {
       }
       this.user = await response.json();
       this.biography_edit = this.user.biography;
-        console.log(this.user);
+      this.totalActivities = parseInt(response.headers.get('x-total-count')) || this.totalActivities
     } catch (error) {
       console.log(error);
       this.serverError = true;
@@ -888,7 +920,7 @@ export default {
   background: transparent;
 }
 
-.simple-btn {
+.dialog-btn {
   background: transparent;
   border-radius: 8px;
   border: 1px solid #282C34;
@@ -1096,5 +1128,23 @@ export default {
 .spinner {
   width: 1rem;
   height: 1rem;
+}
+
+
+
+.activity-load-btn{
+  display: flex;
+  justify-content: center;
+  margin: 1rem auto 0;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border:  1px solid #282C34;
+  transition: all 0.3s ease;
+  font-size: large;
+}
+.activity-load-btn:hover {
+  background: #282C34;
+  color: lightgray;
+  cursor: pointer;
 }
 </style>
