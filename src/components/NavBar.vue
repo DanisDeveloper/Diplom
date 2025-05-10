@@ -1,6 +1,6 @@
 <template>
   <div class="nav-bar">
-    <button class="nav-bar__main-btn" @click="this.$router.push('/')">ShaderToy</button>
+    <button class="nav-bar__main-btn" @click="this.$router.push('/')">FragmentVerse</button>
     <div class="nav-bar__items">
       <div
           v-show="this.$store.state.isAuth"

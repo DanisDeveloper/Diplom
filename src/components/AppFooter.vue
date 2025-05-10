@@ -13,17 +13,14 @@
     <div class="info">
       <h3>Learn</h3>
       <ul>
-        <li class="info-element"><a class="link" href="">Tutorials</a></li>
-        <li class="info-element"><a class="link" href="">Documentation</a></li>
-        <li class="info-element"><a class="link" href="">Examples</a></li>
+        <li class="info-element"><a class="link" href="https://webglfundamentals.org/webgl/lessons/">WebGL fundamentals</a></li>
+        <li class="info-element"><a class="link" href="https://docs.gl/sl4/all">GLSL documentation</a></li>
       </ul>
     </div>
 
     <div class="info">
-      <h3>ShaderToy</h3>
+      <h3>FragmentVerse</h3>
       <ul>
-        <li class="info-element"><a class="link" href="">Team</a></li>
-        <li class="info-element"><a class="link" href="">FAQ</a></li>
         <li class="info-element"><a class="link" href="/about">About</a></li>
       </ul>
     </div>
