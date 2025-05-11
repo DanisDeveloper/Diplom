@@ -55,7 +55,6 @@
         <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
           <img
               :src="`${this.PUBLIC_API_URL}/${this.user.avatar_url || 'avatars/avatar.png'}`"
-              class="avatar-img"
               alt="avatar"
               width="224"
               height="224"
@@ -65,7 +64,6 @@
               style="display: none;"
               v-if="this.isStoreUser"
               type="file"
-              class="avatar-input"
               ref="avatarInput"
               accept="image/*"
               @change="avatarLoadHandler"
@@ -274,7 +272,7 @@ import SaveIcon from "@/components/UI/Icons/SaveIcon.vue";
 import CheckIcon from "@/components/UI/Icons/CheckIcon.vue";
 import CodeIcon from "@/components/UI/Icons/CodeIcon.vue";
 import ShaderWindow from "@/components/ShaderWindow.vue";
-import Pagination from "@/components/pagination.vue";
+import Pagination from "@/components/Pagination.vue";
 import truncate from "../utils/truncate.js";
 import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
 import EditIcon from "@/components/UI/Icons/EditIcon.vue";
@@ -741,19 +739,27 @@ export default {
   position: relative;
   top: -64px; /* - половина 128px */
   z-index: 10;
+  width: 128px;
+  height: 128px;
+  background-color: #000000;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid rgb(53, 59, 67);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s ease;
+
 }
 
 .user-info__avatar img {
-  width: 128px;
-  height: 128px;
-  border-radius: 50%;
-  border: 4px solid rgb(53, 59, 67);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  transition: all 0.3s ease;
 }
 
-.user-info__avatar.editable img:hover {
+.user-info__avatar.editable:hover {
   cursor: pointer;
   transform: scale(1.05);
   box-shadow: 0 4px 24px rgba(255, 255, 255, 0.5);
