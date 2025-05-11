@@ -5,7 +5,7 @@
       <h3>Contacts</h3>
       <ul>
         <li class="info-element"><strong>Email:</strong> danis.ru2002@mail.ru</li>
-        <li class="info-element"><strong>Telegram:</strong> <a class="link" href="https://t.me/Danis707">@Danis707</a>
+        <li class="info-element"><strong>Telegram:</strong> <a class="footer-link" href="https://t.me/Danis707">@Danis707</a>
         </li>
       </ul>
     </div>
@@ -13,15 +13,15 @@
     <div class="info">
       <h3>Learn</h3>
       <ul>
-        <li class="info-element"><a class="link" href="https://webglfundamentals.org/webgl/lessons/">WebGL fundamentals</a></li>
-        <li class="info-element"><a class="link" href="https://docs.gl/sl4/all">GLSL documentation</a></li>
+        <li class="info-element"><a class="footer-link" href="https://webglfundamentals.org/webgl/lessons/">WebGL fundamentals</a></li>
+        <li class="info-element"><a class="footer-link" href="https://docs.gl/sl4/all">GLSL documentation</a></li>
       </ul>
     </div>
 
     <div class="info">
       <h3>FragmentVerse</h3>
       <ul>
-        <li class="info-element"><a class="link" href="/about">About</a></li>
+        <li class="info-element"><a class="footer-link" href="/about">About</a></li>
       </ul>
     </div>
 
@@ -51,12 +51,12 @@ td {
   padding-right: 10px;
 }
 
-.link {
+.footer-link {
   color: lightgray;
   text-decoration: none;
 }
 
-.link:hover {
+.footer-link:hover {
   color: white;
 }
 

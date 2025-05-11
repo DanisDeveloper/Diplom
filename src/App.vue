@@ -83,4 +83,13 @@ html {
   transform: translateY(0);
 }
 
+
+.link {
+  font-weight: bold;
+}
+
+.link:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 20 12" id="down" :fill="color">
+  <svg xmlns="http://www.w3.org/2000/svg" :width="width" :height="height" viewBox="0 0 20 12" id="down" :fill="color">
     <g id="Page-1" fill-rule="evenodd" stroke="none" stroke-width="1">
       <g id="Asset-1" fill-rule="nonzero" transform="translate(-9 -11)">
         <g id="Lager_16" transform="translate(9 11)">
@@ -14,10 +14,19 @@
 
 <script>
 export default {
+  name: "down-icon",
   props: {
     color: {
       type: String,
       default: "lightgrey"
+    },
+    width: {
+      type: Number,
+      default: 28
+    },
+    height: {
+      type: Number,
+      default: 28
     }
   }
 };

@@ -26,6 +26,7 @@
 
 <script>
 export default {
+  name: 'unhide-icon',
   props: {
     color: {
       type: String,

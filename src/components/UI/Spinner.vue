@@ -15,6 +15,8 @@ export default {
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   display: inline-block;
+  width: 24px;
+  height: 24px;
 }
 
 @keyframes spin {

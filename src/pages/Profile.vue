@@ -11,13 +11,23 @@
   <div v-else>
     <toast :message="this.generalToastMessage" ref="generalToast" :background="'#282C34'"></toast>
     <toast :message="this.errorToastMessage" ref="errorToast"></toast>
-    <dialog-window v-model:show="this.showDialog">
+    <dialog-window v-model:show="this.showShaderDeleteDialog">
       <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingShader"></loader>
       <div v-else>
-        <h2 style="text-align: center">Are you sure?</h2>
+        <h2 style="text-align: center">Delete this shader?</h2>
         <div class="dialog-window__buttons">
-          <button class="dialog-btn action-btn" @click="this.showDialog = false">Cancel</button>
+          <button class="dialog-btn action-btn" @click="this.showShaderDeleteDialog = false">Cancel</button>
           <button class="dialog-btn action-btn" @click="deleteShader">Delete</button>
+        </div>
+      </div>
+    </dialog-window>
+    <dialog-window v-model:show="this.showAvatarDeleteDialog">
+      <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingAvatar"></loader>
+      <div v-else>
+        <h2 style="text-align: center">Delete avatar?</h2>
+        <div class="dialog-window__buttons">
+          <button class="dialog-btn action-btn" @click="this.showAvatarDeleteDialog = false">Cancel</button>
+          <button class="dialog-btn action-btn" @click="deleteAvatar">Delete</button>
         </div>
       </div>
     </dialog-window>
@@ -295,7 +305,9 @@ export default {
       isLoading: false,
       tabs: ['Shaders', 'Activity'], // Account добавляется в mounted
       activeTab: 'Shaders',
-      showDialog: false,
+      showAvatarDeleteDialog: false,
+      isDeletingAvatar: false,
+      showShaderDeleteDialog: false,
       isDeletingShader: false,
       shaderForDelete: null,
       isClipboardCopied: false,
@@ -383,7 +395,7 @@ export default {
     },
     handleDeleteShaderClick(shaderId) {
       this.shaderForDelete = shaderId;
-      this.showDialog = true
+      this.showShaderDeleteDialog = true
     },
     shareShader(shaderId) {
       navigator.clipboard.writeText(`${window.location.origin}/new/${shaderId}`);
@@ -393,6 +405,27 @@ export default {
         this.isClipboardCopied = false;
         this.clipboardShaderId = null;
       }, 1000);
+    },
+    async deleteAvatar(){
+      this.isDeletingAvatar = true;
+      try{
+        const response = await fetch(`${this.API_URL}/profile/background`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+        if(response.ok){
+          this.user.avatar_url = null;
+          this.generalToastMessage = 'Successfully cleared avatar';
+          this.$refs.generalToast.show();
+        }
+      } catch (error) {
+        console.log(error);
+        this.errorToastMessage = 'Error clearing avatar';
+        this.$refs.errorToast.show();
+      } finally {
+        this.isDeletingAvatar = false;
+        this.showAvatarDeleteDialog = false;
+      }
     },
     async deleteShader() {
       this.isDeletingShader = true;
@@ -416,12 +449,16 @@ export default {
         this.$refs.errorToast.show();
       } finally {
         this.isDeletingShader = false
-        this.showDialog = false;
+        this.showShaderDeleteDialog = false;
       }
     },
-    triggerAvatarInput() {
-      this.$refs.avatarInput.click();
-      console.log(`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`)
+    async triggerAvatarInput() {
+      if(this.user.avatar_url !== null) {
+        this.showAvatarDeleteDialog = true;
+      }else{
+        this.$refs.avatarInput.click();
+        console.log(`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`)
+      }
     },
     triggerBackgroundInput() {
       this.$refs.backgroundInput.click()
@@ -1123,12 +1160,6 @@ export default {
     transform: translateX(8px);
   }
 }
-
-.spinner {
-  width: 1rem;
-  height: 1rem;
-}
-
 
 
 .activity-load-btn{

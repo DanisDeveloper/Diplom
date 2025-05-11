@@ -3,7 +3,7 @@ import App from './App.vue'
 import router from "@/router/router.js";
 import store from "@/store/index.js";
 import VTooltip from "@/directives/VTooltip.js";
-import components from "@/components/UI/Icons/index.js";
+import components from "@/components/icons/index.js";
 
 const app = createApp(App)
 

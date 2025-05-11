@@ -9,7 +9,6 @@
 
 <script>
 export default {
-  name: "like-icon",
   props: {
     color: {
       type: String,

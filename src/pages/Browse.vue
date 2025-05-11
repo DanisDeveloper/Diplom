@@ -32,10 +32,10 @@
         />
         <div class="shader-window-info">
           <span class="shader-window__text">
-            <span class="shader-window__title">{{ truncate(shader['title']) }}</span>
+            <span>{{ truncate(shader['title']) }}</span>
             <span>&nbsp;by&nbsp;</span>
             <span
-                class="shader-window__author"
+                class="link"
                 @click="$router.push(`/profile/${shader['user_id']}`)"
             >
               {{ truncate(shader['username']) }}
@@ -49,7 +49,6 @@
             {{ shader['likes'] }}
             <like-icon class="like-icon" :width="16" :height="16" :color="'#282C34'"></like-icon>
           </span>
-
         </div>
       </div>
     </div>
@@ -190,21 +189,6 @@ export default {
 
 .shader-window__text > span {
   white-space: nowrap;
-}
-
-.shader-window__title, .shader-window__author {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.shader-window__author {
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.shader-window__author:hover {
-  text-decoration: underline;
 }
 
 .shader-window-info__comments {

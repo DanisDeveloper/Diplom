@@ -36,41 +36,46 @@
           <div class="shader-info__component"><strong>Resolution:</strong> {{ canvasWidth }}x{{ canvasHeight }}</div>
         </div>
         <hr>
-        <div class="btns">
-          <button class="action-icon-btn" v-tooltip="'Upload shader'" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
+        <div class="shader-window-manage-btn">
+          <icon-button v-tooltip="'Upload shader'" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
             <upload-icon :color="compileFailed? '#f44336' : 'lightgrey'"/>
-          </button>
-          <button v-if="isPaused" v-tooltip="'Start shader'" class="action-icon-btn" @click="togglePause">
+          </icon-button>
+          <icon-button v-if="isPaused" v-tooltip="'Start shader'"  @click="togglePause">
             <play-icon/>
-          </button>
-          <button v-else v-tooltip="'Stop shader'" class="action-icon-btn" @click="togglePause">
+          </icon-button>
+          <icon-button v-else v-tooltip="'Stop shader'" @click="togglePause">
             <pause-icon/>
-          </button>
-          <button v-tooltip="'Reset time'" class="action-icon-btn" @click="resetTime">
+          </icon-button>
+          <icon-button v-tooltip="'Reset time'" @click="resetTime">
             <restart-icon/>
-          </button>
-          <button v-tooltip="'Expand screen'" class="action-icon-btn" @click="expandScreen">
+          </icon-button>
+          <icon-button v-tooltip="'Expand screen'" @click="expandScreen">
             <expand-icon/>
-          </button>
+          </icon-button>
 
           <div class="right-btns">
-            <button v-if="isSavingLike" v-tooltip="'Saving like'" class="action-icon-btn btn-saving" disabled>
-              <div class="spinner"></div>
-            </button>
-            <button v-else v-if="this.$store.state.isAuth && this.id" class="action-icon-btn">
+            <icon-button v-tooltip="'Saving like'" v-if="this.$store.state.isAuth && this.id">
+              <spinner v-if="isSavingLike" disabled/>
               <like-icon
-                  v-tooltip="'Like shader'"
+                  v-else
+                  :disabled="isSavingLike"
                   :color="isLiked ? '#f44336' : 'lightgrey'"
                   @click="handleLikeButtonClick"
               />
-            </button>
-            <button v-if="isSavingShader" v-tooltip="'Saving shader'" class="action-icon-btn btn-saving" disabled>
-              <div class="spinner"></div>
-            </button>
-            <button v-else v-if="this.$store.state.isAuth" :class="{'btn-border-error': titleEmpty}" class="action-icon-btn" @click="handleSaveOrForkButtonClick">
-              <save-icon v-tooltip="'Save shader'" :color="titleEmpty? '#f44336' : 'lightgrey'" v-if="isStoreUser || this.id === null"/>
-              <fork-icon v-tooltip="'Fork shader'" v-else/>
-            </button>
+            </icon-button>
+            <icon-button v-if="this.$store.state.isAuth" :class="{'btn-border-error': titleEmpty}" @click="handleSaveOrForkButtonClick">
+              <spinner
+                  v-if="isSavingShader"
+                  v-tooltip="'Saving shader'"
+                  disabled/>
+              <save-icon
+                  v-else-if="isStoreUser || this.id === null"
+                  v-tooltip="'Save shader'"
+                  :color="titleEmpty? '#f44336' : 'lightgrey'"/>
+              <fork-icon
+                  v-else
+                  v-tooltip="'Fork shader'"/>
+            </icon-button>
           </div>
         </div>
       </div>
@@ -133,11 +138,15 @@
               placeholder="Your comment..."
               v-model.trim="comment">
           </textarea>
-          <button v-if="isCommentPosting" class="post-btn btn-saving" disabled>
-            <div class="spinner"></div>
+          <button
+              :disabled="isCommentPosting"
+              class="post-btn"
+              @click="postComment">
+            <spinner v-if="isCommentPosting" disabled/>
+            <span v-else>Post</span>
           </button>
-          <button v-else :disabled="isCommentPosting" class="post-btn" @click="postComment">Post</button>
         </div>
+
         <div v-for="comment in comments" :key="comment['id']" class="comment">
           <img
               class="comment__avatar"
@@ -146,20 +155,25 @@
               :src="`${this.API_URL}/public/${comment['avatar_url'] ? comment['avatar_url'] : 'avatars/avatar.png'}`"
               @click="$router.push(`/profile/${comment['user_id']}`)"
               alt="avatar">
-          <button v-if="isSavingHiddenState && comment['id'] === commentToHide" class="comment__hide btn-saving" disabled>
-            <div class="spinner"></div>
-          </button>
-          <div v-else v-if="this.$store.state.user.id === comment['user_id']" class="comment__hide">
-            <unhide-icon v-tooltip="'Unhide comment'" :width="24" :height="24" v-if="comment['hidden']" @click="handleHideButton(comment)"></unhide-icon>
-            <hide-icon v-tooltip="'Hide comment'" :width="24" :height="24" v-else @click="handleHideButton(comment)"></hide-icon>
-          </div>
+          <icon-button v-if="this.$store.state.user.id === comment['user_id']" class="comment__hide">
+            <spinner
+                v-if="isSavingHiddenState && comment['id'] === commentToHide"
+                disabled/>
+            <unhide-icon
+                v-else-if="comment['hidden']"
+                v-tooltip="'Unhide comment'"
+                @click="handleHideButton(comment)"></unhide-icon>
+            <hide-icon
+                v-else
+                v-tooltip="'Hide comment'"
+                @click="handleHideButton(comment)"></hide-icon>
+          </icon-button>
           <div class="comment__header">
             <span @click="$router.push(`/profile/${comment['user_id']}`)" class="link">
               {{ comment['username'] }}
             </span>
             in {{ this.formatDate(comment['created_at']) }}
           </div>
-
           <div class="comment__content">
             {{ comment['text'] }}
           </div>
@@ -199,10 +213,14 @@ import truncate from "@/utils/truncate.js";
 import toast from "@/components/Toast.vue";
 import NotFoundPage from "@/components/UI/Icons/StatusCodeIcon.vue";
 import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
+import IconButton from "@/components/UI/IconButton.vue";
+import Spinner from "@/components/UI/Spinner.vue";
 
 
 export default {
   components: {
+    Spinner,
+    IconButton,
     StatusCodeIcon,
     NotFoundPage,
     toast,
@@ -530,32 +548,11 @@ export default {
   border-radius: 0;
 }
 
-.btns {
+.shader-window-manage-btn {
   display: flex;
   justify-content: flex-start;
   width: 100%;
   margin-top: 10px;
-}
-
-.action-icon-btn {
-  background: transparent;
-  border-radius: 8px;
-  border: 1px solid #282C34;
-  font-size: large;
-  color: lightgray;
-  cursor: pointer;
-  display: flex;
-  margin: 0 5px;
-  align-items: center;
-  justify-content: center;
-  transition: border 0.2s ease, color 0.2s ease;
-  width: 36px; /* подберите под свой SaveIcon + паддинги */
-  height: 36px; /* чтоб и по высоте не прыгало */
-}
-
-.action-icon-btn:hover {
-  color: white;
-  border: 1px solid lightgray;
 }
 
 .right-btns {
@@ -663,33 +660,6 @@ hr {
 }
 
 
-.btn-saving {
-  /* можно переопределить цвета, если нужно */
-  color: lightgray;
-  border-color: #282C34;
-  cursor: default;
-  position: relative;
-}
-
-/* Сам спиннер внутри кнопки */
-.btn-saving .spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  /* центрируем внутри кнопки */
-  margin: 0 auto;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-
 .error-page-block {
   display: flex;
   flex-direction: column;
@@ -706,16 +676,10 @@ hr {
   text-overflow: ellipsis;
   max-width: 100%;
   white-space: nowrap;
+  font-size: smaller;
 }
 
-.link {
-  font-weight: bold;
-}
 
-.link:hover {
-  text-decoration: underline;
-  cursor: pointer;
-}
 
 .shader-description__bottom {
   display: flex;
@@ -723,7 +687,6 @@ hr {
   align-items: center;
   margin: 10px;
 }
-
 
 .comments-area{
   margin-bottom: 10px;

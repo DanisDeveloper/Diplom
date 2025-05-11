@@ -7,6 +7,7 @@
 
 <script>
 export default {
+  name: "code-icon",
   props: {
     color: {
       type: String,

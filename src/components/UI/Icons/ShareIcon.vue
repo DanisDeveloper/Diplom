@@ -22,6 +22,7 @@
 
 <script>
 export default {
+  name: "share-icon",
   props: {
     color: {
       type: String,

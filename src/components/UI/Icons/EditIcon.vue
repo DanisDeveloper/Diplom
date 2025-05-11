@@ -9,6 +9,7 @@
 
 <script>
 export default {
+  name: "edit-icon",
   props: {
     color: {
       type: String,

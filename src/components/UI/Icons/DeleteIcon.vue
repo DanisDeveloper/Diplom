@@ -13,6 +13,7 @@
 
 <script>
 export default {
+  name: "delete-icon",
   props: {
     color: {
       type: String,

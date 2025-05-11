@@ -14,6 +14,7 @@
 
 <script>
 export default {
+  name: "status-code-icon",
   props: {
     color: {
       type: String,
