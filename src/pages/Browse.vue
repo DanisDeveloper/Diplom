@@ -62,7 +62,7 @@ import Loader from "@/components/Loader.vue";
 import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
 import SortRadioButtons from "@/components/RadioButtons.vue";
 import CommentIcon from "@/components/UI/Icons/CommentIcon.vue";
-import Pagination from "@/components/pagination.vue";
+import Pagination from "@/components/Pagination.vue";
 import truncate from "@/utils/truncate.js";
 import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
 

@@ -160,11 +160,11 @@
             <unhide-icon
                 v-else-if="comment['hidden']"
                 v-tooltip="'Unhide comment'"
-                @click="handleHideButton(comment)"></unhide-icon>
+                @click="handleHideButton(comment)"/>
             <hide-icon
                 v-else
                 v-tooltip="'Hide comment'"
-                @click="handleHideButton(comment)"></hide-icon>
+                @click="handleHideButton(comment)"/>
           </icon-button>
           <div class="comment__header">
             <span @click="$router.push(`/profile/${comment['user_id']}`)" class="link">
