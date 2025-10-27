@@ -18,11 +18,7 @@
         >
           <!-- Fields appear with fade -->
           <transition-group name="field-fade" tag="div">
-            <div
-                v-if="!isLoginForm"
-                class="input-group"
-                key="name"
-            >
+            <div class="input-group" key="name">
               <input
                   maxlength="20"
                   type="text"
@@ -32,7 +28,7 @@
                   required/>
             </div>
 
-            <div class="input-group" key="email">
+            <div  v-if="!isLoginForm" class="input-group" key="email">
               <input
                   maxlength="254"
                   type="email"
@@ -157,7 +153,7 @@ export default {
             case 500:
               this.errorMessage = "Server error";
               break;
-            case 200:
+            case 201:
               this.$router.push("/");
               await checkAuth(this.$store);
               break;
@@ -168,44 +164,44 @@ export default {
           this.isLoading = false;
         }
 
-      } else { // Login
-        try {
-          const payload = {
-            email: this.form.email,
-            password: this.form.password,
-          };
-          this.isLoading = true;
-          console.log(payload)
-          const response = await fetch(this.API_URL + "/auth/login", {
-            method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify(payload),
-            credentials: "include", // Для работы с куками
-          });
-
-          switch (response.status) {
-            case 401:
-              this.errorMessage = "Wrong email or password";
-              break;
-            case 409:
-              this.errorMessage = "User does not exist";
-              break;
-            case 422:
-              this.errorMessage = "Validation error. Please check the form.";
-              break;
-            case 500:
-              this.errorMessage = "Server error";
-              break;
-            case 200:
-              this.$router.push("/");
-              await checkAuth(this.$store);
-              break;
-          }
-        } catch (error) {
-          this.errorMessage = "Server error";
-        } finally {
-          this.isLoading = false;
+      }// Login
+      try {
+        const payload = {
+          name: this.form.name,
+          password: this.form.password,
+        };
+        this.isLoading = true;
+        console.log(payload)
+        const response = await fetch(this.API_URL + "/auth/login", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(payload),
+          credentials: "include", // Для работы с куками
+        });
+        console.log(response)
+        switch (response.status) {
+          case 401:
+            this.errorMessage = "Wrong email or password";
+            break;
+          case 409:
+            this.errorMessage = "User does not exist";
+            break;
+          case 422:
+            this.errorMessage = "Validation error. Please check the form.";
+            break;
+          case 500:
+            this.errorMessage = "Server error";
+            break;
+          case 200:
+            this.$router.push("/");
+            // TODO добавить ожидание перед переходом на main
+            await checkAuth(this.$store);
+            break;
         }
+      } catch (error) {
+        this.errorMessage = "Server error";
+      } finally {
+        this.isLoading = false;
       }
     },
   },

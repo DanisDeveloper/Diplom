@@ -5,7 +5,7 @@
       <div
           v-show="this.$store.state.isAuth"
           class="nav-bar__label"
-          @click="this.$router.push(`/profile/${this.$store.state.user.id}`)"
+          @click="this.$router.push(`/profile/${this.$store.state.user.name}`)"
       >
         {{ this.$store.state.user.name }}
       </div>

@@ -168,7 +168,7 @@
           </icon-button>
           <div class="comment__header">
             <span @click="$router.push(`/profile/${comment['user_id']}`)" class="link">
-              {{ comment['username'] }}
+              {{ comment['user'] }}
             </span>
             in {{ this.formatDate(comment['created_at']) }}
           </div>
@@ -270,7 +270,7 @@ export default {
       forked_shader: null,
 
       isLiked: false,
-      username: '',
+      user: '',
 
       comments: [],
       comment: '',

@@ -646,7 +646,7 @@ export default {
       if (response.status === 409) {
         this.isNotFound = true;
       }
-      this.user = await response.json();
+      this.username = await response.json();
       this.biography_edit = this.user.biography;
       this.totalActivities = parseInt(response.headers.get('x-total-count')) || this.totalActivities
     } catch (error) {

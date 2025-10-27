@@ -38,7 +38,7 @@
                 class="link"
                 @click="$router.push(`/profile/${shader['user_id']}`)"
             >
-              {{ truncate(shader['username']) }}
+              {{ truncate(shader['user']) }}
             </span>
           </span>
           <span class="shader-window-info__comments">
