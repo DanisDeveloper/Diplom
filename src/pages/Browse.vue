@@ -36,7 +36,7 @@
             <span>&nbsp;by&nbsp;</span>
             <span
                 class="link"
-                @click="$router.push(`/profile/${shader['user_id']}`)"
+                @click="$router.push(`/profile/${shader['userId']}`)"
             >
               {{ truncate(shader['user']) }}
             </span>

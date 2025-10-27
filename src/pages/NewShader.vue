@@ -20,7 +20,7 @@
       <shader-window
           class="shader-window"
           ref="shaderWindow"
-          :code="code"
+          :code="this.shader.code"
           @frameWatch="frameWatch"
           @accumulatedTimeWatch="accumulatedTimeWatch"
           @canvasWidthWatch="canvasWidthWatch"
@@ -40,7 +40,7 @@
           <icon-button v-tooltip="'Upload shader'" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
             <upload-icon :color="compileFailed? '#f44336' : 'lightgrey'"/>
           </icon-button>
-          <icon-button v-if="isPaused" v-tooltip="'Start shader'"  @click="togglePause">
+          <icon-button v-if="isPaused" v-tooltip="'Start shader'" @click="togglePause">
             <play-icon/>
           </icon-button>
           <icon-button v-else v-tooltip="'Stop shader'" @click="togglePause">
@@ -54,7 +54,7 @@
           </icon-button>
 
           <div class="right-btns">
-            <icon-button v-tooltip="'Saving like'" v-if="this.$store.state.isAuth && this.id">
+            <icon-button v-tooltip="'Saving like'" v-if="this.$store.state.isAuth && this.shader.id">
               <spinner v-if="isSavingLike" disabled/>
               <like-icon
                   v-else
@@ -63,15 +63,16 @@
                   @click="handleLikeButtonClick"
               />
             </icon-button>
-            <icon-button v-if="this.$store.state.isAuth" :class="{'btn-border-error': titleEmpty}" @click="handleSaveOrForkButtonClick">
+            <icon-button v-if="this.$store.state.isAuth" :class="{'btn-border-error': isTitleEmpty}"
+                         @click="handleSaveOrForkButtonClick">
               <spinner
                   v-if="isSavingShader"
                   v-tooltip="'Saving shader'"
                   disabled/>
               <save-icon
-                  v-else-if="isStoreUser || this.id === null"
+                  v-else-if="shaderOwnerIsMe || this.shader.id === null"
                   v-tooltip="'Save shader'"
-                  :color="titleEmpty? '#f44336' : 'lightgrey'"/>
+                  :color="isTitleEmpty? '#f44336' : 'lightgrey'"/>
               <fork-icon
                   v-else
                   v-tooltip="'Fork shader'"/>
@@ -82,27 +83,27 @@
 
       <div class="description-area">
         <input
-            :disabled="!isStoreUser && this.id"
+            :disabled="!shaderOwnerIsMe && this.shader.id"
             maxlength="50"
-            :class="{'empty-title-error': titleEmpty, 'disabled-input': !isStoreUser && this.id}"
+            :class="{'empty-title-error': isTitleEmpty, 'disabled-input': !shaderOwnerIsMe && this.shader.id}"
             class="shader-title"
             placeholder="Title"
-            v-model.trim="title"
+            v-model.trim="this.shader.title"
         >
         <textarea
-            :disabled="!isStoreUser && this.id"
+            :disabled="!shaderOwnerIsMe && this.shader.id"
             @change="textareaHeightHandler"
             @input="textareaHeightHandler"
             class="shader-description"
-            :class="{'disabled-input': !isStoreUser && this.id}"
+            :class="{'disabled-input': !shaderOwnerIsMe && this.shader.id}"
             placeholder="Description"
-            v-model.trim="description"></textarea>
+            v-model.trim="this.shader.description"></textarea>
 
-        <div v-if="this.id !== null || this.$store.state.isAuth" class="shader-description__bottom">
+        <div v-if="this.shader.id !== null || this.$store.state.isAuth" class="shader-description__bottom">
           <div class="shader-visibility">
-            <label v-if="isStoreUser || (this.id === null && this.$store.state.isAuth)">
+            <label v-if="shaderOwnerIsMe || (this.shader.id === null && this.$store.state.isAuth)">
               Visibility:
-              <select v-model="visibility" class="visibility-select">
+              <select v-model="shader.visibility" class="visibility-select">
                 <option :value="true">Public</option>
                 <option :value="false">Private</option>
               </select>
@@ -110,24 +111,27 @@
           </div>
 
           <div class="shader-metadata">
-            <span v-if="this.id && id_forked">
+            <span v-if="this.shader.id && this.shader.originId">
               forked from
-              <span class="link" @click="$router.push(`/new/${id_forked}`)">{{truncate(forked_shader ? forked_shader['title'] : "")}}</span>
+              <span class="link"
+                    @click="$router.push(`/new/${this.shader.originId}`)">{{
+                  truncate(originShader ? originShader['title'] : "")
+                }}</span>
             </span>
-            <span v-else-if="this.id">
+            <span v-else-if="this.shader.id">
               Created
             </span>
-            <span v-if="this.id">
+            <span v-if="this.shader.id">
               by
-              <span class="link" @click="$router.push(`/profile/${user_id}`)">{{ username }}</span>
-              in {{ this.formatDate(this.created_at) }}
+              <span class="link" @click="$router.push(`/profile/${shader.userId}`)">{{ username }}</span>
+              in {{ this.formatDate(this.shader.created_at) }}
             </span>
           </div>
         </div>
       </div>
 
-      <div v-if="this.id || this.comments.length > 0" class="comments-area">
-        <h3>Comments ({{this.comments.length}})</h3>
+      <div v-if="this.shader.id || this.comments.length > 0" class="comments-area">
+        <h3>Comments ({{ this.comments.length }})</h3>
         <div v-if="this.$store.state.isAuth">
           <textarea
               @change="textareaHeightHandler"
@@ -151,9 +155,9 @@
               width="40"
               height="40"
               :src="`${this.API_URL}/public/${comment['avatar_url'] ? comment['avatar_url'] : 'avatars/avatar.png'}`"
-              @click="$router.push(`/profile/${comment['user_id']}`)"
+              @click="$router.push(`/profile/${comment['userId']}`)"
               alt="avatar">
-          <icon-button v-if="this.$store.state.user.id === comment['user_id']" class="comment__hide">
+          <icon-button v-if="this.$store.state.user.id === comment['userId']" class="comment__hide">
             <spinner
                 v-if="isSavingHiddenState && comment['id'] === commentToHide"
                 disabled/>
@@ -167,7 +171,7 @@
                 @click="handleHideButton(comment)"/>
           </icon-button>
           <div class="comment__header">
-            <span @click="$router.push(`/profile/${comment['user_id']}`)" class="link">
+            <span @click="$router.push(`/profile/${comment['userId']}`)" class="link">
               {{ comment['user'] }}
             </span>
             in {{ this.formatDate(comment['created_at']) }}
@@ -180,7 +184,7 @@
     </div>
 
     <shader-editor
-        v-model="code"
+        v-model="this.shader.code"
         :errors="this.errorLog"
         class="shader-editor">
     </shader-editor>
@@ -246,7 +250,7 @@ export default {
       serverError: false,
 
       // Переменные shader-window
-      code: this.$route.query.code || exampleShader,
+
       isPaused: false,
       frame: 0,
       accumulatedTime: 0,
@@ -257,17 +261,19 @@ export default {
       errorToastMessage: '',
       generalToastMessage: '',
 
-      // TODO перенести все это в один объект (это все информация о шейдере)
-      id: null,
-      title: "",
-      description: "",
-      titleEmpty: false,
-      visibility: true,
-      created_at: null,
-      updated_at: null,
-      user_id: null,
-      id_forked: null,
-      forked_shader: null,
+      shader: {
+        id: null,
+        title: "",
+        description: "",
+        code: this.$route.query.code || exampleShader,
+        visibility: true,
+        created_at: null,
+        updated_at: null,
+        userId: null,
+        originId: null,
+      },
+      isTitleEmpty: false,
+      originShader: null,
 
       isLiked: false,
       user: '',
@@ -303,7 +309,7 @@ export default {
       this.canvasHeight = height;
     },
     compileFailedWatch(failed) {
-      if(failed){
+      if (failed) {
         this.errorToastMessage = 'Shader compilation failed'
         this.$refs.errorToast.show()
         this.compileFailed = true;
@@ -316,7 +322,6 @@ export default {
     errorLogWatch(log) {
       this.errorLog = log;
     },
-
     uploadShader() {
       this.$refs.shaderWindow?.uploadShader();
     },
@@ -332,72 +337,42 @@ export default {
     },
     async handleSaveOrForkButtonClick() {
       // Проверка, что название не пустое
-      if (this.title.length === 0) {
-        this.titleEmpty = true;
+      if (this.shader.title.length === 0) {
+        this.isTitleEmpty = true;
         this.errorToastMessage = 'Title must not be empty'
         this.$refs.errorToast.show();
         clearTimeout(this.titleEmptyTimeoutId)
         this.titleEmptyTimeoutId = setTimeout(() => {
-          this.titleEmpty = false;
+          this.isTitleEmpty = false;
         }, 1000);
         return;
       }
 
       // Сохранение шейдера
-      this.isSavingShader = true;
-      try {
-        let requestBody = null
-        if (this.isStoreUser) {
-          requestBody = {
-            id: this.id,
-            title: this.title,
-            description: this.description,
-            code: this.code,
-            visibility: this.visibility,
-            id_forked: null,
-          };
-        } else {
-          requestBody = {
-            id: null,
-            title: this.title,
-            description: this.description,
-            code: this.code,
-            visibility: this.visibility,
-            id_forked: this.id,
-          };
-        }
-        const response = await fetch(`${this.API_URL}/shaders/`, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          credentials: 'include',
-          body: JSON.stringify(requestBody)
-        });
-        if(response.ok){
-          this.generalToastMessage = 'Shader was saved';
-          this.$refs.generalToast.show();
-        }
-        const body = await response.json();
-        if (!this.isStoreUser || this.id === null) {
-          this.$router.push(`/new/${body.id}/`);
-        }
-      } catch (error) {
-        this.errorToastMessage = 'Error saving shader';
-        this.$refs.errorToast.show();
-      } finally {
-        this.isSavingShader = false;
+      let requestBody = Object.assign({}, this.shader)
+      requestBody.userId = (this.shader.userId === null) ? this.$store.state.user.id : this.shader.userId // в случае нового шейдера, userId === null
+      console.log(this.shader)
+      if (this.shader.id === null)
+        await this.saveNewShader(requestBody);
+      else if (this.shaderOwnerIsMe)
+        await this.updateCurrentShader(requestBody);
+      else {
+        requestBody.originId = this.shader.id
+        await this.forkShader(requestBody);
       }
+
     },
     async handleLikeButtonClick() {
       this.isSavingLike = true;
       try {
-        const response = await fetch(`${this.API_URL}/likes/${this.id}`, {
+        const response = await fetch(`${this.API_URL}/likes/${this.shader.id}`, {
           method: this.isLiked ? "DELETE" : "POST",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
         });
         if (response.ok) {
           this.isLiked = !this.isLiked;
-        }else{
+        } else {
           this.errorToastMessage = 'Error saving like';
           this.$refs.errorToast.show();
         }
@@ -412,7 +387,7 @@ export default {
       if (this.comment.length === 0) return;
       this.isCommentPosting = true;
       try {
-        const response = await fetch(`${this.API_URL}/comments/${this.id}`, {
+        const response = await fetch(`${this.API_URL}/comments/${this.shader.id}`, {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
@@ -446,7 +421,7 @@ export default {
       } catch (error) {
         this.errorToastMessage = 'Error hiding comment';
         this.$refs.errorToast.show();
-      }finally{
+      } finally {
         this.isSavingHiddenState = false;
         this.commentToHide = null;
       }
@@ -466,18 +441,87 @@ export default {
 
       return `${day}-${month}-${year}`;
     },
+    async saveNewShader(requestBody) {
+      try {
+        this.isSavingShader = true;
+        const response = await fetch(`${this.API_URL}/shaders`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          credentials: 'include',
+          body: JSON.stringify(requestBody)
+        });
+        if (response.ok) {
+          this.generalToastMessage = 'Shader was created';
+          this.$refs.generalToast.show();
+        }
+        const body = await response.json();
+        this.$router.push(`/new/${body.id}`);
+      } catch (error) {
+        this.errorToastMessage = 'Error saving shader';
+        this.$refs.errorToast.show();
+      } finally {
+        this.isSavingShader = false;
+      }
+    },
+    async updateCurrentShader(requestBody) {
+      try {
+        this.isSavingShader = true;
+        const response = await fetch(`${this.API_URL}/shaders/${this.shader.id}`, {
+          method: "PUT",
+          headers: {"Content-Type": "application/json"},
+          credentials: 'include',
+          body: JSON.stringify(requestBody)
+        });
+        if (response.ok) {
+          this.generalToastMessage = 'Shader was saved';
+          this.$refs.generalToast.show();
+        }
+        // const body = await response.json();
+      } catch (error) {
+        this.errorToastMessage = 'Error saving shader';
+        this.$refs.errorToast.show();
+      } finally {
+        this.isSavingShader = false;
+      }
+    },
+    async forkShader(requestBody) {
+      try {
+        this.isSavingShader = true;
+
+        const response = await fetch(`${this.API_URL}/shaders`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          credentials: 'include',
+          body: JSON.stringify(requestBody)
+        });
+
+        if (response.ok) {
+          this.generalToastMessage = 'Shader was saved';
+          this.$refs.generalToast.show();
+        }
+
+        const body = await response.json();
+        this.$router.push(`/new/${body.id}`);
+      } catch (error) {
+        this.errorToastMessage = 'Error saving shader';
+        this.$refs.errorToast.show();
+      } finally {
+        this.isSavingShader = false;
+      }
+    }
   },
   computed: {
-    isStoreUser() {
-      return this.user_id === this.$store.state.user.id
+    shaderOwnerIsMe() {
+      return this.shader.userId === this.$store.state.user.id
     },
   },
   async mounted() {
-    if (this.$route.params.id === undefined) return;
+    console.log(`Component mounted. ${this.$route.params.id}`);
+    if (!this.$route.params.id) return;
     this.isLoading = true
     try {
-      console.log(`${this.API_URL}/shaders/${this.$route.params.id}/`)
-      const response = await fetch(`${this.API_URL}/shaders/${this.$route.params.id}/`, {
+      console.log(`${this.API_URL}/shaders/${this.$route.params.id}`)
+      const response = await fetch(`${this.API_URL}/shaders/${this.$route.params.id}`, {
         method: "GET",
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
@@ -486,26 +530,27 @@ export default {
       if ([401, 403].includes(response.status)) {
         this.isForbidden = true;
         return;
-      }else if(response.status === 404){
+      } else if (response.status === 404) {
         this.isNotFound = true;
         return;
       }
 
-      const {shader, is_liked, username, forked_shader ,comments} = await response.json();
-      console.log(shader)
-      this.forked_shader = forked_shader;
-      this.id = shader.id;
-      this.title = shader.title;
-      this.description = shader.description;
-      this.code = shader.code;
-      this.visibility = shader.visibility;
-      this.created_at = shader.created_at;
-      this.updated_at = shader.updated_at;
-      this.user_id = shader.user_id;
-      this.id_forked = shader.id_forked;
-      this.isLiked = is_liked;
-      this.username = username;
-      this.comments = comments;
+      // const {shader, is_liked, username, forked_shader, comments} = await response.json();
+      this.shader = await response.json();
+      console.log(`SHADER: ${this.shader}`)
+      // this.forked_shader = forked_shader;
+      // this.shader.id = shader.id;
+      // this.title = shader.title;
+      // this.description = shader.description;
+      // this.code = shader.code;
+      // this.visibility = shader.visibility;
+      // this.created_at = shader.created_at;
+      // this.updated_at = shader.updated_at;
+      // this.userId = shader.userId;
+      // this.originId = shader.originId;
+      // this.isLiked = is_liked;
+      // this.username = username;
+      // this.comments = comments;
       // ждём, пока Vue применит все изменения, и только потом обновляем шейдер
 
       this.uploadShader();
@@ -678,7 +723,6 @@ hr {
 }
 
 
-
 .shader-description__bottom {
   display: flex;
   justify-content: space-between;
@@ -686,7 +730,7 @@ hr {
   margin: 10px;
 }
 
-.comments-area{
+.comments-area {
   margin-bottom: 10px;
 }
 
@@ -767,11 +811,11 @@ hr {
   border-color: lightgray;
 }
 
-h1, h3{
+h1, h3 {
   color: #282C34;
 }
 
-input, textarea{
+input, textarea {
   outline: none;
 }
 </style>

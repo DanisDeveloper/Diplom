@@ -28,7 +28,7 @@
                   required/>
             </div>
 
-            <div  v-if="!isLoginForm" class="input-group" key="email">
+            <div v-if="!isLoginForm" class="input-group" key="email">
               <input
                   maxlength="254"
                   type="email"
@@ -139,24 +139,30 @@ export default {
             body: JSON.stringify(payload),
             credentials: "include", // Для работы с куками
           });
-
-          switch (response.status) {
-            case 401:
-              this.errorMessage = "Wrong email or password";
-              break;
-            case 409:
-              this.errorMessage = "User already exists";
-              break;
-            case 422:
-              this.errorMessage = "Validation error. Please check the form.";
-              break;
-            case 500:
-              this.errorMessage = "Server error";
-              break;
-            case 201:
-              this.$router.push("/");
-              await checkAuth(this.$store);
-              break;
+          console.log(response)
+          if (response.ok) {
+            this.$router.push("/");
+            await checkAuth(this.$store);
+          } else {
+            const body = await response.json();
+            //TODO переделать под коды ошибок
+            switch (response.status) {
+              case 401:
+                this.errorMessage = "Wrong email or password";
+                return;
+              case 409:
+                if (body.error === "USER_NAME_ALREADY_EXISTS")
+                  this.errorMessage = "Username already exist";
+                else if (body.error === "USER_EMAIL_ALREADY_EXISTS")
+                  this.errorMessage = "Email already exist";
+                return;
+              case 422:
+                this.errorMessage = "Validation error. Please check the form.";
+                return;
+              case 500:
+                this.errorMessage = "Server error";
+                return;
+            }
           }
         } catch (error) {
           this.errorMessage = "Server error";

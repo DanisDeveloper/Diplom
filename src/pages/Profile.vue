@@ -168,9 +168,9 @@
                 <span class="info-label">Last update:</span> <span
                   class="info-value">{{ formatDate(shader.updated_at) }}</span>
               </div>
-              <div class="info-row" :class="{'invisible' : shader.id_forked === null}">
+              <div class="info-row" :class="{'invisible' : shader.originId === null}">
                 <span class="info-label">Forked:</span> <span
-                  class="info-value">{{ truncate(shader.forked_shader ? shader.forked_shader.title : "", 17) }}</span>
+                  class="info-value">{{ truncate(shader.originShader ? shader.originShader.title : "", 17) }}</span>
               </div>
               <div class="right-icons">
                 <delete-icon
