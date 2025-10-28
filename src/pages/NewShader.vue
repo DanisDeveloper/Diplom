@@ -115,7 +115,7 @@
               forked from
               <span class="link"
                     @click="$router.push(`/new/${this.shader.originId}`)">{{
-                  truncate(originShader ? originShader['title'] : "")
+                  truncate(this.shader.origin?.title ? this.shader.origin.title : "")
                 }}</span>
             </span>
             <span v-else-if="this.shader.id">
@@ -123,8 +123,8 @@
             </span>
             <span v-if="this.shader.id">
               by
-              <span class="link" @click="$router.push(`/profile/${shader.userId}`)">{{ username }}</span>
-              in {{ this.formatDate(this.shader.created_at) }}
+              <span class="link" @click="$router.push(`/profile/${shader.user.id}`)">{{ this.shader.user.name }}</span>
+              in {{ this.formatDate(this.shader.createdAt) }}
             </span>
           </div>
         </div>
@@ -174,7 +174,7 @@
             <span @click="$router.push(`/profile/${comment['userId']}`)" class="link">
               {{ comment['user'] }}
             </span>
-            in {{ this.formatDate(comment['created_at']) }}
+            in {{ this.formatDate(comment['createdAt']) }}
           </div>
           <div class="comment__content">
             {{ comment['text'] }}
@@ -267,10 +267,13 @@ export default {
         description: "",
         code: this.$route.query.code || exampleShader,
         visibility: true,
-        created_at: null,
+        createdAt: null,
         updated_at: null,
-        userId: null,
-        originId: null,
+        user: {
+          id: null,
+          name: null
+        },
+        origin: null,
       },
       isTitleEmpty: false,
       originShader: null,
@@ -349,15 +352,21 @@ export default {
       }
 
       // Сохранение шейдера
-      let requestBody = Object.assign({}, this.shader)
-      requestBody.userId = (this.shader.userId === null) ? this.$store.state.user.id : this.shader.userId // в случае нового шейдера, userId === null
+      let requestBody = {
+        title: this.shader.title,
+        description: this.shader.description,
+        code: this.shader.code,
+        visibility: this.shader.visibility,
+        userId: (this.shader.user.id === null) ? this.$store.state.user.id : this.shader.user.id, // в случае нового шейдера, user.id === null
+        originId: (this.shaderOwnerIsMe) ? this.shader.origin?.id : this.shader.id
+      }
       console.log(this.shader)
+
       if (this.shader.id === null)
         await this.saveNewShader(requestBody);
       else if (this.shaderOwnerIsMe)
         await this.updateCurrentShader(requestBody);
       else {
-        requestBody.originId = this.shader.id
         await this.forkShader(requestBody);
       }
 
@@ -512,7 +521,7 @@ export default {
   },
   computed: {
     shaderOwnerIsMe() {
-      return this.shader.userId === this.$store.state.user.id
+      return this.shader.user?.id === this.$store.state.user.id
     },
   },
   async mounted() {
