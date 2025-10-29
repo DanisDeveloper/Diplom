@@ -5,7 +5,7 @@ import Main from "@/pages/Main.vue";
 import Login from "@/pages/Login.vue";
 import Profile from "@/pages/Profile.vue";
 import Browse from "@/pages/Browse.vue";
-import NotFound from "@/pages/NotFound.vue";
+import Empty from "@/pages/Empty.vue";
 
 const routes = [
     {
@@ -38,8 +38,8 @@ const routes = [
     },
     {
         path: '/:pathMatch(.*)*',
-        name: 'NotFound',
-        component: NotFound
+        name: 'Empty',
+        component: Empty
     },
 
 ]

@@ -1,8 +1,7 @@
 <template>
   <loader v-if="isLoading"/>
-  <div v-else-if="this.serverError" class="error-page-block">
-    <status-code-icon :text="'500'" :color="'#282C34'"></status-code-icon>
-    <h1>Server error</h1>
+  <div v-else-if="this.isError" class="error-page-block">
+    <error :status="this.errorStatus"></error>
   </div>
   <div v-else>
     <div class="header">
@@ -65,12 +64,14 @@ import CommentIcon from "@/components/UI/Icons/CommentIcon.vue";
 import Pagination from "@/components/Pagination.vue";
 import truncate from "@/utils/truncate.js";
 import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
+import Error from "@/components/Error.vue";
 
 export default {
-  components: {StatusCodeIcon, Pagination, CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},
+  components: {Error, StatusCodeIcon, Pagination, CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},
   data() {
     return {
-      serverError: false,
+      isError: false,
+      errorStatus: 0,
       isLoading: false,
       totalPages: null,
       page: this.$route.query.page || 1,
@@ -119,13 +120,16 @@ export default {
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
       });
-
+      if(!response.ok){
+        this.isError = true;
+        this.errorStatus = response.status;
+      }
       this.shaders = await response.json();
       console.log(this.shaders)
       this.totalPages = parseInt(response.headers.get('x-total-count'));
 
     } catch (error) {
-      this.serverError = true;
+      this.isError = true;
       console.log(error);
     } finally {
       this.isLoading = false;

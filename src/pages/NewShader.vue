@@ -1,18 +1,8 @@
 <template>
   <loader v-if="this.isLoading"></loader>
-  <div v-else-if="this.isForbidden" class="error-page-block">
-    <forbidden-icon/>
-    <h1>You are not allowed to access this page</h1>
+  <div v-else-if="this.isError" class="error-page-block">
+    <error :status="this.errorStatus"></error>
   </div>
-  <div v-else-if="this.isNotFound" class="error-page-block">
-    <status-code-icon :text="'404'" :color="'#282C34'"/>
-    <h1>Shader was deleted or never existed</h1>
-  </div>
-  <div v-else-if="this.serverError" class="error-page-block">
-    <status-code-icon :text="'500'" :color="'#282C34'"/>
-    <h1>Server error</h1>
-  </div>
-
   <div v-else class="main">
     <toast :message="this.errorToastMessage" ref="errorToast"/>
     <toast :message="this.generalToastMessage" :background="'#282C34'" ref="generalToast"/>
@@ -217,10 +207,12 @@ import NotFoundPage from "@/components/UI/Icons/StatusCodeIcon.vue";
 import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
 import IconButton from "@/components/UI/IconButton.vue";
 import Spinner from "@/components/UI/Spinner.vue";
+import Error from "@/components/Error.vue";
 
 
 export default {
   components: {
+    Error,
     Spinner,
     IconButton,
     StatusCodeIcon,
@@ -290,8 +282,8 @@ export default {
       isSavingShader: false,
       isSavingLike: false,
       isLoading: false,
-      isForbidden: false,
-      isNotFound: false,
+      isError: false,
+      errorStatus: 0,
 
       API_URL: import.meta.env.VITE_API_URL,
 
@@ -338,7 +330,7 @@ export default {
     expandScreen() {
       this.$refs.shaderWindow.expandScreen();
     },
-    async handleSaveOrForkButtonClick() {
+    handleSaveOrForkButtonClick() {
       // Проверка, что название не пустое
       if (this.shader.title.length === 0) {
         this.isTitleEmpty = true;
@@ -357,40 +349,35 @@ export default {
         description: this.shader.description,
         code: this.shader.code,
         visibility: this.shader.visibility,
-        userId: (this.shader.user.id === null) ? this.$store.state.user.id : this.shader.user.id, // в случае нового шейдера, user.id === null
         originId: (this.shaderOwnerIsMe) ? this.shader.origin?.id : this.shader.id
       }
       console.log(this.shader)
 
       if (this.shader.id === null)
-        await this.saveNewShader(requestBody);
+        this.saveNewShader(requestBody);
       else if (this.shaderOwnerIsMe)
-        await this.updateCurrentShader(requestBody);
+        this.updateCurrentShader(requestBody);
       else {
-        await this.forkShader(requestBody);
+        this.forkShader(requestBody);
       }
 
     },
-    async handleLikeButtonClick() {
+    handleLikeButtonClick() {
       this.isSavingLike = true;
-      try {
-        const response = await fetch(`${this.API_URL}/likes/${this.shader.id}`, {
-          method: this.isLiked ? "DELETE" : "POST",
-          headers: {"Content-Type": "application/json"},
-          credentials: 'include',
-        });
+      fetch(`${this.API_URL}/shaders/${this.shader.id}/like`, {
+        method: this.isLiked ? "DELETE" : "POST",
+        headers: {"Content-Type": "application/json"},
+        credentials: 'include',
+      }).then(response => {
         if (response.ok) {
           this.isLiked = !this.isLiked;
-        } else {
-          this.errorToastMessage = 'Error saving like';
-          this.$refs.errorToast.show();
         }
-      } catch (error) {
+      }).catch(error => {
         this.errorToastMessage = 'Error saving like';
         this.$refs.errorToast.show();
-      } finally {
+      }).finally(() => {
         this.isSavingLike = false;
-      }
+      })
     },
     async postComment() {
       if (this.comment.length === 0) return;
@@ -524,52 +511,44 @@ export default {
       return this.shader.user?.id === this.$store.state.user.id
     },
   },
-  async mounted() {
-    console.log(`Component mounted. ${this.$route.params.id}`);
+  mounted() {
     if (!this.$route.params.id) return;
     this.isLoading = true
-    try {
-      console.log(`${this.API_URL}/shaders/${this.$route.params.id}`)
-      const response = await fetch(`${this.API_URL}/shaders/${this.$route.params.id}`, {
-        method: "GET",
-        headers: {"Content-Type": "application/json"},
-        credentials: 'include',
-      });
-      console.log("response", response);
-      if ([401, 403].includes(response.status)) {
-        this.isForbidden = true;
-        return;
-      } else if (response.status === 404) {
-        this.isNotFound = true;
-        return;
+    fetch(`${this.API_URL}/shaders/${this.$route.params.id}`, {
+      method: "GET",
+      headers: {"Content-Type": "application/json"},
+      credentials: 'include',
+    }).then(response => {
+      if (!response.ok) {
+        this.isError = true
+        this.errorStatus = response.status;
+        return
       }
-
-      // const {shader, is_liked, username, forked_shader, comments} = await response.json();
-      this.shader = await response.json();
-      console.log(`SHADER: ${this.shader}`)
-      // this.forked_shader = forked_shader;
-      // this.shader.id = shader.id;
-      // this.title = shader.title;
-      // this.description = shader.description;
-      // this.code = shader.code;
-      // this.visibility = shader.visibility;
-      // this.created_at = shader.created_at;
-      // this.updated_at = shader.updated_at;
-      // this.userId = shader.userId;
-      // this.originId = shader.originId;
-      // this.isLiked = is_liked;
-      // this.username = username;
-      // this.comments = comments;
-      // ждём, пока Vue применит все изменения, и только потом обновляем шейдер
-
+      return response.json();
+    }).then(json => {
+      this.shader = json;
       this.uploadShader();
-      // this.$refs.shaderWindow.initWebGL()
-    } catch (error) {
-      // this.serverError = true;
-      console.log(error);
-    } finally {
+    }).catch(error => {
+      this.isError = true
+    }).finally(() => {
       this.isLoading = false
-    }
+    })
+
+
+    fetch(`${this.API_URL}/shaders/${this.$route.params.id}/like`, {
+      method: "GET",
+      // headers: {"Content-Type": "application/json"},
+      credentials: 'include',
+    }).then(response => {
+      if (!response.ok) {
+        this.isError = true
+        this.errorStatus = response.status;
+      }
+      return response.json();
+    }).then(isLiked => {
+      this.isLiked = isLiked;
+    })
+
   },
 }
 </script>

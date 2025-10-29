@@ -1,23 +1,22 @@
 <template>
-  <div class="not-found">
-    <status-code-icon :text="404"></status-code-icon>
-    <h1>Page not found</h1>
-  </div></template>
+  <error :status="404"></error>
+</template>
 
 <script>
 import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
 import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
+import Error from "@/components/Error.vue";
 
 export default {
-  name: "NotFound",
-  components: {StatusCodeIcon, ForbiddenIcon}
+  name: "Empty",
+  components: {Error, StatusCodeIcon, ForbiddenIcon}
 }
 </script>
 
 
 
 <style scoped>
-.not-found{
+.error{
   display: flex;
   flex-direction: column;
   align-items: center;
