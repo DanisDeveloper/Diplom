@@ -144,7 +144,7 @@
               class="comment__avatar"
               width="40"
               height="40"
-              :src="`${this.API_URL}/public/${comment.user.avatar_url ? comment.user.avatar_url : 'avatars/avatar.png'}`"
+              :src="`${this.PUBLIC_API_URL}/${comment.user.avatar_url ? comment.user.avatar_url : 'images/avatar.png'}`"
               @click="$router.push(`/profile/${comment.user.name}`)"
               alt="avatar">
           <icon-button v-if="this.$store.state.user.id === comment.user.id" class="comment__hide">
@@ -167,7 +167,7 @@
             in {{ this.formatDate(comment.createdAt) }}
           </div>
           <div class="comment__content">
-            {{ !comment.hidden ? comment.text : "" }}
+            {{ !comment.hidden ? comment.text : "Comment was hidden" }}
           </div>
         </div>
       </div>
@@ -284,6 +284,7 @@ export default {
       errorStatus: 0,
 
       API_URL: import.meta.env.VITE_API_URL,
+      PUBLIC_API_URL: import.meta.env.VITE_PUBLIC_API_URL,
 
     }
   },
@@ -781,7 +782,6 @@ hr {
   word-break: break-word;
   overflow-wrap: break-word;
   overflow: auto;
-
 }
 
 .comment__header {
