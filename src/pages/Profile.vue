@@ -9,8 +9,8 @@
     <h1>Server error</h1>
   </div>
   <div v-else>
-    <toast :message="this.generalToastMessage" ref="generalToast" :background="'#282C34'"></toast>
-    <toast :message="this.errorToastMessage" ref="errorToast"></toast>
+    <toast ref="generalToast" :background="'#282C34'"></toast>
+    <toast ref="errorToast"></toast>
     <dialog-window v-model:show="this.showShaderDeleteDialog">
       <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingShader"></loader>
       <div v-else>
@@ -161,7 +161,7 @@
               </div>
               <div class="info-row">
                 <span class="info-label">Created at:</span> <span class="info-value">{{
-                  formatDate(shader.created_at)
+                  formatDate(shader.createdAt)
                 }}</span>
               </div>
               <div class="info-row">
@@ -328,10 +328,6 @@ export default {
       successedPasswordChange: false,
       isPatchingPassword: false,
 
-      generalToastMessage: '',
-      errorToastMessage: '',
-
-
       API_URL: import.meta.env.VITE_API_URL,
       PUBLIC_API_URL: import.meta.env.VITE_PUBLIC_API_URL,
     }
@@ -413,13 +409,11 @@ export default {
         });
         if(response.ok){
           this.user.avatar_url = null;
-          this.generalToastMessage = 'Successfully cleared avatar';
-          this.$refs.generalToast.show();
+          this.$refs.generalToast.show("Successfully cleared avatar");
         }
       } catch (error) {
         console.log(error);
-        this.errorToastMessage = 'Error clearing avatar';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error clearing avatar");
       } finally {
         this.isDeletingAvatar = false;
         this.showAvatarDeleteDialog = false;
@@ -439,12 +433,10 @@ export default {
           this.user.shaders = this.user.shaders.filter(shader => shader.id !== this.shaderForDelete);
           this.user.activities = this.user.activities.filter(activity => activity.shader_id !== this.shaderForDelete);
           this.shaderForDelete = null;
-          this.generalToastMessage = 'Successfully deleted shader';
-          this.$refs.generalToast.show();
+          this.$refs.generalToast.show("Successfully deleted shader");
         }
       } catch (error) {
-        this.errorToastMessage = 'Error deleting shader';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error deleting shader");
       } finally {
         this.isDeletingShader = false
         this.showShaderDeleteDialog = false;
@@ -464,8 +456,7 @@ export default {
     async avatarLoadHandler(event) {
       const file = event.target.files[0];
       if (!file) {
-        this.errorToastMessage = 'Error uploading avatar';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error uploading avatar");
       }
 
       const formData = new FormData();
@@ -480,19 +471,16 @@ export default {
 
         const data = await response.json();
         this.user.avatar_url = data.avatar_url;
-        this.generalToastMessage = 'Successfully uploaded avatar';
-        this.$refs.generalToast.show();
+        this.$refs.generalToast.show("Successfully uploaded avatar");
 
       } catch (error) {
-        this.errorToastMessage = 'Error uploading avatar';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error uploading avatar");
       }
     },
     async backgroundLoadHandler(event) {
       const file = event.target.files[0];
       if (!file) {
-        this.errorToastMessage = 'Error uploading background';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error uploading background");
 
       }
 
@@ -508,11 +496,9 @@ export default {
 
         const data = await response.json();
         this.user.background_url = data.background_url;
-        this.generalToastMessage = 'Successfully uploaded background';
-        this.$refs.generalToast.show();
+        this.$refs.generalToast.show("Successfully uploaded background");
       } catch (error) {
-        this.errorToastMessage = 'Error uploading background';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error uploading background");
       }
     },
     async handleClearBackground() {
@@ -527,8 +513,7 @@ export default {
           this.user.background_url = null;
         }
       } catch (error) {
-        this.errorToastMessage = 'Error clearing background';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error clearing background");
       } finally {
         // TODO возможно стоит сделать лоадер
       }
@@ -554,8 +539,7 @@ export default {
           this.isEditing = false;
         }
       } catch (error) {
-        this.errorToastMessage = 'Error updating biography';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error updating biography");
       } finally {
         this.isPatchingBiography = false;
       }
@@ -582,8 +566,7 @@ export default {
         this.user.activities.push(...data);
       }catch (error) {
         console.log(error);
-        this.errorToastMessage = 'Error loading more activities';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error loading more activities");
       }finally {
         this.isLoadingActivities = false;
       }

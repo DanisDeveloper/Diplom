@@ -11,10 +11,6 @@
 export default {
   name: 'toast',
   props: {
-    message: {
-      type: String,
-      required: true,
-    },
     duration: {
       type: Number,
       default: 5000,
@@ -26,6 +22,7 @@ export default {
   },
   data() {
     return {
+      message: '',
       visible: false,
       progress: 100,
       startTime: null,
@@ -33,7 +30,8 @@ export default {
     };
   },
   methods: {
-    show() {
+    show(message) {
+      this.message = message;
       clearInterval(this.intervalId); // сбрасываем старый таймер
       this.visible = true;
       this.startTime = Date.now();

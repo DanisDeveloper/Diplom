@@ -4,8 +4,8 @@
     <error :status="this.errorStatus"></error>
   </div>
   <div v-else class="main">
-    <toast :message="this.errorToastMessage" ref="errorToast"/>
-    <toast :message="this.generalToastMessage" :background="'#282C34'" ref="generalToast"/>
+    <toast ref="errorToast"/>
+    <toast :background="'#282C34'" ref="generalToast"/>
     <div class="canvas-container">
       <shader-window
           class="shader-window"
@@ -45,10 +45,10 @@
 
           <div class="right-btns">
             <icon-button v-tooltip="'Saving like'" v-if="this.$store.state.isAuth && this.shader.id">
-              <spinner v-if="isSavingLike" disabled/>
+              <spinner v-if="isLoadingLike" disabled/>
               <like-icon
                   v-else
-                  :disabled="isSavingLike"
+                  :disabled="isLoadingLike"
                   :color="isLiked ? '#f44336' : 'lightgrey'"
                   @click="handleLikeButtonClick"
               />
@@ -133,41 +133,41 @@
           <button
               :disabled="isCommentPosting"
               class="post-btn"
-              @click="postComment">
+              @click="handlePostCommentButton">
             <spinner v-if="isCommentPosting" disabled/>
             <span v-else>Post</span>
           </button>
         </div>
 
-        <div v-for="comment in comments" :key="comment['id']" class="comment">
+        <div v-for="(comment, index) in comments" :key="comment.id" class="comment">
           <img
               class="comment__avatar"
               width="40"
               height="40"
-              :src="`${this.API_URL}/public/${comment['avatar_url'] ? comment['avatar_url'] : 'avatars/avatar.png'}`"
-              @click="$router.push(`/profile/${comment['userId']}`)"
+              :src="`${this.API_URL}/public/${comment.user.avatar_url ? comment.user.avatar_url : 'avatars/avatar.png'}`"
+              @click="$router.push(`/profile/${comment.user.name}`)"
               alt="avatar">
-          <icon-button v-if="this.$store.state.user.id === comment['userId']" class="comment__hide">
+          <icon-button v-if="this.$store.state.user.id === comment.user.id" class="comment__hide">
             <spinner
-                v-if="isSavingHiddenState && comment['id'] === commentToHide"
+                v-if="isSavingHiddenState && comment.id === commentToHide"
                 disabled/>
             <unhide-icon
-                v-else-if="comment['hidden']"
+                v-else-if="comment.hidden"
                 v-tooltip="'Unhide comment'"
-                @click="handleHideButton(comment)"/>
+                @click="handleHideButton(comment, index)"/>
             <hide-icon
                 v-else
                 v-tooltip="'Hide comment'"
-                @click="handleHideButton(comment)"/>
+                @click="handleHideButton(comment, index)"/>
           </icon-button>
           <div class="comment__header">
-            <span @click="$router.push(`/profile/${comment['userId']}`)" class="link">
-              {{ comment['user'] }}
+            <span @click="$router.push(`/profile/${comment.user.name}`)" class="link">
+              {{ comment.user.name }}
             </span>
-            in {{ this.formatDate(comment['createdAt']) }}
+            in {{ this.formatDate(comment.createdAt) }}
           </div>
           <div class="comment__content">
-            {{ comment['text'] }}
+            {{ !comment.hidden ? comment.text : "" }}
           </div>
         </div>
       </div>
@@ -250,8 +250,6 @@ export default {
       canvasHeight: 0,
       compileFailed: false,
       errorLog: [],
-      errorToastMessage: '',
-      generalToastMessage: '',
 
       shader: {
         id: null,
@@ -280,7 +278,7 @@ export default {
       commentToHide: null,
 
       isSavingShader: false,
-      isSavingLike: false,
+      isLoadingLike: false,
       isLoading: false,
       isError: false,
       errorStatus: 0,
@@ -305,8 +303,7 @@ export default {
     },
     compileFailedWatch(failed) {
       if (failed) {
-        this.errorToastMessage = 'Shader compilation failed'
-        this.$refs.errorToast.show()
+        this.$refs.errorToast.show("Shader compilation failed")
         this.compileFailed = true;
         clearTimeout(this.updloadErrorTimeoutId);
         this.updloadErrorTimeoutId = setTimeout(() => {
@@ -334,8 +331,7 @@ export default {
       // Проверка, что название не пустое
       if (this.shader.title.length === 0) {
         this.isTitleEmpty = true;
-        this.errorToastMessage = 'Title must not be empty'
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Title must not be empty");
         clearTimeout(this.titleEmptyTimeoutId)
         this.titleEmptyTimeoutId = setTimeout(() => {
           this.isTitleEmpty = false;
@@ -363,7 +359,7 @@ export default {
 
     },
     handleLikeButtonClick() {
-      this.isSavingLike = true;
+      this.isLoadingLike = true;
       fetch(`${this.API_URL}/shaders/${this.shader.id}/like`, {
         method: this.isLiked ? "DELETE" : "POST",
         headers: {"Content-Type": "application/json"},
@@ -373,54 +369,58 @@ export default {
           this.isLiked = !this.isLiked;
         }
       }).catch(error => {
-        this.errorToastMessage = 'Error saving like';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error saving like");
       }).finally(() => {
-        this.isSavingLike = false;
+        this.isLoadingLike = false;
       })
     },
-    async postComment() {
-      if (this.comment.length === 0) return;
+    handlePostCommentButton() {
+      if (this.comment.length === 0) {
+        this.$refs.errorToast.show("Comment cannot be empty");
+        return;
+      }
+
       this.isCommentPosting = true;
-      try {
-        const response = await fetch(`${this.API_URL}/comments/${this.shader.id}`, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          credentials: 'include',
-          body: JSON.stringify({text: this.comment})
-        });
-        const body = await response.json();
+
+      fetch(`${this.API_URL}/shaders/${this.shader.id}/comment`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        credentials: 'include',
+        body: JSON.stringify({text: this.comment})
+      }).then(response => {
+        if (!response.ok) {
+          this.$refs.errorToast.show("Error posting comment");
+        }
+        return response.json();
+      }).then(body => {
         this.comments.unshift(body);
         this.comment = '';
-      } catch (error) {
-        this.errorToastMessage = 'Error posting comment';
-        this.$refs.errorToast.show();
-      } finally {
-        this.isCommentPosting = false;
-      }
-    },
-    async handleHideButton(comment) {
-      this.isSavingHiddenState = true;
-      this.commentToHide = comment['id'];
-      try {
-        const response = await fetch(`${this.API_URL}/comments/${comment.id}`, {
-          method: "PATCH",
-          headers: {"Content-Type": "application/json"},
-          credentials: 'include',
-          body: JSON.stringify({hidden: !comment['hidden']})
-        });
+      }).catch(error => {
+        this.$refs.errorToast.show("Error posting comment");
 
-        const body = await response.json();
-        console.log(comment);
-        console.log(body);
-        Object.assign(comment, body);
-      } catch (error) {
-        this.errorToastMessage = 'Error hiding comment';
-        this.$refs.errorToast.show();
-      } finally {
+      }).finally(() => {
+        this.isCommentPosting = false;
+      })
+    },
+    handleHideButton(comment, index) {
+      this.isSavingHiddenState = true;
+      this.commentToHide = comment.id;
+
+      fetch(`${this.API_URL}/shaders/${this.shader.id}/comments/${comment.id}?hidden=${!comment.hidden}`, {
+        method: "PATCH",
+        headers: {"Content-Type": "application/json"},
+        credentials: 'include'
+      }).then(response => {
+        if (!response.ok) {
+          this.$refs.errorToast.show("Error hiding comment");
+        }
+        comment.hidden = !comment.hidden;
+      }).catch(error => {
+        this.$refs.errorToast.show("Error hiding comment");
+      }).finally(() => {
         this.isSavingHiddenState = false;
         this.commentToHide = null;
-      }
+      })
     },
     textareaHeightHandler(event) {
       // TODO доделать, чтобы высота возвращалась
@@ -447,14 +447,12 @@ export default {
           body: JSON.stringify(requestBody)
         });
         if (response.ok) {
-          this.generalToastMessage = 'Shader was created';
-          this.$refs.generalToast.show();
+          this.$refs.generalToast.show("Shader was created");
         }
         const body = await response.json();
         this.$router.push(`/new/${body.id}`);
       } catch (error) {
-        this.errorToastMessage = 'Error saving shader';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error saving shader");
       } finally {
         this.isSavingShader = false;
       }
@@ -469,13 +467,10 @@ export default {
           body: JSON.stringify(requestBody)
         });
         if (response.ok) {
-          this.generalToastMessage = 'Shader was saved';
-          this.$refs.generalToast.show();
+          this.$refs.generalToast.show("Shader was saved");
         }
-        // const body = await response.json();
       } catch (error) {
-        this.errorToastMessage = 'Error saving shader';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error saving shader");
       } finally {
         this.isSavingShader = false;
       }
@@ -492,28 +487,30 @@ export default {
         });
 
         if (response.ok) {
-          this.generalToastMessage = 'Shader was saved';
-          this.$refs.generalToast.show();
+          this.$refs.generalToast.show("Shader was saved");
         }
 
         const body = await response.json();
         this.$router.push(`/new/${body.id}`);
       } catch (error) {
-        this.errorToastMessage = 'Error saving shader';
-        this.$refs.errorToast.show();
+        this.$refs.errorToast.show("Error saving shader");
       } finally {
         this.isSavingShader = false;
       }
     }
-  },
+  }
+  ,
   computed: {
     shaderOwnerIsMe() {
       return this.shader.user?.id === this.$store.state.user.id
-    },
-  },
+    }
+    ,
+  }
+  ,
   mounted() {
     if (!this.$route.params.id) return;
     this.isLoading = true
+    // Загрузка шейдера
     fetch(`${this.API_URL}/shaders/${this.$route.params.id}`, {
       method: "GET",
       headers: {"Content-Type": "application/json"},
@@ -534,21 +531,41 @@ export default {
       this.isLoading = false
     })
 
-
+    // загрузка лайка
+    this.isLoadingLike = true
     fetch(`${this.API_URL}/shaders/${this.$route.params.id}/like`, {
       method: "GET",
-      // headers: {"Content-Type": "application/json"},
+      headers: {"Content-Type": "application/json"},
       credentials: 'include',
     }).then(response => {
       if (!response.ok) {
-        this.isError = true
-        this.errorStatus = response.status;
+        this.$refs.errorToast.show("Error getting like status");
       }
       return response.json();
     }).then(isLiked => {
       this.isLiked = isLiked;
+    }).catch(error => {
+      this.$refs.errorToast.show("Error getting like status");
+    }).finally(() => {
+      this.isLoadingLike = false
     })
 
+    this.isLoadingComments = true // TODO реализовать анимацию загрузки комментариев
+    fetch(`${this.API_URL}/shaders/${this.$route.params.id}/comments`, {
+      method: "GET",
+      headers: {"Content-Type": "application/json"},
+    }).then(response => {
+      if (!response.ok) {
+        this.$refs.errorToast.show("Error getting shader comments");
+      }
+      return response.json();
+    }).then(body => {
+      this.comments = body;
+    }).catch(error => {
+      this.$refs.errorToast.show("Error getting shader comments");
+    }).finally(() => {
+      this.isLoadingComments = false
+    })
   },
 }
 </script>
