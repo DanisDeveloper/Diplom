@@ -258,7 +258,8 @@ export default {
         code: this.$route.query.code || exampleShader,
         visibility: true,
         createdAt: null,
-        updated_at: null,
+        updatedAt: null,
+        views: 0,
         user: {
           id: null,
           name: null

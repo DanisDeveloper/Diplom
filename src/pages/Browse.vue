@@ -6,7 +6,7 @@
   <div v-else>
     <div class="header">
       <sort-radio-buttons
-          v-model="this.ordering"
+          v-model="this.sortOption"
           :options="this.sortOptions"
       />
       <pagination v-model:page="page" :pages="totalPages" class="pagination"/>
@@ -20,34 +20,36 @@
             class="shader-window"
             ref="shaders"
             :key="index"
-            :code="shader['code']"
+            :code="shader.code"
             :initial-pause="true"
             @mouseenter="handleMouseEnter(index)"
             @mouseleave="handleMouseLeave(index)"
             :disable-mouse-down-event="true"
             :disable-mouse-up-event="true"
             :disable-mouse-move-event="true"
-            @click="$router.push(`/new/${shader['id']}`)"
+            @click="$router.push(`/new/${shader.id}`)"
         />
         <div class="shader-window-info">
-          <span class="shader-window__text">
-            <span>{{ truncate(shader['title']) }}</span>
+          <div class="shader-window__text">
+            <span>{{ truncate(shader.title) }}</span>
             <span>&nbsp;by&nbsp;</span>
             <span
                 class="link"
-                @click="$router.push(`/profile/${shader['userId']}`)"
+                @click="$router.push(`/profile/${shader.user.name}`)"
             >
-              {{ truncate(shader['user']) }}
+              {{ truncate(shader.user.name) }}
             </span>
-          </span>
-          <span class="shader-window-info__comments">
-            {{ shader['comments'] }}
-            <comment-icon class="comment-icon" :width="16" :height="16" :color="'#282C34'"></comment-icon>
-          </span>
-          <span class="shader-window-info__likes">
-            {{ shader['likes'] }}
+          </div>
+          <div class="shader-window-info__stats">
+            <view-icon class="like-icon" :width="20" :height="20" :color="'#282C34'"></view-icon>
+            {{ shader.views }}
+
             <like-icon class="like-icon" :width="16" :height="16" :color="'#282C34'"></like-icon>
-          </span>
+            {{ shader.likes }}
+
+            <comment-icon class="comment-icon" :width="16" :height="16" :color="'#282C34'"></comment-icon>
+            {{ shader.comments }}
+          </div>
         </div>
       </div>
     </div>
@@ -65,9 +67,13 @@ import Pagination from "@/components/Pagination.vue";
 import truncate from "@/utils/truncate.js";
 import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
 import Error from "@/components/Error.vue";
+import ViewIcon from "@/components/UI/Icons/ViewIcon.vue";
 
 export default {
-  components: {Error, StatusCodeIcon, Pagination, CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow},
+  components: {
+    ViewIcon,
+    Error, StatusCodeIcon, Pagination, CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow
+  },
   data() {
     return {
       isError: false,
@@ -75,11 +81,11 @@ export default {
       isLoading: false,
       totalPages: null,
       page: this.$route.query.page || 1,
+      pageSize: 12,
       shaders: [],
-      ordering: this.$route.query.sort || 'Newest',
-      sortOptions: ['Newest', 'Liked', 'Commented'],
+      sortOption: this.$route.query.sort_option || 'NEWEST',
+      sortOptions: ['NEWEST', 'VIEWED', 'LIKED', 'COMMENTED'],
       API_URL: import.meta.env.VITE_API_URL
-
     }
   },
   methods: {
@@ -92,12 +98,13 @@ export default {
     }
   },
   watch: {
-    ordering(newOption) {
+    sortOption(newOption) {
       this.$router.push({
         path: `/browse/`,
         query: {
           page: this.page,
-          sort: newOption
+          page_size: this.pageSize,
+          sort_option: newOption
         }
       })
     },
@@ -106,34 +113,35 @@ export default {
         path: `/browse/`,
         query: {
           page: newPage,
-          sort: this.ordering
+          pageSize: this.pageSize,
+          sort_option: this.sortOption
         }
       })
     }
   },
-  async mounted() {
+  mounted() {
     this.isLoading = true;
-    try {
-      const endpoint = `${this.API_URL}/shaders/?page=${this.page}&sort=${this.ordering}`;
-      const response = await fetch(endpoint, {
-        method: "GET",
-        headers: {"Content-Type": "application/json"},
-        credentials: 'include',
-      });
-      if(!response.ok){
+    const endpoint = `${this.API_URL}/shaders?page=${this.page - 1}&page_size=${this.pageSize}&sort_option=${this.sortOption}`;
+    fetch(endpoint, {
+      method: "GET",
+      headers: {"Content-Type": "application/json"},
+      credentials: 'include',
+    }).then(response => {
+      if (!response.ok) {
         this.isError = true;
         this.errorStatus = response.status;
       }
-      this.shaders = await response.json();
-      console.log(this.shaders)
-      this.totalPages = parseInt(response.headers.get('x-total-count'));
-
-    } catch (error) {
+      console.log(response.headers.get("X-Total-Count"));
+      this.totalPages = parseInt(response.headers.get('X-Total-Pages'));
+      return response.json();
+    }).then(shaders => {
+      this.shaders = shaders;
+    }).catch(error => {
+      this.errorStatus = error.status;
       this.isError = true;
-      console.log(error);
-    } finally {
+    }).finally(() => {
       this.isLoading = false;
-    }
+    })
   }
 }
 </script>
@@ -191,13 +199,10 @@ export default {
   max-width: 80%;
 }
 
-.shader-window__text > span {
-  white-space: nowrap;
-}
-
-.shader-window-info__comments {
+.shader-window-info__stats {
   margin-left: auto;
 }
+
 
 .like-icon, .comment-icon {
   vertical-align: middle;
