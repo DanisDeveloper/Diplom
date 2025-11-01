@@ -1,4 +1,5 @@
 <template>
+  <toast ref="errorToast"/>
   <div class="nav-bar">
     <button class="nav-bar__main-btn" @click="this.$router.push('/')">FragmentVerse</button>
     <div class="nav-bar__items">
@@ -18,8 +19,11 @@
 
 <script>
 import {checkAuth} from "@/auth/checkAuth.js";
+import Error from "@/components/Error.vue";
+import toast from "@/components/Toast.vue";
 
 export default {
+  components: {toast, Error},
   data() {
     return {
       API_URL: import.meta.env.VITE_API_URL
@@ -32,23 +36,23 @@ export default {
     }
   },
   methods: {
-    async authHandler() {
+    authHandler() {
       if (this.$store.state.isAuth) {
-        try {
-          const response = await fetch(this.API_URL + '/auth/logout', {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                credentials: 'include'
-              }
-          )
-          const data = await response.json();
-          if (!response.ok) throw new Error(data.detail || "Server error!");
-          this.$store.commit('logout');
-          await checkAuth(this.$store);
-          this.$router.push('/');
-        } catch (error) {
-          this.errorMessage = error.message;
-        }
+        fetch(this.API_URL + '/auth/logout', {
+              method: "POST",
+              headers: {"Content-Type": "application/json"},
+              credentials: 'include'
+            }
+        ).then(response => {
+          if (response.ok) {
+            this.$store.commit('logout');
+            this.$router.push('/');
+          }else{
+            this.$refs.errorToast.show("Error while logging out")
+          }
+        }).catch(err => {
+          this.$refs.errorToast.show("Error while logging out")
+        })
       } else {
         this.$router.push('/login')
       }
