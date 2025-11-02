@@ -3,8 +3,8 @@
 </template>
 
 <script>
-import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
-import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
+import ForbiddenIcon from "@/components/Icons/ForbiddenIcon.vue";
+import StatusCodeIcon from "@/components/Icons/StatusCodeIcon.vue";
 import Error from "@/components/Error.vue";
 
 export default {

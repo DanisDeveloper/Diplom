@@ -47,7 +47,7 @@
 
 
 <script>
-import ShaderWindow from "@/components/ShaderWindow.vue";
+import ShaderWindow from "@/pages/NewPage/ShaderWindow.vue";
 import funnel from "@/shaders/fragment.js";
 import mandelbrot from "@/shaders/mandelbrot.js"
 import tonnel from "@/shaders/tonnel.js"

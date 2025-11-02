@@ -58,16 +58,16 @@
 
 
 <script>
-import ShaderWindow from "@/components/ShaderWindow.vue";
+import ShaderWindow from "@/pages/NewPage/ShaderWindow.vue";
 import Loader from "@/components/Loader.vue";
-import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
+import LikeIcon from "@/components/Icons/LikeIcon.vue";
 import SortRadioButtons from "@/components/RadioButtons.vue";
-import CommentIcon from "@/components/UI/Icons/CommentIcon.vue";
+import CommentIcon from "@/components/Icons/CommentIcon.vue";
 import Pagination from "@/components/Pagination.vue";
 import truncate from "@/utils/truncate.js";
-import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
+import StatusCodeIcon from "@/components/Icons/StatusCodeIcon.vue";
 import Error from "@/components/Error.vue";
-import ViewIcon from "@/components/UI/Icons/ViewIcon.vue";
+import ViewIcon from "@/components/Icons/ViewIcon.vue";
 
 export default {
   components: {
@@ -128,8 +128,7 @@ export default {
       credentials: 'include',
     }).then(response => {
       if (!response.ok) {
-        this.isError = true;
-        this.errorStatus = response.status;
+        throw new Error(response.text() || "Server returned an error");
       }
       console.log(response.headers.get("X-Total-Count"));
       this.totalPages = parseInt(response.headers.get('X-Total-Pages'));

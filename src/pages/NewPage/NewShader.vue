@@ -183,30 +183,30 @@
 
 <script>
 import NavBar from "@/components/NavBar.vue";
-import ShaderWindow from "@/components/ShaderWindow.vue";
-import ShaderEditor from "@/components/ShaderEditor.vue";
+import ShaderWindow from "@/pages/NewPage/ShaderWindow.vue";
+import ShaderEditor from "@/pages/NewPage/ShaderEditor.vue";
 import exampleShader from "@/shaders/example.js";
 import FooterInfo from "@/components/AppFooter.vue";
-import UploadIcon from "@/components/UI/Icons/UploadIcon.vue";
-import RestartIcon from "@/components/UI/Icons/RestartIcon.vue";
-import PlayIcon from "@/components/UI/Icons/PlayIcon.vue";
-import PauseIcon from "@/components/UI/Icons/PauseIcon.vue";
-import ExpandIcon from "@/components/UI/Icons/ExpandIcon.vue";
-import DownIcon from "@/components/UI/Icons/DownIcon.vue";
-import SaveIcon from "@/components/UI/Icons/SaveIcon.vue";
-import UpIcon from "@/components/UI/Icons/UpIcon.vue";
-import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
+import UploadIcon from "@/components/Icons/UploadIcon.vue";
+import RestartIcon from "@/components/Icons/RestartIcon.vue";
+import PlayIcon from "@/components/Icons/PlayIcon.vue";
+import PauseIcon from "@/components/Icons/PauseIcon.vue";
+import ExpandIcon from "@/components/Icons/ExpandIcon.vue";
+import DownIcon from "@/components/Icons/DownIcon.vue";
+import SaveIcon from "@/components/Icons/SaveIcon.vue";
+import UpIcon from "@/components/Icons/UpIcon.vue";
+import ForbiddenIcon from "@/components/Icons/ForbiddenIcon.vue";
 import Loader from "@/components/Loader.vue";
-import ForkIcon from "@/components/UI/Icons/ForkIcon.vue";
-import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
-import HideIcon from "@/components/UI/Icons/HideIcon.vue";
-import UnhideIcon from "@/components/UI/Icons/UnhideIcon.vue";
+import ForkIcon from "@/components/Icons/ForkIcon.vue";
+import LikeIcon from "@/components/Icons/LikeIcon.vue";
+import HideIcon from "@/components/Icons/HideIcon.vue";
+import UnhideIcon from "@/components/Icons/UnhideIcon.vue";
 import truncate from "@/utils/truncate.js";
 import toast from "@/components/Toast.vue";
-import NotFoundPage from "@/components/UI/Icons/StatusCodeIcon.vue";
-import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
-import IconButton from "@/components/UI/IconButton.vue";
-import Spinner from "@/components/UI/Spinner.vue";
+import NotFoundPage from "@/components/Icons/StatusCodeIcon.vue";
+import StatusCodeIcon from "@/components/Icons/StatusCodeIcon.vue";
+import IconButton from "@/components/IconButton.vue";
+import Spinner from "@/components/Spinner.vue";
 import Error from "@/components/Error.vue";
 
 
@@ -391,7 +391,7 @@ export default {
         body: JSON.stringify({text: this.comment})
       }).then(response => {
         if (!response.ok) {
-          this.$refs.errorToast.show("Error posting comment");
+          throw new Error(response.text() || "Server returned an error");
         }
         return response.json();
       }).then(body => {
@@ -414,7 +414,7 @@ export default {
         credentials: 'include'
       }).then(response => {
         if (!response.ok) {
-          this.$refs.errorToast.show("Error hiding comment");
+          throw new Error(response.text() || "Server returned an error");
         }
         comment.hidden = !comment.hidden;
       }).catch(error => {
@@ -519,9 +519,7 @@ export default {
       credentials: 'include',
     }).then(response => {
       if (!response.ok) {
-        this.isError = true
-        this.errorStatus = response.status;
-        return
+        throw new Error(response.text() || "Server returned an error");
       }
       return response.json();
     }).then(json => {
@@ -529,6 +527,7 @@ export default {
       this.uploadShader();
     }).catch(error => {
       this.isError = true
+      this.errorStatus = error.status
     }).finally(() => {
       this.isLoading = false
     })
@@ -541,7 +540,7 @@ export default {
       credentials: 'include',
     }).then(response => {
       if (!response.ok) {
-        this.$refs.errorToast.show("Error getting like status");
+        throw new Error(response.text() || "Server returned an error");
       }
       return response.json();
     }).then(isLiked => {
@@ -558,7 +557,7 @@ export default {
       headers: {"Content-Type": "application/json"},
     }).then(response => {
       if (!response.ok) {
-        this.$refs.errorToast.show("Error getting shader comments");
+        throw new Error(response.text() || "Server returned an error");
       }
       return response.json();
     }).then(body => {

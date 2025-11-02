@@ -14,6 +14,7 @@
 
 <script>
 export default {
+  name: 'radio-buttons',
   props: {
     modelValue: {
       type: String,

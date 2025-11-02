@@ -1,4 +1,4 @@
-import NewShader from "@/pages/NewShader.vue";
+import NewShader from "@/pages/NewPage/NewShader.vue";
 import {createRouter, createWebHistory} from "vue-router"
 import About from "@/pages/About.vue";
 import Main from "@/pages/Main.vue";

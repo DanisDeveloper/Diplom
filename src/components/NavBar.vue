@@ -23,6 +23,7 @@ import Error from "@/components/Error.vue";
 import toast from "@/components/Toast.vue";
 
 export default {
+  name: "nav-bar",
   components: {toast, Error},
   data() {
     return {
@@ -47,7 +48,7 @@ export default {
           if (response.ok) {
             this.$store.commit('logout');
             this.$router.push('/');
-          }else{
+          } else {
             this.$refs.errorToast.show("Error while logging out")
           }
         }).catch(err => {

@@ -1,12 +1,7 @@
 <template>
   <loader v-if="this.isLoading"></loader>
-  <div v-else-if="this.isNotFound" class="error-page-block">
-    <forbidden-icon></forbidden-icon>
-    <h1>User does not exist</h1>
-  </div>
-  <div v-else-if="this.serverError" class="error-page-block">
-    <status-code-icon :text="'500'" :color="'#282C34'"></status-code-icon>
-    <h1>Server error</h1>
+  <div v-else-if="this.isError" class="error-page-block">
+    <error :status="this.errorStatus"></error>
   </div>
   <div v-else>
     <toast ref="generalToast" :background="'#282C34'"></toast>
@@ -34,7 +29,7 @@
     <div class="user-wrapper">
       <div class="user-background">
         <img
-            :src="`${this.PUBLIC_API_URL}/${this.user.background_url}`"
+            :src="`${this.PUBLIC_API_URL}/images/${this.user.backgroundUrl}`"
             alt=""
         >
         <input
@@ -43,7 +38,7 @@
             type="file"
             ref="backgroundInput"
             accept="image/*"
-            @change="backgroundLoadHandler"
+            @change="userImageLoadHandler($event, 'BACKGROUND')"
         >
         <div v-if="this.isStoreUser" class="cover-btns">
           <button class="cover-btn left-btn" @click="triggerBackgroundInput">Change cover</button>
@@ -54,7 +49,7 @@
       <div class="user-info-wrapper">
         <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
           <img
-              :src="`${this.PUBLIC_API_URL}/${this.user.avatar_url || 'avatars/avatar.png'}`"
+              :src="`${this.PUBLIC_API_URL}/images/${this.user.avatarUrl || 'avatar.png'}`"
               alt="avatar"
               width="224"
               height="224"
@@ -66,7 +61,7 @@
               type="file"
               ref="avatarInput"
               accept="image/*"
-              @change="avatarLoadHandler"
+              @change="userImageLoadHandler($event, 'AVATAR')"
           >
         </div>
         <div class="user-info">
@@ -95,14 +90,19 @@
                 :class="{ 'editable': !isPatchingBiography }"
                 @click="handleCancelClick"/>
             <span v-if="!this.isEditing">{{ this.user.biography }}</span>
-            <input size="140" maxlength="140" v-else type="text" v-model="this.biography_edit">
+            <input size="140" maxlength="140" v-else type="text" v-model="this.biographyEdit">
           </span>
 
           <span class="icon">
-            <code-icon v-tooltip="'Number of user\'s shaders'"  :color="'#282C34'" class="user-info__icon"></code-icon> {{ this.user.shaders?.length || 0 }}
-            <fork-icon v-tooltip="'Number of forks on user\'s shaders'" :color="'#282C34'" class="user-info__icon"></fork-icon> {{ this.user.total_forks }}
-            <like-icon v-tooltip="'Number of likes on user\'s shaders'"  :color="'#282C34'" class="user-info__icon"></like-icon> {{ this.user.total_likes }}
-            <comment-icon v-tooltip="'Number of comments on user\'s shaders'"  :color="'#282C34'" class="user-info__icon"></comment-icon> {{ this.user.total_comments }}
+            <code-icon v-tooltip="'Number of user\'s shaders'" :color="'#282C34'" class="user-info__icon"></code-icon> {{
+              this.user.shaders?.length || 0
+            }}
+            <fork-icon v-tooltip="'Number of forks on user\'s shaders'" :color="'#282C34'"
+                       class="user-info__icon"></fork-icon> {{ this.user.total_forks }}
+            <like-icon v-tooltip="'Number of likes on user\'s shaders'" :color="'#282C34'"
+                       class="user-info__icon"></like-icon> {{ this.user.total_likes }}
+            <comment-icon v-tooltip="'Number of comments on user\'s shaders'" :color="'#282C34'"
+                          class="user-info__icon"></comment-icon> {{ this.user.total_comments }}
           </span>
         </div>
       </div>
@@ -125,12 +125,12 @@
         <pagination
             v-if="pagesCount > this.SHADERS_PER_PAGE"
             v-model:page="page"
-            :pages="pagesCount"
+            :pages="this.totalPages"
             class="pagination"/>
         <div class="shader-grid">
           <div
               class="shader-cell"
-              v-for="(shader, index) in showedShaders"
+              v-for="(shader, index) in this.user.shaders"
               @mouseenter="handleMouseEnter(index)"
               @mouseleave="handleMouseLeave(index)"
               @click="$router.push(`/new/${shader['id']}`)"
@@ -215,7 +215,8 @@
           </tr>
           </tbody>
         </table>
-        <button v-if="this.totalActivities > this.activity_page * this.ACTIVITIES_PER_PAGE" class="activity-load-btn" @click="loadMoreActivities">
+        <button v-if="this.totalActivities > this.activity_page * this.ACTIVITIES_PER_PAGE" class="activity-load-btn"
+                @click="loadMoreActivities">
           <spinner v-if="isLoadingActivities"></spinner>
           <span v-else>Upload more</span>
         </button>
@@ -260,35 +261,36 @@
 
 <script>
 import Loader from "@/components/Loader.vue";
-import HideIcon from "@/components/UI/Icons/HideIcon.vue";
-import UnhideIcon from "@/components/UI/Icons/UnhideIcon.vue";
-import DeleteIcon from "@/components/UI/Icons/DeleteIcon.vue";
-import ShareIcon from "@/components/UI/Icons/ShareIcon.vue";
-import LikeIcon from "@/components/UI/Icons/LikeIcon.vue";
-import CommentIcon from "@/components/UI/Icons/CommentIcon.vue";
-import DialogWindow from "@/components/UI/DialogWindow.vue";
-import ForkIcon from "@/components/UI/Icons/ForkIcon.vue";
-import SaveIcon from "@/components/UI/Icons/SaveIcon.vue";
-import CheckIcon from "@/components/UI/Icons/CheckIcon.vue";
-import CodeIcon from "@/components/UI/Icons/CodeIcon.vue";
-import ShaderWindow from "@/components/ShaderWindow.vue";
+import HideIcon from "@/components/Icons/HideIcon.vue";
+import UnhideIcon from "@/components/Icons/UnhideIcon.vue";
+import DeleteIcon from "@/components/Icons/DeleteIcon.vue";
+import ShareIcon from "@/components/Icons/ShareIcon.vue";
+import LikeIcon from "@/components/Icons/LikeIcon.vue";
+import CommentIcon from "@/components/Icons/CommentIcon.vue";
+import DialogWindow from "@/components/DialogWindow.vue";
+import ForkIcon from "@/components/Icons/ForkIcon.vue";
+import SaveIcon from "@/components/Icons/SaveIcon.vue";
+import CheckIcon from "@/components/Icons/CheckIcon.vue";
+import CodeIcon from "@/components/Icons/CodeIcon.vue";
+import ShaderWindow from "@/pages/NewPage/ShaderWindow.vue";
 import Pagination from "@/components/Pagination.vue";
 import truncate from "../utils/truncate.js";
-import ForbiddenIcon from "@/components/UI/Icons/ForbiddenIcon.vue";
-import EditIcon from "@/components/UI/Icons/EditIcon.vue";
-import CancelIcon from "@/components/UI/Icons/CancelIcon.vue";
-import Spinner from "@/components/UI/Spinner.vue";
+import ForbiddenIcon from "@/components/Icons/ForbiddenIcon.vue";
+import EditIcon from "@/components/Icons/EditIcon.vue";
+import CancelIcon from "@/components/Icons/CancelIcon.vue";
+import Spinner from "@/components/Spinner.vue";
 import Toast from "@/components/Toast.vue";
-import StatusCodeIcon from "@/components/UI/Icons/StatusCodeIcon.vue";
+import StatusCodeIcon from "@/components/Icons/StatusCodeIcon.vue";
+import Error from "@/components/Error.vue";
+import formatDate from "@/utils/formatDate.js";
+import {formatDateTime} from "@/utils/formatDateTime.js";
 
 export default {
   components: {
+    Error,
     StatusCodeIcon,
     Toast,
     Spinner,
-    CancelIcon,
-    EditIcon,
-    ForbiddenIcon,
     Pagination,
     ShaderWindow,
     CodeIcon,
@@ -298,8 +300,16 @@ export default {
   },
   data() {
     return {
-      serverError: false,
-      user: {},
+      isError: false,
+      errorStatus: null,
+      user: {
+        id: null,
+        name: "",
+        createdAt: null,
+        avatarUrl: null,
+        backgroundUrl: null,
+        biography: ""
+      },
       isLoading: false,
       tabs: ['Shaders', 'Activity'], // Account добавляется в mounted
       activeTab: 'Shaders',
@@ -311,10 +321,11 @@ export default {
       isClipboardCopied: false,
       clipboardShaderId: null,
       page: 1,
+      totalPages: 0,
       SHADERS_PER_PAGE: 8,
       isNotFound: false,
       isEditing: false,
-      biography_edit: null,
+      biographyEdit: null,
       isPatchingBiography: false,
       activity_page: 1,
       ACTIVITIES_PER_PAGE: 20,
@@ -333,6 +344,8 @@ export default {
     }
   },
   methods: {
+    formatDateTime,
+    formatDate,
     truncate,
     preventWhitespace(event) {
       if (event.key.match(/\s/)) {
@@ -340,7 +353,7 @@ export default {
       }
     },
     async changePassword() {
-      if(this.oldPassword === "" || this.newPassword === "" || this.confirmPassword === "") {
+      if (this.oldPassword === "" || this.newPassword === "" || this.confirmPassword === "") {
         this.passwordLog = "All fields are required";
         return;
       }
@@ -400,24 +413,23 @@ export default {
         this.clipboardShaderId = null;
       }, 1000);
     },
-    async deleteAvatar(){
+    deleteAvatar() {
       this.isDeletingAvatar = true;
-      try{
-        const response = await fetch(`${this.API_URL}/profile/background`, {
-          method: 'DELETE',
-          credentials: 'include'
-        });
-        if(response.ok){
-          this.user.avatar_url = null;
-          this.$refs.generalToast.show("Successfully cleared avatar");
+      fetch(`${this.API_URL}/users/image?type=AVATAR`, {
+        method: 'DELETE',
+        credentials: 'include'
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(response.text() || "Server returned an error");
         }
-      } catch (error) {
-        console.log(error);
+        this.user.avatarUrl = null;
+        this.$refs.generalToast.show("Successfully cleared avatar");
+      }).catch(error => {
         this.$refs.errorToast.show("Error clearing avatar");
-      } finally {
+      }).finally(() => {
         this.isDeletingAvatar = false;
         this.showAvatarDeleteDialog = false;
-      }
+      })
     },
     async deleteShader() {
       this.isDeletingShader = true;
@@ -442,87 +454,71 @@ export default {
         this.showShaderDeleteDialog = false;
       }
     },
-    async triggerAvatarInput() {
-      if(this.user.avatar_url !== null) {
+    triggerAvatarInput() {
+      if (this.user.avatarUrl !== null) {
         this.showAvatarDeleteDialog = true;
-      }else{
+      } else {
         this.$refs.avatarInput.click();
-        console.log(`${this.API_URL}/public/${this.user.avatar_url || 'avatars/avatar.png'}`)
       }
     },
     triggerBackgroundInput() {
       this.$refs.backgroundInput.click()
     },
-    async avatarLoadHandler(event) {
-      const file = event.target.files[0];
-      if (!file) {
-        this.$refs.errorToast.show("Error uploading avatar");
+    userImageLoadHandler(event, imageType) {
+      const image = event.target.files[0];
+      if (!image) {
+        this.$refs.errorToast.show("Error uploading image");
       }
 
       const formData = new FormData();
-      formData.append('avatar', file);
+      formData.append('image', image);
 
-      try {
-        const response = await fetch(this.API_URL + '/profile/avatar', {
-          method: 'POST',
-          body: formData,
-          credentials: 'include'
-        });
-
-        const data = await response.json();
-        this.user.avatar_url = data.avatar_url;
-        this.$refs.generalToast.show("Successfully uploaded avatar");
-
-      } catch (error) {
-        this.$refs.errorToast.show("Error uploading avatar");
-      }
-    },
-    async backgroundLoadHandler(event) {
-      const file = event.target.files[0];
-      if (!file) {
-        this.$refs.errorToast.show("Error uploading background");
-
-      }
-
-      const formData = new FormData();
-      formData.append('background', file);
-
-      try {
-        const response = await fetch(this.API_URL + '/profile/background', {
-          method: 'POST',
-          body: formData,
-          credentials: 'include'
-        });
-
-        const data = await response.json();
-        this.user.background_url = data.background_url;
-        this.$refs.generalToast.show("Successfully uploaded background");
-      } catch (error) {
-        this.$refs.errorToast.show("Error uploading background");
-      }
-    },
-    async handleClearBackground() {
-      try {
-        const response = await fetch(this.API_URL + '/profile/background', {
-          method: 'DELETE',
-          headers: {'Content-Type': 'application/json'},
-          credentials: 'include'
-        });
-
-        if (response.ok) {
-          this.user.background_url = null;
+      fetch(`${this.API_URL}/users/image?type=${imageType}`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include'
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(response.text() || "Server returned an error");
         }
-      } catch (error) {
+        this.$refs.generalToast.show("Successfully uploaded image");
+        return response.text();
+      }).then(imageUrl => {
+        switch (imageType) {
+          case "AVATAR":
+            this.user.avatarUrl = imageUrl;
+            break;
+          case "BACKGROUND":
+            this.user.backgroundUrl = imageUrl;
+            break;
+        }
+      }).catch(error => {
+        this.$refs.errorToast.show("Error uploading image");
+      })
+    },
+    handleClearBackground() {
+      this.isDeletingAvatar = true;
+      fetch(`${this.API_URL}/users/image?type=BACKGROUND`, {
+        method: 'DELETE',
+        credentials: 'include'
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error(response.text() || "Server returned an error");
+        }
+        this.user.backgroundUrl = null;
+        this.$refs.generalToast.show("Successfully cleared background");
+      }).catch(error => {
         this.$refs.errorToast.show("Error clearing background");
-      } finally {
-        // TODO возможно стоит сделать лоадер
-      }
+      }).finally(() => {
+        this.isDeletingAvatar = false;
+        this.showAvatarDeleteDialog = false;
+      })
     },
     handleEditClick() {
       this.isEditing = true;
     },
     async handleOkClick() {
-      if (this.biography_edit === this.user.biography) {
+      if (this.biographyEdit === this.user.biography) {
         this.isEditing = false;
         return;
       }
@@ -532,10 +528,10 @@ export default {
           method: 'PATCH',
           headers: {'Content-Type': 'application/json'},
           credentials: 'include',
-          body: JSON.stringify({biography: this.biography_edit})
+          body: JSON.stringify({biography: this.biographyEdit})
         });
         if (response.ok) {
-          this.user.biography = this.biography_edit;
+          this.user.biography = this.biographyEdit;
           this.isEditing = false;
         }
       } catch (error) {
@@ -547,14 +543,14 @@ export default {
     handleCancelClick() {
       if (this.isPatchingBiography) return;
       this.isEditing = false;
-      this.biography_edit = this.user.biography;
+      this.biographyEdit = this.user.biography;
     },
     handleTabClick(tab) {
       this.activeTab = tab
       this.passwordLog = ""
     },
     async loadMoreActivities() {
-      try{
+      try {
         this.isLoadingActivities = true;
         const response = await fetch(`${this.API_URL}/profile/${this.$route.params.id}/activities?activity_page=${this.activity_page + 1}&limit=${this.ACTIVITIES_PER_PAGE}`, {
           method: "GET",
@@ -564,48 +560,19 @@ export default {
         this.activity_page += 1;
         const data = await response.json();
         this.user.activities.push(...data);
-      }catch (error) {
+      } catch (error) {
         console.log(error);
         this.$refs.errorToast.show("Error loading more activities");
-      }finally {
+      } finally {
         this.isLoadingActivities = false;
       }
-    },
-    formatDate(date) {
-      const _date = new Date(date);
-
-      const day = String(_date.getDate()).padStart(2, '0');
-      const month = String(_date.getMonth() + 1).padStart(2, '0');
-      const year = _date.getFullYear();
-
-      return `${day}-${month}-${year}`;
-    },
-    formatDateTime(date) {
-      const _date = new Date(date);
-
-      const day = String(_date.getDate()).padStart(2, '0');
-      const month = String(_date.getMonth() + 1).padStart(2, '0');
-      const year = _date.getFullYear();
-
-      const hours = String(_date.getHours()).padStart(2, '0');
-      const minutes = String(_date.getMinutes()).padStart(2, '0');
-      const seconds = String(_date.getSeconds()).padStart(2, '0');
-
-      return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-    },
-  },
+    }
+  }
+  ,
   computed: {
     isStoreUser() {
       return this.user.id === this.$store.state.user.id && this.$store.state.isAuth;
     },
-    pagesCount() {
-      return Math.ceil(this.user.shaders?.length / this.SHADERS_PER_PAGE) || 0;
-    },
-    showedShaders() {
-      console.log(this.user.shaders)
-      console.log((this.page - 1) * this.SHADERS_PER_PAGE, this.page * this.SHADERS_PER_PAGE)
-      return this.user.shaders?.slice((this.page - 1) * this.SHADERS_PER_PAGE, this.page * this.SHADERS_PER_PAGE)
-    }
   },
   watch: {
     page(newPage) {
@@ -614,33 +581,35 @@ export default {
       this.$refs.shaders.forEach(shader => {
         shader.uploadShader()
       });
-    },
+    }
   },
-  async mounted() {
+  mounted() {
     this.isLoading = true;
-    try {
-      const response = await fetch(`${this.API_URL}/profile/${this.$route.params.id}`, {
-        method: "GET",
-        headers: {"Content-Type": "application/json"},
-        credentials: 'include',
-      });
-      console.log(`${this.API_URL}/profile/${this.$route.params.id}`)
-      // TODO обработать 409, когда указан несуществующий пользователь
-      if (response.status === 409) {
-        this.isNotFound = true;
+    fetch(`${this.API_URL}/users/${this.$route.params.id}`, {
+      method: "GET",
+      headers: {"Content-Type": "application/json"},
+      credentials: 'include',
+    }).then(response => {
+      if (!response.ok) {
+        throw new Error(response.text() || "Server returned an error");
       }
-      this.username = await response.json();
-      this.biography_edit = this.user.biography;
-      this.totalActivities = parseInt(response.headers.get('x-total-count')) || this.totalActivities
-    } catch (error) {
-      console.log(error);
-      this.serverError = true;
-    } finally {
+      console.log(response);
+      this.totalPages = parseInt(response.headers.get('X-Total-Pages'));
+      return response.json();
+    }).then(data => {
+      Object.assign(this.user, data);
+      this.biographyEdit = this.user.biography;
+      // this.totalActivities = parseInt(response.headers.get('x-total-count')) || this.totalActivities
+    }).catch(error => {
+      this.isError = false;
+      this.errorStatus = error.status;
+    }).finally(() => {
       this.isLoading = false;
-    }
-    if (this.isStoreUser) {
-      this.tabs.push('Account');
-    }
+      if (this.isStoreUser) {
+        this.tabs.push('Account');
+      }
+    })
+    // TODO обработать 409, когда указан несуществующий пользователь
   }
 }
 </script>
@@ -1151,16 +1120,17 @@ export default {
 }
 
 
-.activity-load-btn{
+.activity-load-btn {
   display: flex;
   justify-content: center;
   margin: 1rem auto 0;
   padding: 0.5rem 1rem;
   border-radius: 0.5rem;
-  border:  1px solid #282C34;
+  border: 1px solid #282C34;
   transition: all 0.3s ease;
   font-size: large;
 }
+
 .activity-load-btn:hover {
   background: #282C34;
   color: lightgray;

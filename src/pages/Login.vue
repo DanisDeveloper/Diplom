@@ -80,7 +80,7 @@
 
 <script>
 import {checkAuth} from "@/auth/checkAuth.js";
-import Spinner from "@/components/UI/Spinner.vue";
+import Spinner from "@/components/Spinner.vue";
 
 export default {
   components: {Spinner},

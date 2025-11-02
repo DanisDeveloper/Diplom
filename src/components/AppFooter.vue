@@ -29,7 +29,9 @@
 </template>
 
 <script>
-export default {}
+export default {
+  name: "app-footer",
+}
 </script>
 
 <style scoped>

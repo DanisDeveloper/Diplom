@@ -7,7 +7,7 @@
 <script>
 
 export default {
-  name: "IconButton"
+  name: "icon-button"
 }
 </script>
 

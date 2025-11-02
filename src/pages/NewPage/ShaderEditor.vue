@@ -13,7 +13,7 @@ import { history, historyKeymap } from "@codemirror/history";
 import { RangeSet } from "@codemirror/state";
 
 export default {
-  name: "ShaderEditor",
+  name: "shader-editor",
   props: {
     modelValue: {
       type: String,

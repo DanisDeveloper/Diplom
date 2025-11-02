@@ -19,7 +19,7 @@
 
 <script>
 export default {
-  name: 'SmartglassLoader',
+  name: 'loader',
   props: {
     color: {
       type: String,
