@@ -51,7 +51,7 @@
                   @click="handleLikeButtonClick"
               />
             </icon-button>
-            <icon-button v-if="this.$store.state.isAuth" :class="{'btn-border-error': isTitleEmpty}"
+            <icon-button v-if="this.$store.state.isAuth" :class="{'btn-border-error': titleEmptyError}"
                          @click="handleSaveOrForkButtonClick">
               <spinner
                   v-if="isSavingShader"
@@ -60,7 +60,7 @@
               <save-icon
                   v-else-if="shaderOwnerIsMe || this.shader.id === null"
                   v-tooltip="'Save shader'"
-                  :color="isTitleEmpty? '#f44336' : 'lightgrey'"/>
+                  :color="titleEmptyError? '#f44336' : 'lightgrey'"/>
               <fork-icon
                   v-else
                   v-tooltip="'Fork shader'"/>
@@ -73,7 +73,7 @@
         <input
             :disabled="!shaderOwnerIsMe && this.shader.id"
             maxlength="50"
-            :class="{'empty-title-error': isTitleEmpty, 'disabled-input': !shaderOwnerIsMe && this.shader.id}"
+            :class="{'empty-title-error': titleEmptyError, 'disabled-input': !shaderOwnerIsMe && this.shader.id}"
             class="shader-title"
             placeholder="Title"
             v-model.trim="this.shader.title"
@@ -99,10 +99,10 @@
           </div>
 
           <div class="shader-metadata">
-            <span v-if="this.shader.id && this.shader.originId">
+            <span v-if="this.shader.id && this.shader.origin?.id">
               forked from
               <span class="link"
-                    @click="$router.push(`/new/${this.shader.originId}`)">{{
+                    @click="$router.push(`/new/${this.shader.origin.id}`)">{{
                   truncate(this.shader.origin?.title ? this.shader.origin.title : "")
                 }}</span>
             </span>
@@ -199,7 +199,7 @@ export default {
         },
         origin: null,
       },
-      isTitleEmpty: false,
+      titleEmptyError: false,
       originShader: null,
 
       isLiked: false,
@@ -266,11 +266,11 @@ export default {
     handleSaveOrForkButtonClick() {
       // Проверка, что название не пустое
       if (this.shader.title.length === 0) {
-        this.isTitleEmpty = true;
+        this.titleEmptyError = true;
         this.$refs.errorToast.show("Title must not be empty");
         clearTimeout(this.titleEmptyTimeoutId)
         this.titleEmptyTimeoutId = setTimeout(() => {
-          this.isTitleEmpty = false;
+          this.titleEmptyError = false;
         }, 1000);
         return;
       }
