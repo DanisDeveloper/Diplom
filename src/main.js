@@ -3,13 +3,13 @@ import App from './App.vue'
 import router from "@/router/router.js";
 import store from "@/store/index.js";
 import VTooltip from "@/directives/VTooltip.js";
-import icons from "@/components/Icons/index.js";
+import components from "@/components/index.js";
 
 const app = createApp(App)
 
 // Глобальная регистрация компонентов
-for (let i = 0; i < icons.length; i++) {
-    app.component(icons[i].name, icons[i])
+for (let i = 0; i < components.length; i++) {
+    app.component(components[i].name, components[i])
 }
 
 app.directive('tooltip', VTooltip)

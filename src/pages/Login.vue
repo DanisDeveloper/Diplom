@@ -83,7 +83,6 @@ import {checkAuth} from "@/auth/checkAuth.js";
 import Spinner from "@/components/Spinner.vue";
 
 export default {
-  components: {Spinner},
   data() {
     return {
       isLoginForm: true, // Переключение между логином и регистрацией
@@ -151,11 +150,15 @@ export default {
                 this.errorMessage = "Wrong email or password";
                 return;
               case 409:
-                if (body.error === "USER_NAME_ALREADY_EXISTS")
-                  this.errorMessage = "Username already exist";
-                else if (body.error === "USER_EMAIL_ALREADY_EXISTS")
-                  this.errorMessage = "Email already exist";
-                return;
+                switch (body.error) {
+                  case "USER_NAME_ALREADY_EXISTS":
+                    this.errorMessage = "Username already exists";
+                    break;
+                  case "USER_EMAIL_ALREADY_EXISTS":
+                    this.errorMessage = "Email already exists";
+                    break;
+                }
+                break;
               case 422:
                 this.errorMessage = "Validation error. Please check the form.";
                 return;

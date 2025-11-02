@@ -58,7 +58,7 @@
 
 
 <script>
-import ShaderWindow from "@/pages/NewPage/ShaderWindow.vue";
+import ShaderWindow from "@/components/ShaderWindow.vue";
 import Loader from "@/components/Loader.vue";
 import LikeIcon from "@/components/Icons/LikeIcon.vue";
 import SortRadioButtons from "@/components/RadioButtons.vue";
@@ -70,10 +70,6 @@ import Error from "@/components/Error.vue";
 import ViewIcon from "@/components/Icons/ViewIcon.vue";
 
 export default {
-  components: {
-    ViewIcon,
-    Error, StatusCodeIcon, Pagination, CommentIcon, SortRadioButtons, LikeIcon, Loader, ShaderWindow
-  },
   data() {
     return {
       isError: false,

@@ -1,8 +1,6 @@
 <template>
   <loader v-if="this.isLoading"></loader>
-  <div v-else-if="this.isError" class="error-page-block">
-    <error :status="this.errorStatus"></error>
-  </div>
+  <error v-else-if="this.isError" :status="this.errorStatus" class="error-page-block"></error>
   <div v-else class="main">
     <toast ref="errorToast"/>
     <toast :background="'#282C34'" ref="generalToast"/>
@@ -20,11 +18,11 @@
       />
 
       <div class="canvas-footer">
-        <div class="shader-info">
-          <div class="shader-info__component"><strong>Frame:</strong> {{ this.frame }}</div>
-          <div class="shader-info__component"><strong>Time:</strong> {{ accumulatedTime.toFixed(2) }}</div>
-          <div class="shader-info__component"><strong>Resolution:</strong> {{ canvasWidth }}x{{ canvasHeight }}</div>
-        </div>
+        <shader-window-info
+            :canvas-height="this.canvasHeight"
+            :canvas-width="this.canvasWidth"
+            :accumulated-time="this.accumulatedTime"
+            :frame="this.frame"/>
         <hr>
         <div class="shader-window-manage-btn">
           <icon-button v-tooltip="'Upload shader'" :class="{'btn-border-error': compileFailed}" @click="uploadShader">
@@ -114,7 +112,7 @@
             <span v-if="this.shader.id">
               by
               <span class="link" @click="$router.push(`/profile/${shader.user.id}`)">{{ this.shader.user.name }}</span>
-              in {{ this.formatDate(this.shader.createdAt) }}
+              in {{ formatDate(this.shader.createdAt) }}
             </span>
           </div>
         </div>
@@ -140,35 +138,10 @@
         </div>
 
         <div v-for="(comment, index) in comments" :key="comment.id" class="comment">
-          <img
-              class="comment__avatar"
-              width="40"
-              height="40"
-              :src="`${this.PUBLIC_API_URL}/${comment.user.avatar_url ? comment.user.avatar_url : 'images/avatar.png'}`"
-              @click="$router.push(`/profile/${comment.user.name}`)"
-              alt="avatar">
-          <icon-button v-if="this.$store.state.user.id === comment.user.id" class="comment__hide">
-            <spinner
-                v-if="isSavingHiddenState && comment.id === commentToHide"
-                disabled/>
-            <unhide-icon
-                v-else-if="comment.hidden"
-                v-tooltip="'Unhide comment'"
-                @click="handleHideButton(comment, index)"/>
-            <hide-icon
-                v-else
-                v-tooltip="'Hide comment'"
-                @click="handleHideButton(comment, index)"/>
-          </icon-button>
-          <div class="comment__header">
-            <span @click="$router.push(`/profile/${comment.user.name}`)" class="link">
-              {{ comment.user.name }}
-            </span>
-            in {{ this.formatDate(comment.createdAt) }}
-          </div>
-          <div class="comment__content">
-            {{ !comment.hidden ? comment.text : "Comment was hidden" }}
-          </div>
+          <shader-comment
+              :index="index"
+              :comment="comment"
+              :shader-id="this.shader.id"/>
         </div>
       </div>
     </div>
@@ -182,60 +155,20 @@
 </template>
 
 <script>
-import NavBar from "@/components/NavBar.vue";
-import ShaderWindow from "@/pages/NewPage/ShaderWindow.vue";
 import ShaderEditor from "@/pages/NewPage/ShaderEditor.vue";
 import exampleShader from "@/shaders/example.js";
-import FooterInfo from "@/components/AppFooter.vue";
-import UploadIcon from "@/components/Icons/UploadIcon.vue";
-import RestartIcon from "@/components/Icons/RestartIcon.vue";
-import PlayIcon from "@/components/Icons/PlayIcon.vue";
-import PauseIcon from "@/components/Icons/PauseIcon.vue";
-import ExpandIcon from "@/components/Icons/ExpandIcon.vue";
-import DownIcon from "@/components/Icons/DownIcon.vue";
-import SaveIcon from "@/components/Icons/SaveIcon.vue";
-import UpIcon from "@/components/Icons/UpIcon.vue";
-import ForbiddenIcon from "@/components/Icons/ForbiddenIcon.vue";
-import Loader from "@/components/Loader.vue";
-import ForkIcon from "@/components/Icons/ForkIcon.vue";
-import LikeIcon from "@/components/Icons/LikeIcon.vue";
-import HideIcon from "@/components/Icons/HideIcon.vue";
-import UnhideIcon from "@/components/Icons/UnhideIcon.vue";
 import truncate from "@/utils/truncate.js";
-import toast from "@/components/Toast.vue";
-import NotFoundPage from "@/components/Icons/StatusCodeIcon.vue";
-import StatusCodeIcon from "@/components/Icons/StatusCodeIcon.vue";
-import IconButton from "@/components/IconButton.vue";
-import Spinner from "@/components/Spinner.vue";
 import Error from "@/components/Error.vue";
+import ShaderWindowInfo from "@/pages/NewPage/ShaderWindowInfo.vue";
+import formatDate from "@/utils/formatDate.js";
+import ShaderComment from "@/pages/NewPage/ShaderComment.vue";
 
 
 export default {
   components: {
-    Error,
-    Spinner,
-    IconButton,
-    StatusCodeIcon,
-    NotFoundPage,
-    toast,
-    UnhideIcon,
-    HideIcon,
-    LikeIcon,
-    ForkIcon,
-    Loader,
-    ForbiddenIcon,
-    UpIcon,
-    SaveIcon,
-    DownIcon,
-    ExpandIcon,
-    PauseIcon,
-    PlayIcon,
-    RestartIcon,
-    UploadIcon,
-    FooterInfo,
+    ShaderComment,
+    ShaderWindowInfo,
     ShaderEditor,
-    ShaderWindow,
-    NavBar
   },
   data() {
     return {
@@ -275,8 +208,8 @@ export default {
       comments: [],
       comment: '',
       isCommentPosting: false,
-      isSavingHiddenState: false,
-      commentToHide: null,
+      // isSavingHiddenState: false,
+      // commentToHide: null,
 
       isSavingShader: false,
       isLoadingLike: false,
@@ -290,6 +223,7 @@ export default {
     }
   },
   methods: {
+    formatDate,
     truncate,
     frameWatch(frame) {
       this.frame = frame
@@ -404,40 +338,11 @@ export default {
         this.isCommentPosting = false;
       })
     },
-    handleHideButton(comment, index) {
-      this.isSavingHiddenState = true;
-      this.commentToHide = comment.id;
-
-      fetch(`${this.API_URL}/shaders/${this.shader.id}/comments/${comment.id}?hidden=${!comment.hidden}`, {
-        method: "PATCH",
-        headers: {"Content-Type": "application/json"},
-        credentials: 'include'
-      }).then(response => {
-        if (!response.ok) {
-          throw new Error(response.text() || "Server returned an error");
-        }
-        comment.hidden = !comment.hidden;
-      }).catch(error => {
-        this.$refs.errorToast.show("Error hiding comment");
-      }).finally(() => {
-        this.isSavingHiddenState = false;
-        this.commentToHide = null;
-      })
-    },
     textareaHeightHandler(event) {
       // TODO доделать, чтобы высота возвращалась
       const textarea = event.target;
       textarea.style.height = '';
       textarea.style.height = textarea.scrollHeight + 'px';
-    },
-    formatDate(date) {
-      const _date = new Date(date);
-
-      const day = String(_date.getDate()).padStart(2, '0');
-      const month = String(_date.getMonth() + 1).padStart(2, '0');
-      const year = _date.getFullYear();
-
-      return `${day}-${month}-${year}`;
     },
     async saveNewShader(requestBody) {
       try {
@@ -609,17 +514,6 @@ export default {
   margin-left: auto;
 }
 
-.shader-info__component {
-  display: inline-block;
-  margin-right: 10px;
-  color: lightgray;
-}
-
-.shader-info {
-  display: flex;
-  justify-content: flex-start;
-}
-
 .canvas-footer {
   margin: 10px 0;
   padding: 10px;
@@ -782,38 +676,6 @@ hr {
   word-break: break-word;
   overflow-wrap: break-word;
   overflow: auto;
-}
-
-.comment__header {
-  display: flex;
-  width: fit-content;
-}
-
-.comment__avatar {
-  float: left;
-  margin-right: 10px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-.comment__hide {
-  cursor: pointer;
-  float: right;
-
-  background: transparent;
-  border-radius: 8px;
-  border: 1px solid #282C34;
-  color: lightgray;
-  padding: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border 0.2s ease;
-
-}
-
-.comment__hide:hover {
-  border-color: lightgray;
 }
 
 h1, h3 {

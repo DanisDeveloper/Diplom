@@ -47,7 +47,7 @@
 
 
 <script>
-import ShaderWindow from "@/pages/NewPage/ShaderWindow.vue";
+import ShaderWindow from "@/components/ShaderWindow.vue";
 import funnel from "@/shaders/fragment.js";
 import mandelbrot from "@/shaders/mandelbrot.js"
 import tonnel from "@/shaders/tonnel.js"
@@ -55,7 +55,6 @@ import voronoi from "@/shaders/voronoi.js"
 import fractal from "@/shaders/fractal.js"
 
 export default {
-  components: {ShaderWindow},
   data() {
     return {
       bestShader: mandelbrot,
@@ -80,9 +79,11 @@ export default {
   justify-content: space-between;
   margin: 10px;
 }
-.best-shader-window{
+
+.best-shader-window {
   cursor: pointer;
 }
+
 .half {
   flex: 1;
 }
@@ -114,7 +115,7 @@ export default {
   align-self: center;
 }
 
-h1{
+h1 {
   color: #282C34;
 }
 </style>

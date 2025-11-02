@@ -28,7 +28,7 @@
 
 <script>
 export default {
-  name: "AboutPage",
+  name: "about-page",
 };
 </script>
 

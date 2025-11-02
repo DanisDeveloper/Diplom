@@ -272,7 +272,7 @@ import ForkIcon from "@/components/Icons/ForkIcon.vue";
 import SaveIcon from "@/components/Icons/SaveIcon.vue";
 import CheckIcon from "@/components/Icons/CheckIcon.vue";
 import CodeIcon from "@/components/Icons/CodeIcon.vue";
-import ShaderWindow from "@/pages/NewPage/ShaderWindow.vue";
+import ShaderWindow from "@/components/ShaderWindow.vue";
 import Pagination from "@/components/Pagination.vue";
 import truncate from "../utils/truncate.js";
 import ForbiddenIcon from "@/components/Icons/ForbiddenIcon.vue";
@@ -286,18 +286,6 @@ import formatDate from "@/utils/formatDate.js";
 import {formatDateTime} from "@/utils/formatDateTime.js";
 
 export default {
-  components: {
-    Error,
-    StatusCodeIcon,
-    Toast,
-    Spinner,
-    Pagination,
-    ShaderWindow,
-    CodeIcon,
-    CheckIcon,
-    SaveIcon,
-    ForkIcon, DialogWindow, CommentIcon, LikeIcon, ShareIcon, DeleteIcon, UnhideIcon, HideIcon, Loader
-  },
   data() {
     return {
       isError: false,

@@ -9,7 +9,6 @@ import Error from "@/components/Error.vue";
 
 export default {
   name: "Empty",
-  components: {Error, StatusCodeIcon, ForbiddenIcon}
 }
 </script>
 
