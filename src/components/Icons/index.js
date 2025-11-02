@@ -19,6 +19,7 @@ import StatusCodeIcon from "@/components/Icons/StatusCodeIcon.vue";
 import UnhideIcon from "@/components/Icons/UnhideIcon.vue";
 import UpIcon from "@/components/Icons/UpIcon.vue";
 import UploadIcon from "@/components/Icons/UploadIcon.vue";
+import ViewIcon from "@/components/Icons/ViewIcon.vue";
 
 export default [
     CancelIcon,
@@ -41,5 +42,6 @@ export default [
     StatusCodeIcon,
     UnhideIcon,
     UpIcon,
-    UploadIcon
+    UploadIcon,
+    ViewIcon
 ]
