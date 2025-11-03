@@ -8,11 +8,11 @@
       alt="avatar">
   <icon-button v-if="this.$store.state.user.id === comment.user.id" class="comment__hide">
     <spinner v-if="isSavingHiddenState" disabled/>
-    <unhide-icon
+    <hide-icon
         v-else-if="comment.hidden"
         v-tooltip="'Unhide comment'"
         @click="handleHideButton(comment, index)"/>
-    <hide-icon
+    <unhide-icon
         v-else
         v-tooltip="'Hide comment'"
         @click="handleHideButton(comment, index)"/>
@@ -26,6 +26,7 @@
   <div class="comment__content">
     {{ !comment.hidden ? comment.text : "Comment was hidden" }}
   </div>
+  <hr v-if="!isLast">
 </template>
 
 
@@ -45,6 +46,8 @@ export default {
     }
   },
   props: {
+    isFirst: Boolean,
+    isLast: Boolean,
     comment: {
       type: Object,
       required: true
@@ -116,4 +119,9 @@ export default {
   border-color: lightgray;
 }
 
+hr {
+  margin: 10px 0;
+  width: 100%;
+  color: lightgray;
+}
 </style>

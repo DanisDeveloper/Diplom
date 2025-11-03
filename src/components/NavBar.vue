@@ -105,7 +105,6 @@ export default {
 .nav-bar__other-btn:hover {
   color: white;
   border: 1px solid lightgray;
-
 }
 
 .nav-bar__label {

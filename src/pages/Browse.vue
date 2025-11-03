@@ -5,7 +5,7 @@
   </div>
   <div v-else>
     <div class="header">
-      <sort-radio-buttons
+      <radio-buttons
           v-model="this.sortOption"
           :options="this.sortOptions"
       />
@@ -41,13 +41,13 @@
             </span>
           </div>
           <div class="shader-window-info__stats">
-            <view-icon class="like-icon" :width="20" :height="20" :color="'#282C34'"></view-icon>
+            <view-icon v-tooltip="'Views'" class="like-icon" :width="20" :height="20" :color="'#282C34'"></view-icon>
             {{ shader.views }}
 
-            <like-icon class="like-icon" :width="16" :height="16" :color="'#282C34'"></like-icon>
+            <like-icon v-tooltip="'Likes'" class="like-icon" :width="16" :height="16" :color="'#282C34'"></like-icon>
             {{ shader.likes }}
 
-            <comment-icon class="comment-icon" :width="16" :height="16" :color="'#282C34'"></comment-icon>
+            <comment-icon v-tooltip="'Comments'" class="comment-icon" :width="16" :height="16" :color="'#282C34'"></comment-icon>
             {{ shader.comments }}
           </div>
         </div>

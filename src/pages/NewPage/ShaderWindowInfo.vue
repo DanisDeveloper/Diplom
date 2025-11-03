@@ -1,20 +1,25 @@
 <template>
   <div class="shader-info">
-    <div class="shader-info__component"><strong>Frame:</strong> {{ this.frame }}</div>
-    <div class="shader-info__component"><strong>Time:</strong> {{ accumulatedTime.toFixed(2) }}</div>
-    <div class="shader-info__component"><strong>Resolution:</strong> {{ canvasWidth }}x{{ canvasHeight }}</div>
+    <div class="shader-info__component">
+      <timer-icon v-tooltip="'Time'"/>
+      {{ accumulatedTime.toFixed(2) }}
+    </div>
+    <div class="shader-info__component">
+      <resolution-icon v-tooltip="'Resolution'"/>
+      {{ canvasWidth }}x{{ canvasHeight }}
+    </div>
   </div>
 
 </template>
 
 <script>
+import TimerIcon from "@/components/Icons/TimerIcon.vue";
+import ResolutionIcon from "@/components/Icons/ResolutionIcon.vue";
+
 export default {
   name: "shader-window-info",
+  components: {ResolutionIcon, TimerIcon},
   props: {
-    frame: {
-      type: Number,
-      required: true,
-    },
     accumulatedTime: {
       type: Number,
       required: true,
@@ -33,14 +38,16 @@ export default {
 
 
 <style scoped>
-.shader-info__component {
-  display: inline-block;
-  margin-right: 10px;
-  color: lightgray;
-}
-
 .shader-info {
   display: flex;
-  justify-content: flex-start;
+  gap: 15px;
+}
+
+.shader-info__component {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: lightgray;
+  white-space: nowrap;
 }
 </style>

@@ -19,7 +19,6 @@ export default {
   border-radius: 8px;
   border: 1px solid transparent;
   cursor: pointer;
-  margin: 0 5px;
   display: flex;
   align-items: center;
   justify-content: center;

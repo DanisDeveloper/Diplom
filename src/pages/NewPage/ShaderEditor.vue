@@ -159,15 +159,6 @@ class ErrorWidget extends WidgetType {
 </script>
 
 <style>
-/* Глобальные стили (убрать scoped!) */
-.editor-container {
-  flex: 1;
-  height: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  margin: 10px;
-}
-
 .cm-error-line {
   background-color: rgba(255, 0, 0, 0.1);
 }
@@ -179,5 +170,19 @@ class ErrorWidget extends WidgetType {
   border-left: 3px solid #f44747;
   font-family: monospace;
   font-size: 0.9em;
+}
+
+.editor-container {
+  flex: 1;
+  max-height: 70vh;
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 0 10px;
+}
+
+.editor-container .cm-editor {
+  max-height: 70vh;
+  overflow-y: auto;
 }
 </style>

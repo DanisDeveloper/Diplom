@@ -1,5 +1,5 @@
 <template>
-  <svg :width="width" :height="height" viewBox="0 0 24 24" :fill="color" xmlns="http://www.w3.org/2000/svg">
+  <svg :width="width" :height="height" viewBox="-2 -2 28 28" :fill="color" xmlns="http://www.w3.org/2000/svg">
     <path
         fill-rule="evenodd"
         clip-rule="evenodd"
@@ -19,11 +19,11 @@ export default {
     },
     width: {
       type: Number,
-      default: 28
+      default: 32
     },
     height: {
       type: Number,
-      default: 28
+      default: 32
     }
   }
 };
