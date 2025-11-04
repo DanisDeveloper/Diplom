@@ -1,6 +1,6 @@
 <template>
   <div class="comments-area-wrapper">
-    <h3>Comments ({{ this.comments.length }})</h3>
+    <h3 v-if="this.shaderId">Comments ({{ this.comments.length }})</h3>
     <div v-if="shaderId !== 0 || this.comments.length > 0" class="comments-area">
       <div class="comment-post" :class="{'comments-empty' : comments.length === 0}">
       <textarea

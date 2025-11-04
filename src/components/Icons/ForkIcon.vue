@@ -1,5 +1,5 @@
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" id="git-fork" :width="width" :height="height">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="28 28 200 200" id="git-fork" :width="width" :height="height">
     <rect width="256" height="256" fill="none"></rect>
     <circle cx="128" cy="188" r="28" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></circle>
     <circle cx="188" cy="67.998" r="28" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="16"></circle>
@@ -21,11 +21,11 @@ export default {
     },
     width: {
       type: Number,
-      default: 34
+      default: 28
     },
     height: {
       type: Number,
-      default: 34
+      default: 28
     }
   }
 };

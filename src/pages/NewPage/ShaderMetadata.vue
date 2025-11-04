@@ -18,7 +18,7 @@
               in {{ formatDate(this.shader.createdAt) }}
             </span>
     </div>
-    <div class="shader-metadata__stats">
+    <div v-if="this.shader.id" class="shader-metadata__stats">
       <view-icon v-tooltip="'Views'" :width="16" :height="16" :color="'#282C34'"/>
       {{ shader.views }}
 

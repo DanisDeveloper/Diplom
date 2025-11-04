@@ -10,15 +10,17 @@
       >
         {{ this.$store.state.user.name }}
       </div>
-      <button class="nav-bar__other-btn" @click="this.$router.push('/browse')">Browse</button>
+      <button class="nav-bar__other-btn" @click="this.$router.push('/gallery')">Gallery</button>
       <button class="nav-bar__other-btn" @click="this.$router.push('/new')">New</button>
+<!--      TODO сделать иконку аватара -->
       <button class="nav-bar__other-btn" @click="authHandler()">{{ this.authText }}</button>
+      <button class="nav-bar__other-btn" @click="this.$router.push('/about')">About</button>
     </div>
   </div>
 </template>
 
 <script>
-import {checkAuth} from "@/auth/checkAuth.js";
+import {checkAuth} from "@/utils/checkAuth.js";
 import Error from "@/components/Error.vue";
 import toast from "@/components/Toast.vue";
 
@@ -67,10 +69,19 @@ export default {
 
 <style scoped>
 .nav-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3.5rem;
+  background: rgba(40, 44, 52, 0.9);
+  backdrop-filter: blur(6px);
   display: flex;
-  background: rgb(40, 44, 52);
-  min-height: 50px;
+  align-items: center;
+  padding: 0 2rem;
+  z-index: 1000;
 }
+
 
 .nav-bar__items {
   margin-left: auto;

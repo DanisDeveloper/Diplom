@@ -174,15 +174,14 @@ class ErrorWidget extends WidgetType {
 
 .editor-container {
   flex: 1;
-  max-height: 70vh;
+  max-height: 90vh;
   height: 100%;
   border-radius: 8px;
   overflow: hidden;
-  margin: 0 10px;
 }
 
 .editor-container .cm-editor {
-  max-height: 70vh;
+  max-height: 80vh;
   overflow-y: auto;
 }
 </style>

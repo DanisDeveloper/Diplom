@@ -79,7 +79,7 @@
 </template>
 
 <script>
-import {checkAuth} from "@/auth/checkAuth.js";
+import {checkAuth} from "@/utils/checkAuth.js";
 import Spinner from "@/components/Spinner.vue";
 
 export default {

@@ -43,6 +43,9 @@ export default {
   background: rgb(40, 44, 52);
   min-height: 50px;
   padding: 10px;
+  background: rgba(40, 44, 52, 0.9);
+  backdrop-filter: blur(6px);
+
 }
 
 .info {

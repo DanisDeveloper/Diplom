@@ -16,17 +16,16 @@
         <shader-metadata :shader="this.shader"/>
       </div>
       <div class="right-btns">
-        <button v-tooltip="isSavingShader? 'Saving shader' : 'Save shader'" class="icon-text-button"
-                v-if="this.$store.state.isAuth" @click="handleSaveButtonClick">
+        <gradient-button
+            v-tooltip="isSavingShader? 'Saving shader' : 'Save shader'"
+            v-if="this.$store.state.isAuth"
+            @click="handleSaveButtonClick">
           <spinner
               v-if="isSavingShader"
               v-tooltip="'Saving shader'"
               disabled/>
-          <save-icon
-              v-else
-              :color="'#282C34'"/>
-          Save
-        </button>
+          <span v-show="!isSavingShader">Save</span>
+        </gradient-button>
 
         <button @click="handleVisibilityButtonClick"
                 class="icon-text-button"
@@ -58,17 +57,19 @@
     </div>
     <div class="main">
       <div class="canvas-container">
-        <shader-window
-            class="shader-window"
-            ref="shaderWindow"
-            :code="this.shader.code"
-            @frameWatch="frameWatch"
-            @accumulatedTimeWatch="accumulatedTimeWatch"
-            @canvasWidthWatch="canvasWidthWatch"
-            @canvasHeightWatch="canvasHeightWatch"
-            @compileFailedWatch="compileFailedWatch"
-            @errorLogWatch="errorLogWatch"
-        />
+        <div class="shader-box">
+          <shader-window
+              class="shader-window"
+              ref="shaderWindow"
+              :code="this.shader.code"
+              @frameWatch="frameWatch"
+              @accumulatedTimeWatch="accumulatedTimeWatch"
+              @canvasWidthWatch="canvasWidthWatch"
+              @canvasHeightWatch="canvasHeightWatch"
+              @compileFailedWatch="compileFailedWatch"
+              @errorLogWatch="errorLogWatch"
+          />
+        </div>
         <div class="canvas-footer">
           <div class="shader-metainfo-controls">
             <div class="shader-window-manage-btn">
@@ -121,10 +122,12 @@ import ShaderComment from "@/pages/NewPage/ShaderComment.vue";
 import ShaderMetadata from "@/pages/NewPage/ShaderMetadata.vue";
 import CommentsArea from "@/pages/NewPage/CommentsArea.vue";
 import UnhideIcon from "@/components/Icons/UnhideIcon.vue";
+import GradientButton from "@/components/GradientButton.vue";
 
 
 export default {
   components: {
+    GradientButton,
     UnhideIcon,
     CommentsArea,
     ShaderMetadata,
@@ -433,12 +436,27 @@ export default {
 .main {
   display: flex;
   justify-content: space-between;
+  margin: 0 0.5em;
+  gap: 0.5em;
 }
 
 .canvas-container {
-  margin-left: 10px;
+  box-sizing: border-box;
   flex: 1;
   font-family: 'JetBrains Mono', monospace;
+}
+
+.shader-box {
+  width: 100%;
+  aspect-ratio: 1.4 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shader-box .shader-window {
+  width: 100%;
+  height: 100%;
 }
 
 .shader-editor {
@@ -456,7 +474,9 @@ export default {
 
 .right-btns {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 0.5em;
+  margin-left: 0.25rem;
 }
 
 .canvas-footer {
@@ -544,24 +564,20 @@ input, textarea {
   outline: none;
 }
 
-
 .icon-text-button {
+  height: fit-content;
   display: flex;
   align-items: center;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 0.2rem;
   background: transparent;
-  font-size: larger;
-  cursor: pointer;
-  color: #282c34;
-  transition: border 0.2s ease, color 0.2s ease;
   border: 1px solid transparent;
+  transition: all 0.3s ease;
+  border-radius: 8px;
   gap: 4px;
 }
-
-.icon-text-button:hover {
-  color: #282c34;
+.icon-text-button:hover{
   border: 1px solid #282c34;
+
 }
 
 </style>

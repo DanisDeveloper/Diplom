@@ -58,16 +58,8 @@
 
 
 <script>
-import ShaderWindow from "@/components/ShaderWindow.vue";
-import Loader from "@/components/Loader.vue";
-import LikeIcon from "@/components/Icons/LikeIcon.vue";
-import SortRadioButtons from "@/components/RadioButtons.vue";
-import CommentIcon from "@/components/Icons/CommentIcon.vue";
-import Pagination from "@/components/Pagination.vue";
 import truncate from "@/utils/truncate.js";
-import StatusCodeIcon from "@/components/Icons/StatusCodeIcon.vue";
 import Error from "@/components/Error.vue";
-import ViewIcon from "@/components/Icons/ViewIcon.vue";
 
 export default {
   data() {
@@ -96,7 +88,7 @@ export default {
   watch: {
     sortOption(newOption) {
       this.$router.push({
-        path: `/browse/`,
+        path: `/gallery/`,
         query: {
           page: this.page,
           page_size: this.pageSize,
@@ -106,7 +98,7 @@ export default {
     },
     page(newPage) {
       this.$router.push({
-        path: `/browse/`,
+        path: `/gallery/`,
         query: {
           page: newPage,
           pageSize: this.pageSize,

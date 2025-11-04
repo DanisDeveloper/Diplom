@@ -27,6 +27,7 @@ export default {
 
 html, body, .app {
   height: 100%;
+  min-height: 100vh;
 }
 
 html {
@@ -35,10 +36,11 @@ html {
   background-size: auto; /* Оригинальный размер */
 }
 
-.layout{
+.layout {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+
 }
 
 .app {
@@ -46,24 +48,25 @@ html {
   flex: 1;
   overflow: hidden;
   flex-direction: column;
+  padding-top: 3.5rem;
 }
 
 .v-tooltip {
   position: absolute;
   background: rgba(50, 50, 50, 0.95); /* чуть светлее, почти непрозрачный */
-  color: #fff;                         /* чистый белый текст */
-  padding: 10px 16px;                  /* больше внутренних отступов */
-  border-radius: 6px;                  /* более закруглённые углы */
-  font-size: 15px;                     /* чуть больше шрифт */
-  font-weight: 500;                    /* полужирный для контрастности */
+  color: #fff; /* чистый белый текст */
+  padding: 10px 16px; /* больше внутренних отступов */
+  border-radius: 6px; /* более закруглённые углы */
+  font-size: 15px; /* чуть больше шрифт */
+  font-weight: 500; /* полужирный для контрастности */
   white-space: nowrap;
   z-index: 1000;
   pointer-events: none;
-  opacity: 0;                          /* по умолчанию скрыта */
-  transform: translateY(4px);          /* чтобы анимация выглядела плавнее */
+  opacity: 0; /* по умолчанию скрыта */
+  transform: translateY(4px); /* чтобы анимация выглядела плавнее */
   transition: opacity 0.2s ease, transform 0.2s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* объёмная тень */
-  border: 1px solid rgba(255,255,255,0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Псевдо‑стрелочка сверху */
@@ -71,7 +74,7 @@ html {
   content: "";
   position: absolute;
   top: -6px;
-  left: 12px;   /* можно подкорректировать по центру элемента */
+  left: 12px; /* можно подкорректировать по центру элемента */
   border-width: 6px;
   border-style: solid;
   border-color: transparent transparent rgba(50, 50, 50, 0.95) transparent;

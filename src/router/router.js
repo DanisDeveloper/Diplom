@@ -1,24 +1,25 @@
 import NewShader from "@/pages/NewPage/NewShader.vue";
 import {createRouter, createWebHistory} from "vue-router"
 import About from "@/pages/About.vue";
-import Main from "@/pages/Main.vue";
 import Login from "@/pages/Login.vue";
 import Profile from "@/pages/Profile.vue";
-import Browse from "@/pages/Browse.vue";
+import Gallery from "@/pages/Gallery.vue";
 import Empty from "@/pages/Empty.vue";
+import ShowCase from "@/pages/ShowCase.vue";
 
 const routes = [
+
     {
         path: '/',
-        component: Main
+        component: ShowCase
     },
     {
         path: '/login',
         component: Login
     },
     {
-        path: '/browse',
-        component: Browse
+        path: '/gallery',
+        component: Gallery
     },
     {
         path: '/new',
@@ -46,7 +47,16 @@ const routes = [
 
 const router = createRouter({
     routes,
-    history: createWebHistory()
+    history: createWebHistory(),
+    scrollBehavior(to, from, savedPosition) {
+        // если пользователь использует "назад", вернуть сохранённую позицию
+        if (savedPosition) {
+            return savedPosition
+        } else {
+            // иначе перейти в начало страницы
+            return { top: 0 }
+        }
+    },
 })
 
 
