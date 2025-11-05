@@ -64,7 +64,7 @@
             </div>
           </transition-group>
 
-          <button class="submit-btn" :disabled="isLoading">
+          <button class=" gradient" :disabled="isLoading">
             <span v-if="!isLoading">{{ isLoginForm ? 'Sign in' : 'Sign up' }}</span>
             <spinner class="loading-spinner" v-else/>
           </button>
@@ -286,7 +286,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  overflow: hidden;
+  background: transparent;
 }
 
 .form-height-enter-active,

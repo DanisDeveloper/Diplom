@@ -617,6 +617,8 @@ export default {
   height: 240px;
   overflow: hidden;
   background: linear-gradient(135deg, #0d1b2a, #1b263b, #415a77, #0d1b2a);
+  background-size: 300% 300%;
+  animation: gradientMove 10s ease-in-out infinite;
 }
 
 .user-background img {
