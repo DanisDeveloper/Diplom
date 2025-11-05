@@ -3,8 +3,8 @@
     <button
         v-for="i in totalPages"
         :key="i"
-        class="page"
-        :class="{'active-page': i == this.page, 'dots': i === '...'}"
+        class="page gradient"
+        :class="{'selected': i == this.page, 'dots': i === '...'}"
         @click="typeof i === 'number' && handlePageClick(i)"
         :disabled="i === '...'"
     >
@@ -67,40 +67,11 @@ export default {
 </script>
 
 <style scoped>
-.page {
-  padding: 4px 8px;
-  margin: 0 4px;
-  border-radius: 8px;
-  background: transparent;
-  font-size: large;
-  cursor: pointer;
-  color: #282C34;
-  transition: all 0.3s ease;
-  border: 1px solid #282C34;
+.pagination{
+  display: flex;
+  gap: 0.5rem;
 }
-
-.page:hover {
-  color: lightgray;
-  background: #282C34;
-  transition: all 0.3s ease;
-}
-
-
-.active-page {
-  color: lightgray;
-  background: #282C34;
-}
-
-button.dots {
-  cursor: default;
-  background: transparent;
-  border: none;
-  color: #282C34;
-  margin: 0;
-}
-
-button.dots:hover {
-  background: transparent;
-  color: #282C34;
+.page{
+  padding: 0.7rem;
 }
 </style>

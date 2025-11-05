@@ -16,16 +16,14 @@
         <shader-metadata :shader="this.shader"/>
       </div>
       <div class="right-btns">
-        <gradient-button
+        <button
+            class="gradient"
             v-tooltip="isSavingShader? 'Saving shader' : 'Save shader'"
             v-if="this.$store.state.isAuth"
             @click="handleSaveButtonClick">
-          <spinner
-              v-if="isSavingShader"
-              v-tooltip="'Saving shader'"
-              disabled/>
+          <spinner v-if="isSavingShader" disabled/>
           <span v-show="!isSavingShader">Save</span>
-        </gradient-button>
+        </button>
 
         <button @click="handleVisibilityButtonClick"
                 class="icon-text-button"
@@ -51,7 +49,8 @@
           />
         </button>
         <button v-tooltip="'Fork shader'" class="icon-text-button" v-if="this.shader.id" @click="handleForkButtonClick">
-          <fork-icon :color="'#282C34'"/>
+          <spinner v-if="isForkingShader" disabled/>
+          <fork-icon v-else :color="'#282C34'"/>
         </button>
       </div>
     </div>
@@ -122,12 +121,10 @@ import ShaderComment from "@/pages/NewPage/ShaderComment.vue";
 import ShaderMetadata from "@/pages/NewPage/ShaderMetadata.vue";
 import CommentsArea from "@/pages/NewPage/CommentsArea.vue";
 import UnhideIcon from "@/components/Icons/UnhideIcon.vue";
-import GradientButton from "@/components/GradientButton.vue";
 
 
 export default {
   components: {
-    GradientButton,
     UnhideIcon,
     CommentsArea,
     ShaderMetadata,
@@ -175,6 +172,7 @@ export default {
 
       isChangingVisibility: false,
       isSavingShader: false,
+      isForkingShader: false,
       isLoadingLike: false,
       isLoading: false,
       isError: false,
@@ -335,7 +333,7 @@ export default {
     },
     async forkShader(requestBody) {
       try {
-        this.isSavingShader = true;
+        this.isForkingShader = true;
 
         const response = await fetch(`${this.API_URL}/shaders`, {
           method: "POST",
@@ -353,7 +351,7 @@ export default {
       } catch (error) {
         this.$refs.errorToast.show("Error saving shader");
       } finally {
-        this.isSavingShader = false;
+        this.isForkingShader = false;
       }
     }
   },
@@ -575,9 +573,10 @@ input, textarea {
   border-radius: 8px;
   gap: 4px;
 }
+
 .icon-text-button:hover{
   border: 1px solid #282c34;
-
+  transform: scale(1.1) translateY(-2px);
 }
 
 </style>

@@ -4,6 +4,7 @@ import router from "@/router/router.js";
 import store from "@/store/index.js";
 import VTooltip from "@/directives/VTooltip.js";
 import components from "@/components/index.js";
+import '@/main.css'
 
 const app = createApp(App)
 

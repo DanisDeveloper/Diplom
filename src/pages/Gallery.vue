@@ -12,10 +12,7 @@
       <pagination v-model:page="page" :pages="totalPages" class="pagination"/>
     </div>
     <div class="shader-grid">
-      <div
-          v-for="(shader, index) in shaders"
-          class="shader-cell"
-      >
+      <div v-for="(shader, index) in shaders" class="shader-cell">
         <shader-window
             class="shader-window"
             ref="shaders"
@@ -162,7 +159,8 @@ export default {
   transition: all 0.3s ease;
   background: transparent;
   border-radius: 10px;
-}
+  aspect-ratio: 14 / 9;
+  }
 
 .shader-window:hover {
   transform: scale(1.03);

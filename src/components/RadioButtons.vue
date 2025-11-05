@@ -3,8 +3,8 @@
     <button
         v-for="option in options"
         :key="option"
-        class="option-button"
-        :class="{ active: modelValue === option }"
+        class="gradient"
+        :class="{ selected: modelValue === option }"
         @click="handleButtonClick(option)"
     >
       {{ option }}
@@ -35,22 +35,9 @@ export default {
 </script>
 
 <style scoped>
-.option-button {
-  padding: 4px 8px;
-  margin: 0 4px;
-  border-radius: 8px;
-  background: transparent;
-  font-size: large;
-  cursor: pointer;
-  color: #282C34;
-  transition: all 0.3s ease;
-  border: 1px solid #282C34;
+.wrapper{
+  display: flex;
+  gap: 8px;
 }
-
-.option-button.active, .option-button:hover {
-  background: #282C34;
-  color: lightgray;
-}
-
 
 </style>

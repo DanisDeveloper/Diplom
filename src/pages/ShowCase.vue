@@ -14,15 +14,17 @@
       </div>
       <div class="text">
         <h2>Build your own shaders</h2>
-        <p>Create stunning visual effects by writing your own shaders. Experiment with colors, shapes, and animations to bring your ideas to life.</p>
-        <gradient-button @click="this.$router.push('/new')">Build</gradient-button>
+        <p>Create stunning visual effects by writing your own shaders. Experiment with colors, shapes, and animations to
+          bring your ideas to life.</p>
+        <button class="gradient" @click="this.$router.push('/new')">Build</button>
       </div>
     </section>
     <section class="section reverse">
       <div class="text">
         <h2>Explore gallery</h2>
-        <p>Discover amazing shaders created by the community. Browse through interactive visuals and get inspired for your next project.</p>
-        <gradient-button @click="this.$router.push('/gallery')">Explore</gradient-button>
+        <p>Discover amazing shaders created by the community. Browse through interactive visuals and get inspired for
+          your next project.</p>
+        <button class="gradient" @click="this.$router.push('/gallery')">Explore</button>
       </div>
       <div class="shader">
         <shader-window
@@ -50,8 +52,9 @@
       </div>
       <div class="text">
         <h2>Get started</h2>
-        <p>Start your journey in the world of shaders. No experience required — just dive in and create beautiful procedural art.</p>
-        <gradient-button @click="this.$router.push('/login')">Get started</gradient-button>
+        <p>Start your journey in the world of shaders. No experience required — just dive in and create beautiful
+          procedural art.</p>
+        <button class="gradient" @click="this.$router.push('/login')">Get started</button>
       </div>
     </section>
   </div>
@@ -64,13 +67,11 @@ import voronoi from "@/shaders/voronoi.js"
 import fragment from "@/shaders/fragment.js"
 import {gsap} from "gsap";
 import {ScrollTrigger} from "gsap/ScrollTrigger";
-import GradientButton from "@/components/GradientButton.vue";
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default {
   name: "ShowCase",
-  components: {GradientButton},
   data() {
     return {
       shaders: [fragment, voronoi, tonnel],

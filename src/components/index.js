@@ -23,5 +23,5 @@ export default [
     RadioButtons,
     ShaderWindow,
     Spinner,
-    Toast
+    Toast,
 ]
