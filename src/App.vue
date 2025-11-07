@@ -1,8 +1,15 @@
 <template>
   <div class="layout">
     <nav-bar></nav-bar>
-    <div class="app">
-      <router-view :key="$route.fullPath"></router-view>
+    <div class="content">
+
+      <div class="app">
+        <div v-if="loadingOrError" class="full-center">
+          <loader v-if="this.$store.state.ui.isLoadingPage"></loader>
+          <error v-else-if="$store.state.ui.errorStatus" :status="$store.state.ui.errorStatus"></error>
+        </div>
+        <router-view v-show="!loadingOrError" :key="$route.params.id"></router-view>
+      </div>
     </div>
     <footer-info></footer-info>
   </div>
@@ -13,7 +20,12 @@ import FooterInfo from "@/components/AppFooter.vue";
 import NavBar from "@/components/NavBar.vue";
 
 export default {
-  components: {NavBar, FooterInfo}
+  components: {NavBar, FooterInfo},
+  computed:{
+    loadingOrError(){
+      return this.$store.state.ui.isLoadingPage || this.$store.state.ui.errorStatus
+    }
+  }
 }
 </script>
 
@@ -25,7 +37,7 @@ export default {
   box-sizing: border-box;
 }
 
-html, body, .app {
+html, body, .app, .content {
   height: 100%;
   min-height: 100vh;
 }
@@ -53,19 +65,19 @@ html {
 
 .v-tooltip {
   position: absolute;
-  background: rgba(50, 50, 50, 0.95); /* чуть светлее, почти непрозрачный */
-  color: #fff; /* чистый белый текст */
-  padding: 10px 16px; /* больше внутренних отступов */
-  border-radius: 6px; /* более закруглённые углы */
-  font-size: 15px; /* чуть больше шрифт */
-  font-weight: 500; /* полужирный для контрастности */
+  background: rgba(50, 50, 50, 0.95);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
   white-space: nowrap;
   z-index: 1000;
   pointer-events: none;
-  opacity: 0; /* по умолчанию скрыта */
-  transform: translateY(4px); /* чтобы анимация выглядела плавнее */
+  opacity: 0;
+  transform: translateY(4px);
   transition: opacity 0.2s ease, transform 0.2s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); /* объёмная тень */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
@@ -74,7 +86,7 @@ html {
   content: "";
   position: absolute;
   top: -6px;
-  left: 12px; /* можно подкорректировать по центру элемента */
+  left: 12px;
   border-width: 6px;
   border-style: solid;
   border-color: transparent transparent rgba(50, 50, 50, 0.95) transparent;
@@ -95,4 +107,18 @@ html {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.full-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 </style>

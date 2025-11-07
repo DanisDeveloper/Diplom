@@ -4,11 +4,11 @@
     <button class="nav-bar__main-btn" @click="this.$router.push('/')">FragmentVerse</button>
     <div class="nav-bar__items">
       <div
-          v-show="this.$store.state.isAuth"
+          v-show="this.$store.state.auth.isAuth"
           class="nav-bar__label"
-          @click="this.$router.push(`/profile/${this.$store.state.user.name}`)"
+          @click="this.$router.push(`/profile/${this.$store.state.auth.user.name}`)"
       >
-        {{ this.$store.state.user.name }}
+        {{ this.$store.state.auth.user.name }}
       </div>
       <button class="nav-bar__other-btn" @click="this.$router.push('/gallery')">Gallery</button>
       <button class="nav-bar__other-btn" @click="this.$router.push('/new')">New</button>
@@ -35,12 +35,12 @@ export default {
   },
   computed: {
     authText() {
-      return this.$store.state.isAuth ? 'Log out' : 'Log in';
+      return this.$store.state.auth.isAuth ? 'Log out' : 'Log in';
     }
   },
   methods: {
     authHandler() {
-      if (this.$store.state.isAuth) {
+      if (this.$store.state.auth.isAuth) {
         fetch(this.API_URL + '/auth/logout', {
               method: "POST",
               headers: {"Content-Type": "application/json"},
@@ -48,7 +48,7 @@ export default {
             }
         ).then(response => {
           if (response.ok) {
-            this.$store.commit('logout');
+            this.$store.commit('auth/logout');
             this.$router.push('/');
           } else {
             this.$refs.errorToast.show("Error while logging out")

@@ -1,64 +1,58 @@
 <template>
-  <loader v-if="isLoading"/>
-  <div v-else-if="this.isError" class="error-page-block">
-    <error :status="this.errorStatus"></error>
+  <div class="header">
+    <radio-buttons
+        v-model="this.sortOption"
+        :options="this.sortOptions"
+    />
+    <pagination v-model:page="page" :pages="totalPages" class="pagination"/>
   </div>
-  <div v-else>
-    <div class="header">
-      <radio-buttons
-          v-model="this.sortOption"
-          :options="this.sortOptions"
+  <div class="shader-grid">
+    <div v-for="(shader, index) in shaders" class="shader-cell">
+      <shader-window
+          class="shader-window"
+          ref="shaders"
+          :key="index"
+          :code="shader.code"
+          :initial-pause="true"
+          @mouseenter="handleMouseEnter(index)"
+          @mouseleave="handleMouseLeave(index)"
+          :disable-mouse-down-event="true"
+          :disable-mouse-up-event="true"
+          :disable-mouse-move-event="true"
+          @click="$router.push(`/new/${shader.id}`)"
       />
-      <pagination v-model:page="page" :pages="totalPages" class="pagination"/>
-    </div>
-    <div class="shader-grid">
-      <div v-for="(shader, index) in shaders" class="shader-cell">
-        <shader-window
-            class="shader-window"
-            ref="shaders"
-            :key="index"
-            :code="shader.code"
-            :initial-pause="true"
-            @mouseenter="handleMouseEnter(index)"
-            @mouseleave="handleMouseLeave(index)"
-            :disable-mouse-down-event="true"
-            :disable-mouse-up-event="true"
-            :disable-mouse-move-event="true"
-            @click="$router.push(`/new/${shader.id}`)"
-        />
-        <div class="shader-window-info">
-          <div class="shader-window__text">
-            <span>{{ truncate(shader.title) }}</span>
-            <span>&nbsp;by&nbsp;</span>
-            <span
-                class="link"
-                @click="$router.push(`/profile/${shader.user.name}`)"
-            >
+      <div class="shader-window-info">
+        <div class="shader-window__text">
+          <span>{{ truncate(shader.title) }}</span>
+          <span>&nbsp;by&nbsp;</span>
+          <span
+              class="link"
+              @click="$router.push(`/profile/${shader.user.name}`)"
+          >
               {{ truncate(shader.user.name) }}
             </span>
-          </div>
-          <div class="shader-window-info__stats">
-            <view-icon v-tooltip="`${shader.views} Views`"
-                       class="like-icon"
-                       :width="20"
-                       :height="20"
-                       :color="'#282C34'"/>
-            {{ shader.views }}
+        </div>
+        <div class="shader-window-info__stats">
+          <view-icon v-tooltip="`${shader.views} Views`"
+                     class="like-icon"
+                     :width="20"
+                     :height="20"
+                     :color="'#282C34'"/>
+          {{ shader.views }}
 
-            <like-icon v-tooltip="`${shader.likes} Likes`"
-                       class="like-icon"
-                       :width="16"
-                       :height="16"
-                       :color="'#282C34'"/>
-            {{ shader.likes }}
+          <like-icon v-tooltip="`${shader.likes} Likes`"
+                     class="like-icon"
+                     :width="16"
+                     :height="16"
+                     :color="'#282C34'"/>
+          {{ shader.likes }}
 
-            <comment-icon v-tooltip="`${shader.comments} Comments`"
-                          class="comment-icon"
-                          :width="16"
-                          :height="16"
-                          :color="'#282C34'"/>
-            {{ shader.comments }}
-          </div>
+          <comment-icon v-tooltip="`${shader.comments} Comments`"
+                        class="comment-icon"
+                        :width="16"
+                        :height="16"
+                        :color="'#282C34'"/>
+          {{ shader.comments }}
         </div>
       </div>
     </div>
@@ -73,8 +67,6 @@ import Error from "@/components/Error.vue";
 export default {
   data() {
     return {
-      isError: false,
-      errorStatus: 0,
       isLoading: false,
       totalPages: null,
       page: this.$route.query.page || 1,
@@ -117,7 +109,7 @@ export default {
     }
   },
   mounted() {
-    this.isLoading = true;
+    this.$store.commit("ui/setLoading", true);
     const endpoint = `${this.API_URL}/shaders?page=${this.page - 1}&page_size=${this.pageSize}&sort_option=${this.sortOption}`;
     fetch(endpoint, {
       method: "GET",
@@ -133,10 +125,9 @@ export default {
     }).then(shaders => {
       this.shaders = shaders;
     }).catch(error => {
-      this.errorStatus = error.status;
-      this.isError = true;
+      this.$store.commit("ui/setError", error.status);
     }).finally(() => {
-      this.isLoading = false;
+      this.$store.commit("ui/setLoading", false);
     })
   }
 }
@@ -206,13 +197,4 @@ export default {
   padding-bottom: 2px;
 }
 
-.error-page-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 250px;
-  margin-top: 100px;
-  color: #282C34;
-}
 </style>

@@ -6,7 +6,7 @@
       :src="`${this.PUBLIC_API_URL}/${comment.user.avatarUrl ? comment.user.avatarUrl : 'images/avatar.png'}`"
       @click="$router.push(`/profile/${comment.user.name}`)"
       alt="avatar">
-  <icon-button v-if="this.$store.state.user.id === comment.user.id" class="comment__hide">
+  <icon-button v-if="this.$store.state.auth.user.id === comment.user.id" class="comment__hide">
     <spinner v-if="isSavingHiddenState" disabled/>
     <hide-icon
         v-else-if="comment.hidden"

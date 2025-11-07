@@ -1,18 +1,10 @@
 import {createStore} from "vuex";
-
+import ui from "@/store/modules/ui.js";
+import auth from "@/store/modules/auth.js";
 export default createStore({
-    state: {
-        isAuth: false,
-        user: {},
+    modules:{
+        ui,
+        auth
     },
-    mutations: {
-        login(state, user) {
-            state.isAuth = true;
-            state.user = user;
-        },
-        logout(state) {
-            state.isAuth = false;
-            state.user = {};
-        }
-    }
+
 })

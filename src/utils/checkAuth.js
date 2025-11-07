@@ -11,10 +11,10 @@ export async function checkAuth(store) {
 
         const user = await response.json();
         if (user !== null) {
-            store.commit('login', user)
+            store.commit('auth/login', user)
         }
     } catch (error) {
         console.error('Ошибка проверки авторизации:', error);
-        store.commit('logout')
+        store.commit('auth/logout')
     }
 }

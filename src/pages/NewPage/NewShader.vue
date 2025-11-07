@@ -1,112 +1,108 @@
 <template>
-  <loader v-if="this.isLoading"></loader>
-  <error v-else-if="this.isError" :status="this.errorStatus" class="error-page-block"></error>
-  <div v-else>
-    <toast ref="errorToast"/>
-    <toast :background="'#282C34'" ref="generalToast"/>
-    <div class="shader-navigation-bar">
-      <div class="shader-title-area">
-        <input
-            :disabled="!shaderOwnerIsMe && this.shader.id"
-            maxlength="30"
-            :class="{'disabled-input': !shaderOwnerIsMe && this.shader.id}"
-            class="shader-title"
-            placeholder="Title"
-            v-model.trim="this.shader.title">
-        <shader-metadata :shader="this.shader"/>
-      </div>
-      <div class="right-btns">
-        <button
-            class="gradient"
-            v-tooltip="isSavingShader? 'Saving shader' : 'Save shader'"
-            v-if="this.$store.state.isAuth"
-            @click="handleSaveButtonClick">
-          <spinner v-if="isSavingShader" disabled/>
-          <span v-show="!isSavingShader">Save</span>
-        </button>
+  <toast ref="errorToast"/>
+  <toast :background="'#282C34'" ref="generalToast"/>
+  <div class="shader-navigation-bar">
+    <div class="shader-title-area">
+      <input
+          :disabled="!shaderOwnerIsMe && this.shader.id"
+          maxlength="30"
+          :class="{'disabled-input': !shaderOwnerIsMe && this.shader.id}"
+          class="shader-title"
+          placeholder="Title"
+          v-model.trim="this.shader.title">
+      <shader-metadata :shader="this.shader"/>
+    </div>
+    <div class="right-btns">
+      <button
+          class="gradient"
+          v-tooltip="isSavingShader? 'Saving shader' : 'Save shader'"
+          v-if="this.$store.state.auth.isAuth"
+          @click="handleSaveButtonClick">
+        <spinner v-if="isSavingShader" disabled/>
+        <span v-show="!isSavingShader">Save</span>
+      </button>
 
-        <button @click="handleVisibilityButtonClick"
-                class="icon-text-button"
-                v-tooltip="this.shader.visibility ? 'Make shader private' : 'Make shader public'"
-                v-if="this.$store.state.isAuth && shaderOwnerIsMe">
-          <spinner v-if="isChangingVisibility" disabled/>
-          <unhide-icon v-else-if="this.shader.visibility" :color="'#282C34'"/>
-          <hide-icon
-              v-else
-              :disabled="isChangingVisibility"
-              :color="'#282C34'"
-          />
-        </button>
-        <button @click="handleLikeButtonClick"
-                class="icon-text-button"
-                v-tooltip="isLiked ? 'Unlike shader' : 'Like shader'"
-                v-if="this.$store.state.isAuth && this.shader.id">
-          <spinner v-if="isLoadingLike" disabled/>
-          <like-icon
-              v-else
-              :disabled="isLoadingLike"
-              :color="isLiked ? '#f44336' : '#282C34'"
-          />
-        </button>
-        <button v-tooltip="'Fork shader'" class="icon-text-button" v-if="this.shader.id" @click="handleForkButtonClick">
-          <spinner v-if="isForkingShader" disabled/>
-          <fork-icon v-else :color="'#282C34'"/>
-        </button>
-      </div>
+      <button @click="handleVisibilityButtonClick"
+              class="icon-text-button"
+              v-tooltip="this.shader.visibility ? 'Make shader private' : 'Make shader public'"
+              v-if="this.$store.state.auth.isAuth && shaderOwnerIsMe">
+        <spinner v-if="isChangingVisibility" disabled/>
+        <unhide-icon v-else-if="this.shader.visibility" :color="'#282C34'"/>
+        <hide-icon
+            v-else
+            :disabled="isChangingVisibility"
+            :color="'#282C34'"
+        />
+      </button>
+      <button @click="handleLikeButtonClick"
+              class="icon-text-button"
+              v-tooltip="isLiked ? 'Unlike shader' : 'Like shader'"
+              v-if="this.$store.state.auth.isAuth && this.shader.id">
+        <spinner v-if="isLoadingLike" disabled/>
+        <like-icon
+            v-else
+            :disabled="isLoadingLike"
+            :color="isLiked ? '#f44336' : '#282C34'"
+        />
+      </button>
+      <button v-tooltip="'Fork shader'" class="icon-text-button" v-if="this.shader.id" @click="handleForkButtonClick">
+        <spinner v-if="isForkingShader" disabled/>
+        <fork-icon v-else :color="'#282C34'"/>
+      </button>
     </div>
-    <div class="main">
-      <div class="canvas-container">
-        <div class="shader-box">
-          <shader-window
-              class="shader-window"
-              ref="shaderWindow"
-              :code="this.shader.code"
-              @frameWatch="frameWatch"
-              @accumulatedTimeWatch="accumulatedTimeWatch"
-              @canvasWidthWatch="canvasWidthWatch"
-              @canvasHeightWatch="canvasHeightWatch"
-              @compileFailedWatch="compileFailedWatch"
-              @errorLogWatch="errorLogWatch"
-          />
-        </div>
-        <div class="canvas-footer">
-          <div class="shader-metainfo-controls">
-            <div class="shader-window-manage-btn">
-              <icon-button v-tooltip="'Upload shader'" :class="{'btn-border-error': compileFailed}"
-                           @click="uploadShader">
-                <upload-icon :color="compileFailed? '#f44336' : 'lightgrey'"/>
-              </icon-button>
-              <icon-button v-if="isPaused" v-tooltip="'Start shader'" @click="togglePause">
-                <play-icon/>
-              </icon-button>
-              <icon-button v-else v-tooltip="'Stop shader'" @click="togglePause">
-                <pause-icon/>
-              </icon-button>
-              <icon-button v-tooltip="'Reset time'" @click="resetTime">
-                <restart-icon/>
-              </icon-button>
-              <icon-button v-tooltip="'Expand screen'" @click="expandScreen">
-                <expand-icon/>
-              </icon-button>
-            </div>
-            <shader-window-info
-                class="shader-window-info"
-                :accumulated-time="this.accumulatedTime"
-                :canvas-height="this.canvasHeight"
-                :canvas-width="this.canvasWidth"/>
+  </div>
+  <div class="main">
+    <div class="canvas-container">
+      <div class="shader-box">
+        <shader-window
+            class="shader-window"
+            ref="shaderWindow"
+            :code="this.shader.code"
+            @frameWatch="frameWatch"
+            @accumulatedTimeWatch="accumulatedTimeWatch"
+            @canvasWidthWatch="canvasWidthWatch"
+            @canvasHeightWatch="canvasHeightWatch"
+            @compileFailedWatch="compileFailedWatch"
+            @errorLogWatch="errorLogWatch"
+        />
+      </div>
+      <div class="canvas-footer">
+        <div class="shader-metainfo-controls">
+          <div class="shader-window-manage-btn">
+            <icon-button v-tooltip="'Upload shader'" :class="{'btn-border-error': compileFailed}"
+                         @click="uploadShader">
+              <upload-icon :color="compileFailed? '#f44336' : 'lightgrey'"/>
+            </icon-button>
+            <icon-button v-if="isPaused" v-tooltip="'Start shader'" @click="togglePause">
+              <play-icon/>
+            </icon-button>
+            <icon-button v-else v-tooltip="'Stop shader'" @click="togglePause">
+              <pause-icon/>
+            </icon-button>
+            <icon-button v-tooltip="'Reset time'" @click="resetTime">
+              <restart-icon/>
+            </icon-button>
+            <icon-button v-tooltip="'Expand screen'" @click="expandScreen">
+              <expand-icon/>
+            </icon-button>
           </div>
+          <shader-window-info
+              class="shader-window-info"
+              :accumulated-time="this.accumulatedTime"
+              :canvas-height="this.canvasHeight"
+              :canvas-width="this.canvasWidth"/>
         </div>
-        <comments-area
-            v-if="this.$store.state.isAuth"
-            :comments="comments"
-            :shader-id="this.shader?.id || 0"/>
       </div>
-      <shader-editor
-          v-model="this.shader.code"
-          :errors="this.errorLog"
-          class="shader-editor">
-      </shader-editor>
+      <comments-area
+          v-if="this.$store.state.auth.isAuth"
+          :comments="comments"
+          :shader-id="this.shader?.id || 0"/>
     </div>
+    <shader-editor
+        v-model="this.shader.code"
+        :errors="this.errorLog"
+        class="shader-editor">
+    </shader-editor>
   </div>
 </template>
 
@@ -175,8 +171,6 @@ export default {
       isForkingShader: false,
       isLoadingLike: false,
       isLoading: false,
-      isError: false,
-      errorStatus: 0,
 
       API_URL: import.meta.env.VITE_API_URL,
       PUBLIC_API_URL: import.meta.env.VITE_PUBLIC_API_URL,
@@ -357,12 +351,12 @@ export default {
   },
   computed: {
     shaderOwnerIsMe() {
-      return this.shader.user?.id === this.$store.state.user.id
+      return this.shader.user?.id === this.$store.state.auth.user.id
     },
   },
   mounted() {
     if (!this.$route.params.id) return;
-    this.isLoading = true
+    this.$store.commit("ui/setLoading", true);
     // Загрузка шейдера
     fetch(`${this.API_URL}/shaders/${this.$route.params.id}`, {
       method: "GET",
@@ -377,14 +371,13 @@ export default {
       Object.assign(this.shader, shader);
       this.uploadShader();
     }).catch(error => {
-      this.isError = true
-      this.errorStatus = error.status
+      this.$store.commit("ui/setError", error.status);
     }).finally(() => {
-      this.isLoading = false
+      this.$store.commit("ui/setLoading", false);
     })
 
     // загрузка лайка
-    if (this.$store.state.isAuth) {
+    if (this.$store.state.auth.isAuth) {
       this.isLoadingLike = true
       fetch(`${this.API_URL}/shaders/${this.$route.params.id}/like`, {
         method: "GET",
@@ -544,15 +537,6 @@ hr {
   color: lightgray;
 }
 
-.error-page-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 250px;
-  margin-top: 100px;
-  color: #282C34;
-}
 
 h1, h3 {
   color: #282C34;
@@ -574,7 +558,7 @@ input, textarea {
   gap: 4px;
 }
 
-.icon-text-button:hover{
+.icon-text-button:hover {
   border: 1px solid #282c34;
   transform: scale(1.1) translateY(-2px);
 }

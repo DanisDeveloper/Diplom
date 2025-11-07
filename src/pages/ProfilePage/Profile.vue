@@ -1,72 +1,67 @@
 <template>
-  <loader v-if="this.isLoading"></loader>
-  <div v-else-if="this.isError" class="error-page-block">
-    <error :status="this.errorStatus"></error>
-  </div>
-  <div v-else>
-    <toast ref="generalToast" :background="'#282C34'"></toast>
-    <toast ref="errorToast"></toast>
-    <dialog-window v-model:show="this.showShaderDeleteDialog">
-      <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingShader"></loader>
-      <div v-else>
-        <h2 style="text-align: center">Delete this shader?</h2>
-        <div class="dialog-window__buttons">
-          <button class="dialog-btn action-btn" @click="this.showShaderDeleteDialog = false">Cancel</button>
-          <button class="dialog-btn action-btn" @click="deleteShader">Delete</button>
-        </div>
+  <toast ref="generalToast" :background="'#282C34'"></toast>
+  <toast ref="errorToast"></toast>
+  <dialog-window v-model:show="this.showShaderDeleteDialog">
+    <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingShader"></loader>
+    <div v-else>
+      <h2 style="text-align: center">Delete this shader?</h2>
+      <div class="dialog-window__buttons">
+        <button class="dialog-btn action-btn" @click="this.showShaderDeleteDialog = false">Cancel</button>
+        <button class="dialog-btn action-btn" @click="deleteShader">Delete</button>
       </div>
-    </dialog-window>
-    <dialog-window v-model:show="this.showAvatarDeleteDialog">
-      <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingAvatar"></loader>
-      <div v-else>
-        <h2 style="text-align: center">Delete avatar?</h2>
-        <div class="dialog-window__buttons">
-          <button class="dialog-btn action-btn" @click="this.showAvatarDeleteDialog = false">Cancel</button>
-          <button class="dialog-btn action-btn" @click="deleteAvatar">Delete</button>
-        </div>
+    </div>
+  </dialog-window>
+  <dialog-window v-model:show="this.showAvatarDeleteDialog">
+    <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingAvatar"></loader>
+    <div v-else>
+      <h2 style="text-align: center">Delete avatar?</h2>
+      <div class="dialog-window__buttons">
+        <button class="dialog-btn action-btn" @click="this.showAvatarDeleteDialog = false">Cancel</button>
+        <button class="dialog-btn action-btn" @click="deleteAvatar">Delete</button>
       </div>
-    </dialog-window>
-    <div class="user-wrapper">
-      <div class="user-background">
+    </div>
+  </dialog-window>
+  <div class="user-wrapper">
+    <div class="user-background">
+      <img
+          :src="`${this.PUBLIC_API_URL}/images/${this.user.backgroundUrl}`"
+          alt=""
+      >
+      <input
+          style="display: none;"
+          v-if="this.isStoreUser"
+          type="file"
+          ref="backgroundInput"
+          accept="image/*"
+          @change="userImageLoadHandler($event, 'BACKGROUND')"
+      >
+      <div v-if="this.isStoreUser" class="cover-btns">
+        <button class="cover-btn left-btn" @click="triggerBackgroundInput">Change cover</button>
+        <button class="cover-btn right-btn" @click="handleClearBackground">Clear</button>
+      </div>
+
+    </div>
+    <div class="user-info-wrapper">
+      <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
         <img
-            :src="`${this.PUBLIC_API_URL}/images/${this.user.backgroundUrl}`"
-            alt=""
-        >
+            :src="`${this.PUBLIC_API_URL}/images/${this.user.avatarUrl || 'avatar.png'}`"
+            alt="avatar"
+            width="224"
+            height="224"
+            @click="triggerAvatarInput"
+        />
         <input
             style="display: none;"
             v-if="this.isStoreUser"
             type="file"
-            ref="backgroundInput"
+            ref="avatarInput"
             accept="image/*"
-            @change="userImageLoadHandler($event, 'BACKGROUND')"
+            @change="userImageLoadHandler($event, 'AVATAR')"
         >
-        <div v-if="this.isStoreUser" class="cover-btns">
-          <button class="cover-btn left-btn" @click="triggerBackgroundInput">Change cover</button>
-          <button class="cover-btn right-btn" @click="handleClearBackground">Clear</button>
-        </div>
-
       </div>
-      <div class="user-info-wrapper">
-        <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
-          <img
-              :src="`${this.PUBLIC_API_URL}/images/${this.user.avatarUrl || 'avatar.png'}`"
-              alt="avatar"
-              width="224"
-              height="224"
-              @click="triggerAvatarInput"
-          />
-          <input
-              style="display: none;"
-              v-if="this.isStoreUser"
-              type="file"
-              ref="avatarInput"
-              accept="image/*"
-              @change="userImageLoadHandler($event, 'AVATAR')"
-          >
-        </div>
-        <div class="user-info">
-          <span class="title">{{ this.user.name }}</span>
-          <span class="biography">
+      <div class="user-info">
+        <span class="title">{{ this.user.name }}</span>
+        <span class="biography">
             <edit-icon
                 v-if="isStoreUser && !this.isEditing && !isPatchingBiography"
                 v-tooltip="'Edit biography'"
@@ -93,10 +88,10 @@
             <input size="140" maxlength="140" v-else type="text" v-model="this.biographyEdit">
           </span>
 
-          <span class="icon">
+        <span class="icon">
             <code-icon v-tooltip="'Number of user\'s shaders'" :color="'#282C34'" class="user-info__icon"></code-icon> {{
-              this.user.shaders?.length || 0
-            }}
+            this.user.shaders?.length || 0
+          }}
             <fork-icon v-tooltip="'Number of forks on user\'s shaders'" :color="'#282C34'"
                        class="user-info__icon"></fork-icon> {{ this.user.total_forks }}
             <like-icon v-tooltip="'Number of likes on user\'s shaders'" :color="'#282C34'"
@@ -104,183 +99,162 @@
             <comment-icon v-tooltip="'Number of comments on user\'s shaders'" :color="'#282C34'"
                           class="user-info__icon"></comment-icon> {{ this.user.total_comments }}
           </span>
-        </div>
       </div>
     </div>
+  </div>
 
-    <div class="tabs-wrapper">
-      <div class="tabs">
-        <button
-            v-for="tab in tabs"
-            :key="tab"
-            :class="{ 'active': tab === activeTab }"
-            class="tab"
-            @click="handleTabClick(tab)">
-          {{ tab }}
-        </button>
-      </div>
+  <div class="tabs-wrapper">
+    <div class="tabs">
+      <button
+          v-for="tab in tabs"
+          :key="tab"
+          :class="{ 'active': tab === activeTab }"
+          class="tab"
+          @click="handleTabClick(tab)">
+        {{ tab }}
+      </button>
+    </div>
 
-      <div v-if="activeTab === 'Shaders'" class="shaders-wrapper">
-        <h1 v-if="this.user.shaders?.length === 0 || false">User has no shaders</h1>
-        <pagination
-            v-if="pagesCount > this.SHADERS_PER_PAGE"
-            v-model:page="page"
-            :pages="this.totalPages"
-            class="pagination"/>
-        <div class="shader-grid">
-          <div
-              class="shader-cell"
-              v-for="(shader, index) in this.user.shaders"
-              @mouseenter="handleMouseEnter(index)"
-              @mouseleave="handleMouseLeave(index)"
-              @click="$router.push(`/new/${shader['id']}`)"
-          >
-            <shader-window
-                class="shader-window"
-                ref="shaders"
-                :key="shader.id"
-                :code="shader.code"
-                :initial-pause="true"
-                :disable-mouse-down-event="true"
-                :disable-mouse-up-event="true"
-                :disable-mouse-move-event="true"
-            />
-            <div class="shader-cell__info">
-              <div class="info-row">
-                <span class="info-label">Title:</span> <span class="info-value">{{ shader.title }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Visibility:</span> <span
-                  class="info-value">{{ shader.visibility ? 'Public' : 'Private' }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Likes:</span> <span class="info-value">{{ shader.likes }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Comments:</span> <span class="info-value">{{ shader.comments }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Created at:</span> <span class="info-value">{{
-                  formatDate(shader.createdAt)
-                }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Last update:</span> <span
-                  class="info-value">{{ formatDate(shader.updated_at) }}</span>
-              </div>
-              <div class="info-row" :class="{'invisible' : shader.originId === null}">
-                <span class="info-label">Forked:</span> <span
-                  class="info-value">{{ truncate(shader.originShader ? shader.originShader.title : "", 17) }}</span>
-              </div>
-              <div class="right-icons">
-                <delete-icon
-                    v-if="isStoreUser"
-                    v-tooltip="'Delete shader'"
-                    class="icon-btn action-btn"
-                    @click.stop="handleDeleteShaderClick(shader.id)"/>
-                <share-icon
-                    v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"
-                    v-tooltip="'Copy link'"
-                    class="icon-btn action-btn"
-                    @click.stop="shareShader(shader.id)"/>
-                <check-icon v-else class="icon-btn"/>
-              </div>
+    <div v-if="activeTab === 'Shaders'" class="shaders-wrapper">
+      <h1 v-if="this.user.shaders?.length === 0 || false">User has no shaders</h1>
+      <pagination
+          v-if="pagesCount > this.SHADERS_PER_PAGE"
+          v-model:page="page"
+          :pages="this.totalPages"
+          class="pagination"/>
+      <div class="shader-grid">
+        <div
+            class="shader-cell"
+            v-for="(shader, index) in this.user.shaders"
+            @mouseenter="handleMouseEnter(index)"
+            @mouseleave="handleMouseLeave(index)"
+            @click="$router.push(`/new/${shader['id']}`)"
+        >
+          <shader-window
+              class="shader-window"
+              ref="shaders"
+              :key="shader.id"
+              :code="shader.code"
+              :initial-pause="true"
+              :disable-mouse-down-event="true"
+              :disable-mouse-up-event="true"
+              :disable-mouse-move-event="true"
+          />
+          <div class="shader-cell__info">
+            <div class="info-row">
+              <span class="info-label">Title:</span> <span class="info-value">{{ shader.title }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Visibility:</span> <span
+                class="info-value">{{ shader.visibility ? 'Public' : 'Private' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Likes:</span> <span class="info-value">{{ shader.likes }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Comments:</span> <span class="info-value">{{ shader.comments }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Created at:</span> <span class="info-value">{{
+                formatDate(shader.createdAt)
+              }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Last update:</span> <span
+                class="info-value">{{ formatDate(shader.updated_at) }}</span>
+            </div>
+            <div class="info-row" :class="{'invisible' : shader.originId === null}">
+              <span class="info-label">Forked:</span> <span
+                class="info-value">{{ truncate(shader.originShader ? shader.originShader.title : "", 17) }}</span>
+            </div>
+            <div class="right-icons">
+              <delete-icon
+                  v-if="isStoreUser"
+                  v-tooltip="'Delete shader'"
+                  class="icon-btn action-btn"
+                  @click.stop="handleDeleteShaderClick(shader.id)"/>
+              <share-icon
+                  v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"
+                  v-tooltip="'Copy link'"
+                  class="icon-btn action-btn"
+                  @click.stop="shareShader(shader.id)"/>
+              <check-icon v-else class="icon-btn"/>
             </div>
           </div>
         </div>
       </div>
-
-      <div v-else-if="activeTab === 'Activity'">
-        <table class="shader-table">
-          <thead>
-          <tr>
-            <th :class="{'bottom-left-border-radius': this.user.activities.length === 0}">Activity</th>
-            <th>Shader</th>
-            <th :class="{'bottom-right-border-radius': this.user.activities.length === 0}">Date</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr class="shader-item" v-for="(activity,index) in user.activities" :key="index">
-            <td class="shader-item__activity">
-              <like-icon class="icon-btn" v-if="activity.type === 'like'"></like-icon>
-              <comment-icon class="icon-btn" v-else-if="activity.type === 'comment'"></comment-icon>
-              <fork-icon class="icon-btn" v-else-if="activity.type=== 'fork'"></fork-icon>
-            </td>
-            <td>
-              <router-link :to="`/new/${activity.shader_id}`" class="shader-link">
-                {{ activity.shader_title }}
-              </router-link>
-            </td>
-            <td>{{ formatDateTime(activity.action_created_at) }}</td>
-          </tr>
-          </tbody>
-        </table>
-        <button v-if="this.totalActivities > this.activity_page * this.ACTIVITIES_PER_PAGE" class="activity-load-btn"
-                @click="loadMoreActivities">
-          <spinner v-if="isLoadingActivities"></spinner>
-          <span v-else>Upload more</span>
-        </button>
-      </div>
-
-      <div v-else-if="activeTab === 'Account'">
-        <div class="change-password-wrapper">
-          <h1>Change password</h1>
-          <input
-              type="password"
-              placeholder="Old password"
-              v-model.trim="oldPassword"
-              @keydown="preventWhitespace"
-              required/>
-          <input
-              type="password"
-              placeholder="New password"
-              v-model.trim="newPassword"
-              @keydown="preventWhitespace"
-              required/>
-          <input
-              type="password"
-              placeholder="Confirm password"
-              v-model.trim="confirmPassword"
-              @keydown="preventWhitespace"
-              required/>
-          <button class="submit-btn" type="submit" @click="changePassword">
-            <span v-if="!this.isPatchingPassword">Change password</span>
-            <spinner v-else/>
-          </button>
-          <transition name="shake">
-            <label v-if="this.passwordLog" :class="{'success' : this.successedPasswordChange}">{{
-                this.passwordLog
-              }}</label>
-          </transition>
-        </div>
-      </div>
-
     </div>
+
+    <div v-else-if="activeTab === 'Activity'">
+      <table class="shader-table">
+        <thead>
+        <tr>
+          <th :class="{'bottom-left-border-radius': this.user.activities.length === 0}">Activity</th>
+          <th>Shader</th>
+          <th :class="{'bottom-right-border-radius': this.user.activities.length === 0}">Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="shader-item" v-for="(activity,index) in user.activities" :key="index">
+          <td class="shader-item__activity">
+            <like-icon class="icon-btn" v-if="activity.type === 'like'"></like-icon>
+            <comment-icon class="icon-btn" v-else-if="activity.type === 'comment'"></comment-icon>
+            <fork-icon class="icon-btn" v-else-if="activity.type=== 'fork'"></fork-icon>
+          </td>
+          <td>
+            <router-link :to="`/new/${activity.shader_id}`" class="shader-link">
+              {{ activity.shader_title }}
+            </router-link>
+          </td>
+          <td>{{ formatDateTime(activity.action_created_at) }}</td>
+        </tr>
+        </tbody>
+      </table>
+      <button v-if="this.totalActivities > this.activity_page * this.ACTIVITIES_PER_PAGE" class="activity-load-btn"
+              @click="loadMoreActivities">
+        <spinner v-if="isLoadingActivities"></spinner>
+        <span v-else>Upload more</span>
+      </button>
+    </div>
+
+    <div v-else-if="activeTab === 'Account'">
+      <div class="change-password-wrapper">
+        <h1>Change password</h1>
+        <input
+            type="password"
+            placeholder="Old password"
+            v-model.trim="oldPassword"
+            @keydown="preventWhitespace"
+            required/>
+        <input
+            type="password"
+            placeholder="New password"
+            v-model.trim="newPassword"
+            @keydown="preventWhitespace"
+            required/>
+        <input
+            type="password"
+            placeholder="Confirm password"
+            v-model.trim="confirmPassword"
+            @keydown="preventWhitespace"
+            required/>
+        <button class="submit-btn" type="submit" @click="changePassword">
+          <span v-if="!this.isPatchingPassword">Change password</span>
+          <spinner v-else/>
+        </button>
+        <transition name="shake">
+          <label v-if="this.passwordLog" :class="{'success' : this.successedPasswordChange}">{{
+              this.passwordLog
+            }}</label>
+        </transition>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script>
-import Loader from "@/components/Loader.vue";
-import HideIcon from "@/components/Icons/HideIcon.vue";
-import UnhideIcon from "@/components/Icons/UnhideIcon.vue";
-import DeleteIcon from "@/components/Icons/DeleteIcon.vue";
-import ShareIcon from "@/components/Icons/ShareIcon.vue";
-import LikeIcon from "@/components/Icons/LikeIcon.vue";
-import CommentIcon from "@/components/Icons/CommentIcon.vue";
-import DialogWindow from "@/components/DialogWindow.vue";
-import ForkIcon from "@/components/Icons/ForkIcon.vue";
-import SaveIcon from "@/components/Icons/SaveIcon.vue";
-import CheckIcon from "@/components/Icons/CheckIcon.vue";
-import CodeIcon from "@/components/Icons/CodeIcon.vue";
-import ShaderWindow from "@/components/ShaderWindow.vue";
-import Pagination from "@/components/Pagination.vue";
-import truncate from "../utils/truncate.js";
-import ForbiddenIcon from "@/components/Icons/ForbiddenIcon.vue";
-import EditIcon from "@/components/Icons/EditIcon.vue";
-import CancelIcon from "@/components/Icons/CancelIcon.vue";
-import Spinner from "@/components/Spinner.vue";
-import Toast from "@/components/Toast.vue";
-import StatusCodeIcon from "@/components/Icons/StatusCodeIcon.vue";
+import truncate from "@/utils/truncate.js";
 import Error from "@/components/Error.vue";
 import formatDate from "@/utils/formatDate.js";
 import {formatDateTime} from "@/utils/formatDateTime.js";
@@ -288,8 +262,6 @@ import {formatDateTime} from "@/utils/formatDateTime.js";
 export default {
   data() {
     return {
-      isError: false,
-      errorStatus: null,
       user: {
         id: null,
         name: "",
@@ -298,7 +270,6 @@ export default {
         backgroundUrl: null,
         biography: ""
       },
-      isLoading: false,
       tabs: ['Shaders', 'Activity'], // Account добавляется в mounted
       activeTab: 'Shaders',
       showAvatarDeleteDialog: false,
@@ -559,7 +530,7 @@ export default {
   ,
   computed: {
     isStoreUser() {
-      return this.user.id === this.$store.state.user.id && this.$store.state.isAuth;
+      return this.user.id === this.$store.state.auth.user.id && this.$store.state.auth.isAuth;
     },
   },
   watch: {
@@ -572,7 +543,7 @@ export default {
     }
   },
   mounted() {
-    this.isLoading = true;
+    this.$store.commit("ui/setLoading", true);
     fetch(`${this.API_URL}/users/${this.$route.params.id}`, {
       method: "GET",
       headers: {"Content-Type": "application/json"},
@@ -589,10 +560,9 @@ export default {
       this.biographyEdit = this.user.biography;
       // this.totalActivities = parseInt(response.headers.get('x-total-count')) || this.totalActivities
     }).catch(error => {
-      this.isError = false;
-      this.errorStatus = error.status;
+      this.$store.commit("ui/setError", error.status);
     }).finally(() => {
-      this.isLoading = false;
+      this.$store.commit("ui/setLoading", false);
       if (this.isStoreUser) {
         this.tabs.push('Account');
       }
@@ -649,7 +619,7 @@ export default {
 
 .cover-btn:hover {
   cursor: pointer;
-  background-color: #3a3f4b; /* чуть светлее при наведении */
+  background-color: #3a3f4b;
 }
 
 .cover-btn.left-btn::after {
@@ -1011,17 +981,6 @@ export default {
 .invisible {
   visibility: hidden;
 }
-
-.error-page-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 250px;
-  margin-top: 100px;
-  color: #282C34;
-}
-
 
 .change-password-wrapper {
   max-width: 400px;

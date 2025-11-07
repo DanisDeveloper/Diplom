@@ -39,13 +39,5 @@ export default {
 
 
 <style scoped>
-.error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 250px;
-  margin-top: 100px;
-  color: #282C34;
-}
+
 </style>
