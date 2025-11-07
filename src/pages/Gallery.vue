@@ -1,5 +1,5 @@
 <template>
-  <div class="header">
+  <div v-show="!this.$store.state.ui.isLoadingPage" class="header">
     <radio-buttons
         v-model="this.sortOption"
         :options="this.sortOptions"
@@ -68,8 +68,8 @@ export default {
   data() {
     return {
       isLoading: false,
-      totalPages: null,
-      page: this.$route.query.page || 1,
+      totalPages: 0,
+      page: Number(this.$route.query.page) || 1,
       pageSize: 12,
       shaders: [],
       sortOption: this.$route.query.sort_option || 'NEWEST',
