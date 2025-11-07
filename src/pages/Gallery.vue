@@ -38,13 +38,25 @@
             </span>
           </div>
           <div class="shader-window-info__stats">
-            <view-icon v-tooltip="'Views'" class="like-icon" :width="20" :height="20" :color="'#282C34'"></view-icon>
+            <view-icon v-tooltip="`${shader.views} Views`"
+                       class="like-icon"
+                       :width="20"
+                       :height="20"
+                       :color="'#282C34'"/>
             {{ shader.views }}
 
-            <like-icon v-tooltip="'Likes'" class="like-icon" :width="16" :height="16" :color="'#282C34'"></like-icon>
+            <like-icon v-tooltip="`${shader.likes} Likes`"
+                       class="like-icon"
+                       :width="16"
+                       :height="16"
+                       :color="'#282C34'"/>
             {{ shader.likes }}
 
-            <comment-icon v-tooltip="'Comments'" class="comment-icon" :width="16" :height="16" :color="'#282C34'"></comment-icon>
+            <comment-icon v-tooltip="`${shader.comments} Comments`"
+                          class="comment-icon"
+                          :width="16"
+                          :height="16"
+                          :color="'#282C34'"/>
             {{ shader.comments }}
           </div>
         </div>
@@ -160,7 +172,7 @@ export default {
   background: transparent;
   border-radius: 10px;
   aspect-ratio: 14 / 9;
-  }
+}
 
 .shader-window:hover {
   transform: scale(1.03);

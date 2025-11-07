@@ -2,7 +2,7 @@ import NewShader from "@/pages/NewPage/NewShader.vue";
 import {createRouter, createWebHistory} from "vue-router"
 import About from "@/pages/About.vue";
 import Login from "@/pages/Login.vue";
-import Profile from "@/pages/Profile.vue";
+import Profile from "@/pages/ProfilePage/Profile.vue";
 import Gallery from "@/pages/Gallery.vue";
 import Empty from "@/pages/Empty.vue";
 import ShowCase from "@/pages/ShowCase.vue";

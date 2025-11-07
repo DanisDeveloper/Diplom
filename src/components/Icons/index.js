@@ -21,6 +21,7 @@ import UpIcon from "@/components/Icons/UpIcon.vue";
 import UploadIcon from "@/components/Icons/UploadIcon.vue";
 import ViewIcon from "@/components/Icons/ViewIcon.vue";
 import TimerIcon from "@/components/Icons/TimerIcon.vue";
+import GitHubIcon from "@/components/Icons/GitHubIcon.vue";
 
 export default [
     CancelIcon,
@@ -46,5 +47,6 @@ export default [
     UploadIcon,
     ViewIcon,
     TimerIcon,
-    RestartIcon
+    RestartIcon,
+    GitHubIcon
 ]

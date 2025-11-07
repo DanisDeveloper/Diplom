@@ -19,13 +19,13 @@
             </span>
     </div>
     <div v-if="this.shader.id" class="shader-metadata__stats">
-      <view-icon v-tooltip="'Views'" :width="16" :height="16" :color="'#282C34'"/>
+      <view-icon v-tooltip="`${shader.views} Views`" :width="16" :height="16" :color="'#282C34'"/>
       {{ shader.views }}
 
-      <like-icon v-tooltip="'Likes'" :width="16" :height="16" :color="'#282C34'"/>
+      <like-icon v-tooltip="`${shader.likes} Likes`" :width="16" :height="16" :color="'#282C34'"/>
       {{ shader.likes }}
 
-      <comment-icon v-tooltip="'Comments'" :width="16" :height="16" :color="'#282C34'"/>
+      <comment-icon v-tooltip="`${shader.comments} Comments`" :width="16" :height="16" :color="'#282C34'"/>
       {{ shader.comments }}
     </div>
 

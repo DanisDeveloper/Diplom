@@ -1,79 +1,87 @@
 <template>
   <div class="outer-container">
     <div class="auth-container">
-      <!-- Tabs with sliding underline -->
-      <div class="tabs">
-        <button class="tab left-tab" :class="{ active: isLoginForm }" @click="handleLoginTabClick">Login</button>
-        <button class="tab right-tab" :class="{ active: !isLoginForm }" @click="handleRegisterTabClick">Registration
-        </button>
-        <div class="slider" :class="{ right: !isLoginForm }"></div>
-      </div>
-
-      <!-- Animated form container -->
-      <transition name="form-height" mode="out-in">
-        <form
-            :key="isLoginForm ? 'login' : 'reg'"
-            @submit.prevent="handleSubmit"
-            class="form"
-        >
-          <!-- Fields appear with fade -->
-          <transition-group name="field-fade" tag="div">
-            <div class="input-group" key="name">
-              <input
-                  maxlength="20"
-                  type="text"
-                  placeholder="Name"
-                  v-model="form.name"
-                  @keydown="preventWhitespace"
-                  required/>
-            </div>
-
-            <div v-if="!isLoginForm" class="input-group" key="email">
-              <input
-                  maxlength="254"
-                  type="email"
-                  placeholder="Email"
-                  v-model="form.email"
-                  @keydown="preventWhitespace"
-                  required/>
-            </div>
-
-            <div class="input-group" key="password">
-              <input
-                  maxlength="254"
-                  type="password"
-                  placeholder="Password"
-                  v-model.trim="form.password"
-                  @keydown="preventWhitespace"
-                  required/>
-            </div>
-
-            <div
-                v-if="!isLoginForm"
-                class="input-group"
-                key="confirm"
-            >
-              <input
-                  maxlength="254"
-                  type="password"
-                  placeholder="Confirm password"
-                  v-model.trim="form.confirmPassword"
-                  @keydown="preventWhitespace"
-                  required
-              />
-            </div>
-          </transition-group>
-
-          <button class=" gradient" :disabled="isLoading">
-            <span v-if="!isLoading">{{ isLoginForm ? 'Sign in' : 'Sign up' }}</span>
-            <spinner class="loading-spinner" v-else/>
+      <div class="simple-auth-container">
+        <!-- Tabs with sliding underline -->
+        <div class="tabs">
+          <button class="tab left-tab" :class="{ active: isLoginForm }" @click="handleLoginTabClick">Login</button>
+          <button class="tab right-tab" :class="{ active: !isLoginForm }" @click="handleRegisterTabClick">Registration
           </button>
+          <div class="slider" :class="{ right: !isLoginForm }"></div>
+        </div>
 
-          <transition name="shake">
-            <label v-if="errorMessage" :key="errorMessageKey" class="error-label">{{ errorMessage }}</label>
-          </transition>
-        </form>
-      </transition>
+        <!-- Animated form container -->
+        <transition name="form-height" mode="out-in">
+          <form
+              :key="isLoginForm ? 'login' : 'reg'"
+              @submit.prevent="handleSubmit"
+              class="form"
+          >
+            <!-- Fields appear with fade -->
+            <transition-group name="field-fade" tag="div">
+              <div class="input-group" key="name">
+                <input
+                    maxlength="20"
+                    type="text"
+                    placeholder="Name"
+                    v-model="form.name"
+                    @keydown="preventWhitespace"
+                    required/>
+              </div>
+
+              <div v-if="!isLoginForm" class="input-group" key="email">
+                <input
+                    maxlength="254"
+                    type="email"
+                    placeholder="Email"
+                    v-model="form.email"
+                    @keydown="preventWhitespace"
+                    required/>
+              </div>
+
+              <div class="input-group" key="password">
+                <input
+                    maxlength="254"
+                    type="password"
+                    placeholder="Password"
+                    v-model.trim="form.password"
+                    @keydown="preventWhitespace"
+                    required/>
+              </div>
+
+              <div
+                  v-if="!isLoginForm"
+                  class="input-group"
+                  key="confirm"
+              >
+                <input
+                    maxlength="254"
+                    type="password"
+                    placeholder="Confirm password"
+                    v-model.trim="form.confirmPassword"
+                    @keydown="preventWhitespace"
+                    required
+                />
+              </div>
+            </transition-group>
+
+            <button class=" gradient" :disabled="isLoading">
+              <span v-if="!isLoading">{{ isLoginForm ? 'Sign in' : 'Sign up' }}</span>
+              <spinner class="loading-spinner" v-else/>
+            </button>
+
+            <transition name="shake">
+              <label v-if="errorMessage" :key="errorMessageKey" class="error-label">{{ errorMessage }}</label>
+            </transition>
+          </form>
+        </transition>
+      </div>
+<!--      <div class="oauth-container">-->
+<!--        <div class="github">-->
+<!--          <git-hub-icon></git-hub-icon>-->
+<!--          <span>Sign in with Github</span>-->
+<!--        </div>-->
+<!--      </div>-->
     </div>
   </div>
 </template>
@@ -81,8 +89,10 @@
 <script>
 import {checkAuth} from "@/utils/checkAuth.js";
 import Spinner from "@/components/Spinner.vue";
+import GitHubIcon from "@/components/Icons/GitHubIcon.vue";
 
 export default {
+  components: {GitHubIcon},
   data() {
     return {
       isLoginForm: true, // Переключение между логином и регистрацией
@@ -166,6 +176,7 @@ export default {
                 this.errorMessage = "Server error";
                 return;
             }
+            return;
           }
         } catch (error) {
           this.errorMessage = "Server error";
@@ -213,6 +224,9 @@ export default {
         this.isLoading = false;
       }
     },
+    handleGithubButtonClick() {
+      //TODO
+    }
   },
 };
 
@@ -222,7 +236,9 @@ export default {
 .outer-container {
   display: flex;
   justify-content: center;
-  margin-top: 6rem
+  align-items: center;
+  flex-direction: column;
+  height: 90vh;
 }
 
 .auth-container {
@@ -330,26 +346,6 @@ export default {
   border-color: #282c34;
 }
 
-/* Submit button */
-.submit-btn {
-  background: #282c34;
-  color: #fff;
-  border: none;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  min-height: 2.5rem;
-}
-
-.submit-btn:hover:not(:disabled) {
-  transform: translateY(-3px);
-  background-color: #3a3f4b;
-}
-
-.submit-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
 
 /* Shake on error */
 .error-label {
@@ -378,5 +374,30 @@ export default {
 .loading-spinner {
   width: 1rem;
   height: 1rem;
+}
+
+
+.oauth-container {
+  margin-top: 1rem;
+
+}
+
+.github {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  align-items: center;
+  font-size: 1rem;
+  background: black;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.github:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
 }
 </style>
