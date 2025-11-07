@@ -2,6 +2,17 @@
   <toast ref="errorToast"/>
   <div class="nav-bar">
     <button class="nav-bar__main-btn" @click="this.$router.push('/')">FragmentVerse</button>
+    <div class="nav-bar__search">
+      <input
+          @keyup.enter="onSearch"
+          maxlength="40"
+          class="nav-bar__search-input"
+          @change="onSearchChanged"
+          v-model="this.searchQuery"
+          type="text"
+          placeholder="Search shaders"
+      >
+    </div>
     <div class="nav-bar__items">
       <div
           v-show="this.$store.state.auth.isAuth"
@@ -12,7 +23,7 @@
       </div>
       <button class="nav-bar__other-btn" @click="this.$router.push('/gallery')">Gallery</button>
       <button class="nav-bar__other-btn" @click="this.$router.push('/new')">New</button>
-<!--      TODO сделать иконку аватара -->
+      <!--      TODO сделать иконку аватара -->
       <button class="nav-bar__other-btn" @click="authHandler()">{{ this.authText }}</button>
       <button class="nav-bar__other-btn" @click="this.$router.push('/about')">About</button>
     </div>
@@ -29,8 +40,8 @@ export default {
   components: {toast, Error},
   data() {
     return {
+      searchQuery: this.$store.state.search.query,
       API_URL: import.meta.env.VITE_API_URL
-
     }
   },
   computed: {
@@ -38,6 +49,7 @@ export default {
       return this.$store.state.auth.isAuth ? 'Log out' : 'Log in';
     }
   },
+
   methods: {
     authHandler() {
       if (this.$store.state.auth.isAuth) {
@@ -59,6 +71,13 @@ export default {
       } else {
         this.$router.push('/login')
       }
+    },
+    onSearch() {
+      this.$store.commit("search/setQuery", this.searchQuery);
+      this.$router.push(`/gallery?query=${this.$store.state.search.query}`);
+    },
+    onSearchChanged(){
+      this.$store.commit("search/setQuery", this.searchQuery);
     }
   },
   mounted() {
@@ -69,6 +88,8 @@ export default {
 
 <style scoped>
 .nav-bar {
+  display: flex;
+  align-items: center;
   position: fixed;
   top: 0;
   left: 0;
@@ -76,8 +97,6 @@ export default {
   height: 3.5rem;
   background: rgba(40, 44, 52, 0.9);
   backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
   padding: 0 2rem;
   z-index: 1000;
 }
@@ -134,5 +153,51 @@ export default {
   color: white;
   border: 1px solid lightgray;
 }
+
+.nav-bar__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #f8f9fa;
+  border-radius: 9999px;
+  padding: 0.2rem 0.8rem;
+  margin-left: 3rem;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+}
+
+.nav-bar__search:hover {
+  background: #ffffff;
+  border-color: #cfd4da;
+}
+
+.nav-bar__search:focus-within {
+  border-color: #1b263b;
+  background: #fff;
+}
+
+.nav-bar__search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #282C34;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 4px 6px;
+}
+
+.nav-bar__search-input::placeholder {
+  color: #999;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.nav-bar__search-input:focus::placeholder {
+  opacity: 0.4;
+}
+
+
 
 </style>

@@ -1,10 +1,13 @@
 import {createStore} from "vuex";
 import ui from "@/store/modules/ui.js";
 import auth from "@/store/modules/auth.js";
+import search from "@/store/modules/search.js";
+
 export default createStore({
     modules:{
         ui,
-        auth
+        auth,
+        search,
     },
 
 })

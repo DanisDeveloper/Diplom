@@ -89,8 +89,9 @@ export default {
   watch: {
     sortOption(newOption) {
       this.$router.push({
-        path: `/gallery/`,
+        path: `/gallery`,
         query: {
+          query: this.$route.query.query || this.$store.state.search.query ,
           page: this.page,
           page_size: this.pageSize,
           sort_option: newOption
@@ -99,8 +100,9 @@ export default {
     },
     page(newPage) {
       this.$router.push({
-        path: `/gallery/`,
+        path: `/gallery`,
         query: {
+          query: this.$route.query.query || this.$store.state.search.query ,
           page: newPage,
           pageSize: this.pageSize,
           sort_option: this.sortOption
@@ -110,7 +112,7 @@ export default {
   },
   mounted() {
     this.$store.commit("ui/setLoading", true);
-    const endpoint = `${this.API_URL}/shaders?page=${this.page - 1}&page_size=${this.pageSize}&sort_option=${this.sortOption}`;
+    const endpoint = `${this.API_URL}/shaders?query=${this.$route.query.query || this.$store.state.search.query}&page=${this.page - 1}&page_size=${this.pageSize}&sort_option=${this.sortOption}`;
     fetch(endpoint, {
       method: "GET",
       headers: {"Content-Type": "application/json"},
