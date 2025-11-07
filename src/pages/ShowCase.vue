@@ -153,6 +153,7 @@ export default {
 
 .shader {
   width: 65%;
+  padding: 1em;
 }
 
 .shader .shader-window {

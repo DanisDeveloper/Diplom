@@ -154,7 +154,7 @@ export default {
 }
 
 .shader-cell {
-  margin: 0 16px 16px;
+  padding: 0.5em;
 }
 
 .shader-window {
@@ -162,7 +162,7 @@ export default {
   transition: all 0.3s ease;
   background: transparent;
   border-radius: 10px;
-  aspect-ratio: 14 / 9;
+  aspect-ratio: 14 / 10;
 }
 
 .shader-window:hover {

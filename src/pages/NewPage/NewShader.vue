@@ -46,7 +46,7 @@
               :color="isLiked ? '#f44336' : '#282C34'"
           />
         </button>
-        <button v-tooltip="'Fork shader'" class="icon-text-button" v-if="this.shader.id" @click="handleForkButtonClick">
+        <button v-tooltip="'Fork shader'" class="icon-text-button" v-if="this.$store.state.auth.isAuth && this.shader.id" @click="handleForkButtonClick">
           <spinner v-if="isForkingShader" disabled/>
           <fork-icon v-else :color="'#282C34'"/>
         </button>
