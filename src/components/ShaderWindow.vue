@@ -306,11 +306,18 @@ export default {
         return true;
       }
 
-      // Отсоединяем старый фрагментный шейдер (предполагается, что он второй)
+
+      // Отсоединяем только старый фрагментный шейдер
       const shaders = gl.getAttachedShaders(this.program);
-      if (shaders && shaders.length > 1) {
-        gl.detachShader(this.program, shaders[1]);
+      if (shaders && shaders.length) {
+        for (const s of shaders) {
+          const type = gl.getShaderParameter(s, gl.SHADER_TYPE);
+          if (type === gl.FRAGMENT_SHADER) {
+            gl.detachShader(this.program, s);
+          }
+        }
       }
+
       gl.attachShader(this.program, newFragmentShader);
       gl.linkProgram(this.program);
 

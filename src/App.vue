@@ -2,13 +2,12 @@
   <div class="layout">
     <nav-bar></nav-bar>
     <div class="content">
-
       <div class="app">
         <div v-if="loadingOrError" class="full-center">
           <loader v-if="this.$store.state.ui.isLoadingPage"></loader>
           <error v-else-if="$store.state.ui.errorStatus" :status="$store.state.ui.errorStatus"></error>
         </div>
-        <router-view v-show="!loadingOrError" :key="$route.params.id"></router-view>
+        <router-view v-show="!loadingOrError" :key="$route.fullPath"></router-view>
       </div>
     </div>
     <footer-info></footer-info>
