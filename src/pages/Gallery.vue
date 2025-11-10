@@ -4,7 +4,7 @@
         v-model="this.sortOption"
         :options="this.sortOptions"
     />
-    <pagination v-model:page="page" :pages="totalPages" class="pagination"/>
+    <pagination v-model:page="this.currentPage" :pages="totalPages" class="pagination"/>
   </div>
   <div class="shader-grid">
     <div v-for="(shader, index) in shaders" class="shader-cell">
@@ -69,7 +69,7 @@ export default {
     return {
       isLoading: false,
       totalPages: 0,
-      page: Number(this.$route.query.page) || 1,
+      currentPage: Number(this.$route.query.currentPage) || 1,
       pageSize: 12,
       shaders: [],
       sortOption: this.$route.query.sort_option || 'NEWEST',
@@ -92,18 +92,18 @@ export default {
         path: `/gallery`,
         query: {
           query: this.$route.query.query || this.$store.state.search.query ,
-          page: this.page,
+          currentPage: this.currentPage,
           page_size: this.pageSize,
           sort_option: newOption
         }
       })
     },
-    page(newPage) {
+    currentPage(newPage) {
       this.$router.push({
         path: `/gallery`,
         query: {
           query: this.$route.query.query || this.$store.state.search.query ,
-          page: newPage,
+          currentPage: newPage,
           pageSize: this.pageSize,
           sort_option: this.sortOption
         }
@@ -112,7 +112,7 @@ export default {
   },
   mounted() {
     this.$store.commit("ui/setLoading", true);
-    const endpoint = `${this.API_URL}/shaders?query=${this.$route.query.query || this.$store.state.search.query}&page=${this.page - 1}&page_size=${this.pageSize}&sort_option=${this.sortOption}`;
+    const endpoint = `${this.API_URL}/shaders/public?query=${this.$route.query.query || this.$store.state.search.query}&page=${this.currentPage - 1}&page_size=${this.pageSize}&sort_option=${this.sortOption}`;
     fetch(endpoint, {
       method: "GET",
       headers: {"Content-Type": "application/json"},

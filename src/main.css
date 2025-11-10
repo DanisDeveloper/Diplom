@@ -45,3 +45,18 @@ button:nth-child(5) { animation-duration: 8s; animation-delay: 0.2s; }
         background-position: 0% 50%;
     }
 }
+
+.icon-btn {
+    width: 36px;
+    height: 36px;
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: transparent;
+    transition: all 0.3s ease;
+    gap: 4px;
+}
+
+.icon-btn:hover {
+    border: 1px solid lightgray;
+}

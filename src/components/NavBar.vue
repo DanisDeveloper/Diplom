@@ -105,6 +105,7 @@ export default {
 .nav-bar__items {
   margin-left: auto;
   display: flex;
+  align-items: center;
 }
 
 .nav-bar__main-btn {

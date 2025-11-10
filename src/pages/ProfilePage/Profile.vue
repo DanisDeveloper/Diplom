@@ -1,16 +1,6 @@
 <template>
   <toast ref="generalToast" :background="'#282C34'"></toast>
   <toast ref="errorToast"></toast>
-  <dialog-window v-model:show="this.showShaderDeleteDialog">
-    <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingShader"></loader>
-    <div v-else>
-      <h2 style="text-align: center">Delete this shader?</h2>
-      <div class="dialog-window__buttons">
-        <button class="dialog-btn action-btn" @click="this.showShaderDeleteDialog = false">Cancel</button>
-        <button class="dialog-btn action-btn" @click="deleteShader">Delete</button>
-      </div>
-    </div>
-  </dialog-window>
   <dialog-window v-model:show="this.showAvatarDeleteDialog">
     <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingAvatar"></loader>
     <div v-else>
@@ -115,75 +105,7 @@
       </button>
     </div>
 
-    <div v-if="activeTab === 'Shaders'" class="shaders-wrapper">
-      <h1 v-if="this.user.shaders?.length === 0 || false">User has no shaders</h1>
-      <pagination
-          v-if="pagesCount > this.SHADERS_PER_PAGE"
-          v-model:page="page"
-          :pages="this.totalPages"
-          class="pagination"/>
-      <div class="shader-grid">
-        <div
-            class="shader-cell"
-            v-for="(shader, index) in this.user.shaders"
-            @mouseenter="handleMouseEnter(index)"
-            @mouseleave="handleMouseLeave(index)"
-            @click="$router.push(`/new/${shader['id']}`)"
-        >
-          <shader-window
-              class="shader-window"
-              ref="shaders"
-              :key="shader.id"
-              :code="shader.code"
-              :initial-pause="true"
-              :disable-mouse-down-event="true"
-              :disable-mouse-up-event="true"
-              :disable-mouse-move-event="true"
-          />
-          <div class="shader-cell__info">
-            <div class="info-row">
-              <span class="info-label">Title:</span> <span class="info-value">{{ shader.title }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Visibility:</span> <span
-                class="info-value">{{ shader.visibility ? 'Public' : 'Private' }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Likes:</span> <span class="info-value">{{ shader.likes }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Comments:</span> <span class="info-value">{{ shader.comments }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Created at:</span> <span class="info-value">{{
-                formatDate(shader.createdAt)
-              }}</span>
-            </div>
-            <div class="info-row">
-              <span class="info-label">Last update:</span> <span
-                class="info-value">{{ formatDate(shader.updated_at) }}</span>
-            </div>
-            <div class="info-row" :class="{'invisible' : shader.originId === null}">
-              <span class="info-label">Forked:</span> <span
-                class="info-value">{{ truncate(shader.originShader ? shader.originShader.title : "", 17) }}</span>
-            </div>
-            <div class="right-icons">
-              <delete-icon
-                  v-if="isStoreUser"
-                  v-tooltip="'Delete shader'"
-                  class="icon-btn action-btn"
-                  @click.stop="handleDeleteShaderClick(shader.id)"/>
-              <share-icon
-                  v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"
-                  v-tooltip="'Copy link'"
-                  class="icon-btn action-btn"
-                  @click.stop="shareShader(shader.id)"/>
-              <check-icon v-else class="icon-btn"/>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <shader-tab v-if="this.activeTab==='Shaders'" :is-store-user="this.isStoreUser"/>
 
     <div v-else-if="activeTab === 'Activity'">
       <table class="shader-table">
@@ -258,8 +180,10 @@ import truncate from "@/utils/truncate.js";
 import Error from "@/components/Error.vue";
 import formatDate from "@/utils/formatDate.js";
 import {formatDateTime} from "@/utils/formatDateTime.js";
+import ShaderTab from "@/pages/ProfilePage/tabs/ShaderTab.vue";
 
 export default {
+  components: {ShaderTab},
   data() {
     return {
       user: {
@@ -274,12 +198,7 @@ export default {
       activeTab: 'Shaders',
       showAvatarDeleteDialog: false,
       isDeletingAvatar: false,
-      showShaderDeleteDialog: false,
-      isDeletingShader: false,
-      shaderForDelete: null,
-      isClipboardCopied: false,
-      clipboardShaderId: null,
-      page: 1,
+      currentPage: 1,
       totalPages: 0,
       SHADERS_PER_PAGE: 8,
       isNotFound: false,
@@ -353,25 +272,7 @@ export default {
         this.isPatchingPassword = false;
       }
     },
-    handleMouseEnter(index) {
-      this.$refs.shaders[index].togglePause();
-    },
-    handleMouseLeave(index) {
-      this.$refs.shaders[index].togglePause()
-    },
-    handleDeleteShaderClick(shaderId) {
-      this.shaderForDelete = shaderId;
-      this.showShaderDeleteDialog = true
-    },
-    shareShader(shaderId) {
-      navigator.clipboard.writeText(`${window.location.origin}/new/${shaderId}`);
-      this.isClipboardCopied = true;
-      this.clipboardShaderId = shaderId;
-      setTimeout(() => {
-        this.isClipboardCopied = false;
-        this.clipboardShaderId = null;
-      }, 1000);
-    },
+
     deleteAvatar() {
       this.isDeletingAvatar = true;
       fetch(`${this.API_URL}/users/image?type=AVATAR`, {
@@ -390,29 +291,7 @@ export default {
         this.showAvatarDeleteDialog = false;
       })
     },
-    async deleteShader() {
-      this.isDeletingShader = true;
-      try {
-        // await new Promise(resolve => setTimeout(resolve, 1000));
-        const response = await fetch(this.API_URL + '/shaders/' + this.shaderForDelete, {
-          method: 'DELETE',
-          headers: {'Content-Type': 'application/json'},
-          credentials: 'include'
-        });
 
-        if (response.ok) {
-          this.user.shaders = this.user.shaders.filter(shader => shader.id !== this.shaderForDelete);
-          this.user.activities = this.user.activities.filter(activity => activity.shader_id !== this.shaderForDelete);
-          this.shaderForDelete = null;
-          this.$refs.generalToast.show("Successfully deleted shader");
-        }
-      } catch (error) {
-        this.$refs.errorToast.show("Error deleting shader");
-      } finally {
-        this.isDeletingShader = false
-        this.showShaderDeleteDialog = false;
-      }
-    },
     triggerAvatarInput() {
       if (this.user.avatarUrl !== null) {
         this.showAvatarDeleteDialog = true;
@@ -483,16 +362,17 @@ export default {
       }
       this.isPatchingBiography = true;
       try {
-        const response = await fetch(this.API_URL + '/profile/biography', {
+        const response = await fetch(this.API_URL + `/users?biography=${this.biographyEdit}`, {
           method: 'PATCH',
           headers: {'Content-Type': 'application/json'},
           credentials: 'include',
           body: JSON.stringify({biography: this.biographyEdit})
         });
-        if (response.ok) {
-          this.user.biography = this.biographyEdit;
-          this.isEditing = false;
+        if (!response.ok) {
+          throw new Error(response.text() || "Server returned an error");
         }
+        this.user.biography = this.biographyEdit;
+        this.isEditing = false;
       } catch (error) {
         this.$refs.errorToast.show("Error updating biography");
       } finally {
@@ -526,8 +406,7 @@ export default {
         this.isLoadingActivities = false;
       }
     }
-  }
-  ,
+  },
   computed: {
     isStoreUser() {
       return this.user.id === this.$store.state.auth.user.id && this.$store.state.auth.isAuth;
@@ -768,11 +647,6 @@ export default {
 }
 
 
-.pagination {
-  margin: 0 0 16px auto;
-}
-
-
 /* Таблица */
 .shader-table {
   width: 100%;
@@ -865,15 +739,6 @@ export default {
 }
 
 
-.icon-btn {
-  width: 36px;
-  height: 36px;
-  padding: 4px;
-  border-radius: 8px;
-  border: 1px solid transparent;
-  background: transparent;
-}
-
 .dialog-btn {
   background: transparent;
   border-radius: 8px;
@@ -897,90 +762,6 @@ export default {
   cursor: pointer;
 }
 
-
-.shaders-wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-
-.shader-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-  width: 100%;
-}
-
-.shader-cell {
-  width: 100%;
-  border-radius: 10px;
-  transition: all 0.3s ease;
-}
-
-.shader-cell:hover {
-  transform: translateY(-10px) scale(1.02);
-  cursor: pointer;
-  box-shadow: 0 10px 10px rgba(40, 44, 52, 0.8);
-
-}
-
-.shader-cell:hover .shader-cell__info {
-  background: rgba(40, 40, 60, 0.9);
-}
-
-.shader-window {
-  cursor: pointer;
-}
-
-.shader-window :deep(canvas) {
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
-}
-
-.shader-cell__info {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 8px 16px;
-  padding: 16px;
-  background: rgba(40, 44, 52, 0.8);
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  color: lightgray;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
-}
-
-/* Одна строка информации */
-.shader-cell__info .info-row {
-  display: flex;
-  align-items: center;
-}
-
-.shader-cell__info .info-label {
-  flex-shrink: 0;
-  margin-right: 6px;
-  font-weight: 600;
-  color: #a0a0ff;
-}
-
-.shader-cell__info .info-value {
-  flex-grow: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.shader-cell__info .right-icons {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-}
-
-.invisible {
-  visibility: hidden;
-}
 
 .change-password-wrapper {
   max-width: 400px;
