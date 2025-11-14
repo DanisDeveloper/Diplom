@@ -149,6 +149,7 @@ import {useUsers} from "@/pages/ProfilePage/composables/useUsers.js";
 import {onMounted} from "vue";
 import {useRoute} from "vue-router";
 import {useBiographyEdit} from "@/pages/ProfilePage/composables/useBiography.js";
+import {useToast} from "@/composables/useToast.js";
 import {useProfileImages} from "@/pages/ProfilePage/composables/useImages.js";
 import {useShaders} from "@/pages/ProfilePage/composables/useShaders.js";
 
@@ -158,6 +159,8 @@ export default {
     return {
       tabs: ['Shaders', 'Activity'], // Account добавляется в mounted
       activeTab: 'Shaders',
+      // showAvatarDeleteDialog: false,
+      // isDeletingAvatar: false,
       isNotFound: false,
       activity_page: 1,
       ACTIVITIES_PER_PAGE: 20,
