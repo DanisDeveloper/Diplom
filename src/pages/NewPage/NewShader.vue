@@ -1,7 +1,5 @@
 <template>
   <div>
-    <toast ref="errorToast"/>
-    <toast :background="'#282C34'" ref="generalToast"/>
     <div class="shader-navigation-bar">
       <div class="shader-title-area">
         <input
@@ -46,7 +44,8 @@
               :color="isLiked ? '#f44336' : '#282C34'"
           />
         </button>
-        <button v-tooltip="'Fork shader'" class="icon-text-button" v-if="this.$store.state.auth.isAuth && this.shader.id" @click="handleForkButtonClick">
+        <button v-tooltip="'Fork shader'" class="icon-text-button"
+                v-if="this.$store.state.auth.isAuth && this.shader.id" @click="handleForkButtonClick">
           <spinner v-if="isForkingShader" disabled/>
           <fork-icon v-else :color="'#282C34'"/>
         </button>
@@ -119,9 +118,19 @@ import ShaderComment from "@/pages/NewPage/ShaderComment.vue";
 import ShaderMetadata from "@/pages/NewPage/ShaderMetadata.vue";
 import CommentsArea from "@/pages/NewPage/CommentsArea.vue";
 import UnhideIcon from "@/components/Icons/UnhideIcon.vue";
+import {useToast} from "@/composables/useToast.js";
 
 
 export default {
+  setup() {
+    const { show } = useToast();
+
+    const notify = (message, isError=false) => {
+      show(message, { duration: 3000, background: isError? '#f10000' :'#4caf50' });
+    };
+
+    return { notify };
+  },
   components: {
     UnhideIcon,
     CommentsArea,
@@ -196,7 +205,7 @@ export default {
     },
     compileFailedWatch(failed) {
       if (failed) {
-        this.$refs.errorToast.show("Shader compilation failed")
+        this.notify("Shader compilation failed", true)
         this.compileFailed = true;
         clearTimeout(this.updloadErrorTimeoutId);
         this.updloadErrorTimeoutId = setTimeout(() => {
@@ -223,7 +232,7 @@ export default {
     handleSaveButtonClick() {
       // Проверка, что название не пустое
       if (this.shader.title.length === 0) {
-        this.$refs.errorToast.show("Title must not be empty");
+        this.notify("Title must not be empty", true)
         return;
       }
 
@@ -244,7 +253,7 @@ export default {
     handleForkButtonClick() {
       // Проверка, что название не пустое
       if (this.shader.title.length === 0) {
-        this.$refs.errorToast.show("Title must not be empty");
+        this.notify("Title must not be empty", true);
         return;
       }
       let requestBody = {
@@ -267,7 +276,7 @@ export default {
           this.isLiked = !this.isLiked;
         }
       }).catch(error => {
-        this.$refs.errorToast.show("Error saving like");
+        this.notify("Error saving like", true);
       }).finally(() => {
         this.isLoadingLike = false;
       })
@@ -284,7 +293,7 @@ export default {
         }
         this.shader.visibility = !this.shader.visibility;
       }).catch(error => {
-        this.$refs.errorToast.show("Error saving like");
+        this.notify("Error saving like", true);
       }).finally(() => {
         this.isChangingVisibility = false;
       })
@@ -299,12 +308,12 @@ export default {
           body: JSON.stringify(requestBody)
         });
         if (response.ok) {
-          this.$refs.generalToast.show("Shader was created");
+          this.notify("Shader was created");
         }
         const body = await response.json();
         this.$router.push(`/new/${body.id}`);
       } catch (error) {
-        this.$refs.errorToast.show("Error saving shader");
+        this.notify("Error saving shader", true);
       } finally {
         this.isSavingShader = false;
       }
@@ -319,10 +328,10 @@ export default {
           body: JSON.stringify(requestBody)
         });
         if (response.ok) {
-          this.$refs.generalToast.show("Shader was saved");
+          this.notify("Shader was saved");
         }
       } catch (error) {
-        this.$refs.errorToast.show("Error saving shader");
+        this.notify("Error saving shader", true);
       } finally {
         this.isSavingShader = false;
       }
@@ -339,13 +348,13 @@ export default {
         });
 
         if (response.ok) {
-          this.$refs.generalToast.show("Shader was saved");
+          this.notify("Shader was saved");
         }
 
         const body = await response.json();
         this.$router.push(`/new/${body.id}`);
       } catch (error) {
-        this.$refs.errorToast.show("Error saving shader");
+        this.notify("Error saving shader", true);
       } finally {
         this.isForkingShader = false;
       }
@@ -393,7 +402,7 @@ export default {
       }).then(isLiked => {
         this.isLiked = isLiked;
       }).catch(error => {
-        this.$refs.errorToast.show("Error getting like status");
+        this.notify("Error getting like status", true);
       }).finally(() => {
         this.isLoadingLike = false
       })
@@ -411,7 +420,7 @@ export default {
     }).then(comments => {
       this.comments = comments;
     }).catch(error => {
-      this.$refs.errorToast.show("Error getting shader comments");
+      this.notify("Error getting shader comments", true);
     }).finally(() => {
       this.isLoadingComments = false
     })

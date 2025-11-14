@@ -1,33 +1,36 @@
 <template>
   <loader v-if="isLoadingShaders"/>
   <div v-else class="shaders-wrapper">
-    <dialog-window v-model:show="this.showShaderDeleteDialog">
-      <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingShader"></loader>
+    <dialog-window v-model:show="showShaderDeleteDialog">
+      <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="isDeletingShader"/>
       <div v-else>
         <h2 style="text-align: center">Delete this shader?</h2>
         <div class="dialog-window__buttons">
-          <button class="dialog-btn action-btn" @click="this.showShaderDeleteDialog = false">Cancel</button>
+          <button class="dialog-btn action-btn" @click="showShaderDeleteDialog = false">Cancel</button>
           <button class="dialog-btn action-btn" @click="deleteShader">Delete</button>
         </div>
       </div>
     </dialog-window>
-    <h1 v-if="this.shaders?.length === 0">User has no shaders</h1>
+
+    <h1 v-if="shaders?.length === 0">User has no shaders</h1>
+
     <pagination
         v-model:page="currentPage"
-        :pages="this.totalPages"
+        :pages="totalPages"
         class="pagination"/>
+
     <div class="shader-grid">
       <div
           class="shader-cell"
-          v-for="(shader, index) in this.shaders"
-          @mouseenter="handleMouseEnter(index)"
-          @mouseleave="handleMouseLeave(index)"
-          @click="$router.push(`/new/${shader['id']}`)"
+          v-for="(shader, index) in shaders"
+          :key="shader.id"
+          @mouseenter="togglePause(index)"
+          @mouseleave="togglePause(index)"
+          @click="$router.push(`/new/${shader.id}`)"
       >
         <shader-window
             class="shader-window"
-            ref="shaders"
-            :key="shader.id"
+            ref="shaderRefs"
             :code="shader.code"
             :initial-pause="true"
             :disable-mouse-down-event="true"
@@ -57,26 +60,25 @@
             }}</span>
           </div>
           <div class="info-row">
-            <span class="info-label">Last update:</span> <span
-              class="info-value">{{ formatDate(shader.updatedAt) }}</span>
+            <span class="info-label">Last update:</span> <span class="info-value">{{
+              formatDate(shader.updatedAt)
+            }}</span>
           </div>
           <div class="info-row" :class="{'invisible' : !shader.origin?.id}">
             <span class="info-label">Forked from:</span>
             <span
                 @click.stop="$router.push(`/new/${shader.origin?.id}`)"
                 class="info-value" :class="{'link': shader.origin?.id}">
-              {{ truncate(shader.origin?.title ? shader.origin?.title : "", 17) }}
+              {{ truncate(shader.origin?.title ? shader.origin.title : "", 17) }}
             </span>
           </div>
           <div class="right-icons">
             <delete-icon
                 v-if="isStoreUser"
-                v-tooltip="'Delete shader'"
                 class="icon-btn action-btn"
                 @click.stop="handleDeleteShaderClick(shader.id)"/>
             <share-icon
-                v-if="!this.isClipboardCopied || this.clipboardShaderId !== shader.id"
-                v-tooltip="'Copy link'"
+                v-if="!isClipboardCopied || clipboardShaderId !== shader.id"
                 class="icon-btn action-btn"
                 @click.stop="shareShader(shader.id)"/>
             <check-icon v-else class="icon-btn"/>
@@ -85,123 +87,57 @@
       </div>
     </div>
   </div>
-
 </template>
 
-<script>
+<script setup>
+import {onMounted, ref} from "vue";
+import Loader from "@/components/Loader.vue";
+import pagination from "@/components/Pagination.vue";
+import shaderWindow from "@/components/ShaderWindow.vue";
 import formatDate from "@/utils/formatDate.js";
 import truncate from "@/utils/truncate.js";
-import Error from "@/components/Error.vue";
-import Loader from "@/components/Loader.vue";
+import {useProfileUsers} from "@/composables/useProfileUsers.js";
+import {useProfileShaders} from "@/composables/useProfileShaders.js";
+import DeleteIcon from "@/components/Icons/DeleteIcon.vue";
+import ShareIcon from "@/components/Icons/ShareIcon.vue";
+import CheckIcon from "@/components/Icons/CheckIcon.vue";
+import {useToast} from "@/composables/useToast.js";
 
-export default {
-  name: "ShaderTab",
-  components: {Loader},
 
-  data() {
-    return {
-      isLoadingShaders: false,
-      shaders: [],
-      currentPage: 1,
-      totalPages: 0,
-      SHADERS_PER_PAGE: 8,
-      sortOption: "NEWEST",
-      isClipboardCopied: false,
-      clipboardShaderId: null,
-      showShaderDeleteDialog: false,
-      isDeletingShader: false,
-      shaderForDelete: null,
+// --------------------
+// Toast пример
+// --------------------
+const { show } = useToast();
+const {isStoreUser} = useProfileUsers();
 
-      API_URL: import.meta.env.VITE_API_URL,
-    }
-  },
-  props: {
-    isStoreUser: {
-      type: Boolean,
-      required: true
-    }
-  },
-  methods: {
-    truncate,
-    formatDate,
-    handleMouseEnter(index) {
-      this.$refs.shaders[index].togglePause();
-    },
-    handleMouseLeave(index) {
-      this.$refs.shaders[index].togglePause()
-    },
-    handleDeleteShaderClick(shaderId) {
-      this.shaderForDelete = shaderId;
-      this.showShaderDeleteDialog = true
-    },
-    shareShader(shaderId) {
-      navigator.clipboard.writeText(`${window.location.origin}/new/${shaderId}`);
-      this.isClipboardCopied = true;
-      this.clipboardShaderId = shaderId;
-      setTimeout(() => {
-        this.isClipboardCopied = false;
-        this.clipboardShaderId = null;
-      }, 1000);
-    },
-    fetchShaders(username, page, pageSize, sortOption) {
-      this.isLoadingShaders = true;
-      fetch(`${this.API_URL}/shaders?username=${username}&page=${page - 1}&page_size=${pageSize}&sort_option=${sortOption}`, {
-        method: "GET",
-        headers: {"Content-Type": "application/json"},
-        credentials: 'include'
-      }).then(response => {
-        if (!response.ok) {
-          throw new Error(response.text() || "Server returned an error");
-        }
-        this.totalPages = parseInt(response.headers.get('X-Total-Pages'));
-        return response.json();
-      }).then(shaders => {
-        this.shaders = shaders;
+const {
+  shaders,
+  isLoadingShaders,
+  totalPages,
+  currentPage,
+  showShaderDeleteDialog,
+  isDeletingShader,
+  shaderIdForDelete,
+  fetchShaders,
+  deleteShader,
+  shareShader,
+  isClipboardCopied,
+  clipboardShaderId
+} = useProfileShaders(show);
 
-      }).catch(error => {
-        this.$refs.errorToast.show("Error getting shaders"); // TODO проверить
-      }).finally(() => {
-        this.isLoadingShaders = false;
-      })
-    },
-    async deleteShader() {
-      this.isDeletingShader = true;
-      try {
-        const response = await fetch(`${this.API_URL}/shaders/${this.shaderForDelete}`, {
-          method: 'DELETE',
-          headers: {'Content-Type': 'application/json'},
-          credentials: 'include'
-        });
+const shaderRefs = ref([]);
 
-        if (response.ok) {
-          this.shaders = this.shaders.filter(shader => shader.id !== this.shaderForDelete);
-          this.fetchShaders(this.$route.params.id, this.currentPage, this.SHADERS_PER_PAGE, this.sortOption); // чтобы сделать сделать
-          // this.activities = this.activities.filter(activity => activity.shader_id !== this.shaderForDelete);
-          this.shaderForDelete = null;
-          this.$refs.generalToast.show("Successfully deleted shader");
-        }
-      } catch (error) {
-        this.$refs.errorToast.show("Error deleting shader");
-      } finally {
-        this.isDeletingShader = false
-        this.showShaderDeleteDialog = false;
-      }
-    },
-  },
-  watch: {
-    sortOption(newOption) {
-      this.fetchShaders(this.$route.params.id, this.currentPage, this.SHADERS_PER_PAGE, newOption);
-    },
-    currentPage(newPage) {
-      this.fetchShaders(this.$route.params.id, newPage, this.SHADERS_PER_PAGE, this.sortOption);
-    }
-  },
-  mounted() {
-    this.fetchShaders(this.$route.params.id, this.currentPage, this.SHADERS_PER_PAGE, this.sortOption);
-  }
+function togglePause(index) {
+  shaderRefs.value[index]?.togglePause();
 }
-</script>
 
+function handleDeleteShaderClick(shaderId) {
+  shaderIdForDelete.value = shaderId;
+  showShaderDeleteDialog.value = true;
+}
+
+onMounted(() => fetchShaders());
+</script>
 
 <style scoped>
 .pagination {
@@ -212,7 +148,6 @@ export default {
   display: flex;
   flex-direction: column;
 }
-
 
 .shader-grid {
   display: grid;
@@ -231,7 +166,6 @@ export default {
   transform: translateY(-10px) scale(1.02);
   cursor: pointer;
   box-shadow: 0 10px 10px rgba(40, 44, 52, 0.8);
-
 }
 
 .shader-cell:hover .shader-cell__info {
@@ -308,7 +242,6 @@ export default {
   justify-content: space-between;
   margin: 10px 0 0;
 }
-
 
 .action-btn {
   transition: all 0.3s ease;
