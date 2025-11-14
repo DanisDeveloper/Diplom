@@ -51,13 +51,13 @@
         <span class="title">{{ this.user.name }}</span>
         <span class="biography">
             <edit-icon
-                v-if="isStoreUser && !this.isEditing && !isPatchingBiography"
+                v-if="isStoreUser && !isEditing && !isPatchingBiography"
                 v-tooltip="'Edit biography'"
                 :color="'#282C34'"
                 class="user-info__icon editable"
                 @click="handleEditClick"/>
             <check-icon
-                v-if="this.isEditing && !isPatchingBiography"
+                v-if="isEditing && !isPatchingBiography"
                 v-tooltip="'Save biography'"
                 :color="'#282C34'"
                 class="user-info__icon editable"
@@ -66,14 +66,14 @@
                 v-else v-if="isPatchingBiography"
                 class="user-info__icon"/>
             <cancel-icon
-                v-if="this.isEditing"
+                v-if="isEditing"
                 v-tooltip="'Cancel changes'"
                 :color="'#282C34'"
                 class="user-info__icon"
                 :class="{ 'editable': !isPatchingBiography }"
                 @click="handleCancelClick"/>
-            <span v-if="!this.isEditing">{{ this.user.biography }}</span>
-            <input size="140" maxlength="140" v-else type="text" v-model="this.biographyEdit">
+            <span v-if="!isEditing">{{ this.user.biography }}</span>
+            <input size="140" maxlength="140" v-else type="text" v-model="biographyEdit">
           </span>
 
         <span class="icon">
@@ -148,9 +148,11 @@ import formatDate from "@/utils/formatDate.js";
 import {formatDateTime} from "@/utils/formatDateTime.js";
 import ShaderTab from "@/pages/ProfilePage/tabs/ShaderTab.vue";
 import AccountTab from "@/pages/ProfilePage/tabs/AccountTab/AccountTab.vue";
-import {useProfileShaders} from "@/composables/useProfileShaders.js";
+import {useUsers} from "@/pages/ProfilePage/composables/useUsers.js";
+import {onMounted} from "vue";
+import {useRoute} from "vue-router";
+import {useBiographyEdit} from "@/pages/ProfilePage/composables/useBiography.js";
 import {useToast} from "@/composables/useToast.js";
-import {useProfileUsers} from "@/composables/useProfileUsers.js";
 
 export default {
   components: {AccountTab, ShaderTab},
@@ -172,9 +174,6 @@ export default {
       totalPages: 0,
       SHADERS_PER_PAGE: 8,
       isNotFound: false,
-      isEditing: false,
-      biographyEdit: null,
-      isPatchingBiography: false,
       activity_page: 1,
       ACTIVITIES_PER_PAGE: 20,
       totalActivities: 0,
@@ -270,38 +269,6 @@ export default {
         this.showAvatarDeleteDialog = false;
       })
     },
-    handleEditClick() {
-      this.isEditing = true;
-    },
-    async handleOkClick() {
-      if (this.biographyEdit === this.user.biography) {
-        this.isEditing = false;
-        return;
-      }
-      this.isPatchingBiography = true;
-      try {
-        const response = await fetch(this.API_URL + `/users?biography=${this.biographyEdit}`, {
-          method: 'PATCH',
-          headers: {'Content-Type': 'application/json'},
-          credentials: 'include',
-          body: JSON.stringify({biography: this.biographyEdit})
-        });
-        if (!response.ok) {
-          throw new Error(response.text() || "Server returned an error");
-        }
-        this.user.biography = this.biographyEdit;
-        this.isEditing = false;
-      } catch (error) {
-        this.notify("Error updating biography", true);
-      } finally {
-        this.isPatchingBiography = false;
-      }
-    },
-    handleCancelClick() {
-      if (this.isPatchingBiography) return;
-      this.isEditing = false;
-      this.biographyEdit = this.user.biography;
-    },
     handleTabClick(tab) {
       this.activeTab = tab
       this.passwordLog = ""
@@ -334,43 +301,43 @@ export default {
       });
     }
   },
-  mounted() {
-    this.$store.commit("ui/setLoading", true);
-    fetch(`${this.API_URL}/users/${this.$route.params.id}`, {
-      method: "GET",
-      headers: {"Content-Type": "application/json"},
-      credentials: 'include',
-    }).then(response => {
-      if (!response.ok) {
-        throw new Error(response.text() || "Server returned an error");
-      }
-      console.log(response);
-      this.totalPages = parseInt(response.headers.get('X-Total-Pages'));
-      return response.json();
-    }).then(data => {
-      Object.assign(this.user, data);
-      this.biographyEdit = this.user.biography;
-      // this.totalActivities = parseInt(response.headers.get('x-total-count')) || this.totalActivities
-    }).catch(error => {
-      this.$store.commit("ui/setError", error.status);
-    }).finally(() => {
-      this.$store.commit("ui/setLoading", false);
-      if (isStoreUser) {
-        this.tabs.push('Account');
-      }
-    })
-    // TODO обработать 409, когда указан несуществующий пользователь
-  },
   setup() {
-    const{isStoreUser} = useProfileUsers();
-    const {totalShaders} = useProfileShaders();
+    const route = useRoute();
     const {show} = useToast();
+    const {
+      user,
+      isStoreUser,
+      fetchUser,
+      isLoadingUser,
+    } = useUsers();
 
-    const notify = (message, isError = false) => {
-      show(message, {duration: 3000, background: isError ? '#f10000' : '#4caf50'});
-    };
-    return {totalShaders, notify, isStoreUser};
+    const {
+      isEditing,
+      biographyEdit,
+      isPatchingBiography,
+      handleEditClick,
+      handleCancelClick,
+      handleOkClick
+    } = useBiographyEdit(user, show);
+
+    onMounted(() => {
+      fetchUser(route.params.id);
+    });
+
+    return {
+      user,
+      isStoreUser,
+      fetchUser,
+      isLoadingUser,
+      isEditing,
+      biographyEdit,
+      isPatchingBiography,
+      handleEditClick,
+      handleCancelClick,
+      handleOkClick
+    }
   }
+
 }
 </script>
 

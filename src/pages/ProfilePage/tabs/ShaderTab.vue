@@ -96,8 +96,8 @@ import pagination from "@/components/Pagination.vue";
 import shaderWindow from "@/components/ShaderWindow.vue";
 import formatDate from "@/utils/formatDate.js";
 import truncate from "@/utils/truncate.js";
-import {useProfileUsers} from "@/composables/useProfileUsers.js";
-import {useProfileShaders} from "@/composables/useProfileShaders.js";
+import {useUsers} from "@/pages/ProfilePage/composables/useUsers.js";
+import {useShaders} from "@/pages/ProfilePage/composables/useShaders.js";
 import DeleteIcon from "@/components/Icons/DeleteIcon.vue";
 import ShareIcon from "@/components/Icons/ShareIcon.vue";
 import CheckIcon from "@/components/Icons/CheckIcon.vue";
@@ -108,7 +108,7 @@ import {useToast} from "@/composables/useToast.js";
 // Toast пример
 // --------------------
 const {show} = useToast();
-const {isStoreUser} = useProfileUsers();
+const {isStoreUser} = useUsers();
 
 const {
   shaders,
@@ -123,7 +123,7 @@ const {
   shareShader,
   isClipboardCopied,
   clipboardShaderId
-} = useProfileShaders(show);
+} = useShaders(show);
 
 const shaderRefs = ref([]);
 

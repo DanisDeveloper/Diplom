@@ -2,7 +2,7 @@ import {computed, ref} from "vue";
 import {useRoute} from "vue-router";
 import {useStore} from "vuex";
 
-export function useProfileShaders(showToast) {
+export function useShaders(showToast) {
     const route = useRoute();
     const store = useStore();
 
