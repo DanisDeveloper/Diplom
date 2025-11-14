@@ -151,26 +151,16 @@ import {useRoute} from "vue-router";
 import {useBiographyEdit} from "@/pages/ProfilePage/composables/useBiography.js";
 import {useToast} from "@/composables/useToast.js";
 import {useProfileImages} from "@/pages/ProfilePage/composables/useImages.js";
+import {useShaders} from "@/pages/ProfilePage/composables/useShaders.js";
 
 export default {
   components: {AccountTab, ShaderTab},
   data() {
     return {
-      user: {
-        id: null,
-        name: "",
-        createdAt: null,
-        avatarUrl: null,
-        backgroundUrl: null,
-        biography: ""
-      },
       tabs: ['Shaders', 'Activity'], // Account добавляется в mounted
       activeTab: 'Shaders',
       // showAvatarDeleteDialog: false,
       // isDeletingAvatar: false,
-      currentPage: 1,
-      totalPages: 0,
-      SHADERS_PER_PAGE: 8,
       isNotFound: false,
       activity_page: 1,
       ACTIVITIES_PER_PAGE: 20,
@@ -225,6 +215,7 @@ export default {
       fetchUser,
       isLoadingUser,
     } = useUsers();
+    const {totalShaders} = useShaders();
 
     const {
       isEditing,
@@ -270,7 +261,8 @@ export default {
       triggerBackgroundInput,
       userImageLoadHandler,
       deleteAvatar,
-      handleClearBackground
+      handleClearBackground,
+      totalShaders
     }
   }
 
