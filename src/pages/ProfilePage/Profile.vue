@@ -12,7 +12,7 @@
   <div class="user-wrapper">
     <div class="user-background">
       <img
-          :src="`${this.PUBLIC_API_URL}/images/${user.backgroundUrl}`"
+          :src="`${this.$store.state.api.PUBLIC_API_URL}/images/${user.backgroundUrl}`"
           alt=""
       >
       <input
@@ -32,7 +32,7 @@
     <div class="user-info-wrapper">
       <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
         <img
-            :src="`${this.PUBLIC_API_URL}/images/${user.avatarUrl || 'avatar.png'}`"
+            :src="`${this.$store.state.api.PUBLIC_API_URL}/images/${user.avatarUrl || 'avatar.png'}`"
             alt="avatar"
             width="224"
             height="224"
@@ -166,10 +166,6 @@ export default {
       ACTIVITIES_PER_PAGE: 20,
       totalActivities: 0,
       isLoadingActivities: false,
-
-
-      API_URL: import.meta.env.VITE_API_URL,
-      PUBLIC_API_URL: import.meta.env.VITE_PUBLIC_API_URL,
     }
   },
   methods: {
@@ -181,7 +177,7 @@ export default {
     async loadMoreActivities() {
       try {
         this.isLoadingActivities = true;
-        const response = await fetch(`${this.API_URL}/profile/${this.$route.params.id}/activities?activity_page=${this.activity_page + 1}&limit=${this.ACTIVITIES_PER_PAGE}`, {
+        const response = await fetch(`${this.$store.state.api.API_URL}/profile/${this.$route.params.id}/activities?activity_page=${this.activity_page + 1}&limit=${this.ACTIVITIES_PER_PAGE}`, {
           method: "GET",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
@@ -197,18 +193,8 @@ export default {
       }
     }
   },
-  watch: {
-    page(newPage) {
-      console.log(`Page changed to ${newPage}`)
-      this.page = newPage;
-      this.$refs.shaders.forEach(shader => {
-        shader.uploadShader()
-      });
-    }
-  },
   setup() {
     const route = useRoute();
-    const {show} = useToast();
     const {
       user,
       isStoreUser,
