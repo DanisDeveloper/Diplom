@@ -15,7 +15,14 @@ export function useUsers() {
         avatarUrl: null,
         backgroundUrl: null,
         biography: "",
-        activities: []
+        stats:{
+            totalShaders: 0,
+            totalLikes: 0,
+            totalComments: 0,
+            totalViews: 0
+        },
+        activities: [],
+
     });
     const isLoadingUser = ref(false);
     const isStoreUser = computed(() =>

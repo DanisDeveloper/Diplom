@@ -77,15 +77,26 @@
           </span>
 
         <span class="icon">
-            <code-icon v-tooltip="'Number of user\'s shaders'" :color="'#282C34'" class="user-info__icon"></code-icon> {{
-            totalShaders || 0
-          }}
-            <fork-icon v-tooltip="'Number of forks on user\'s shaders'" :color="'#282C34'"
-                       class="user-info__icon"></fork-icon> {{ user.total_forks }}
-            <like-icon v-tooltip="'Number of likes on user\'s shaders'" :color="'#282C34'"
-                       class="user-info__icon"></like-icon> {{ user.total_likes }}
-            <comment-icon v-tooltip="'Number of comments on user\'s shaders'" :color="'#282C34'"
-                          class="user-info__icon"></comment-icon> {{ user.total_comments }}
+            <code-icon
+                v-tooltip="'Number of user\'s shaders'"
+                :color="'#282C34'"
+                class="user-info__icon"/>
+          {{ user.stats.totalShaders || 0 }}
+            <view-icon
+                v-tooltip="'Number of views on user\'s shaders'"
+                :color="'#282C34'"
+                class="user-info__icon"/>
+          {{ user.stats.totalViews || 0 }}
+            <like-icon
+                v-tooltip="'Number of likes on user\'s shaders'"
+                :color="'#282C34'"
+                class="user-info__icon"/>
+          {{ user.stats.totalLikes || 0 }}
+            <comment-icon
+                v-tooltip="'Number of comments on user\'s shaders'"
+                :color="'#282C34'"
+                class="user-info__icon"/>
+          {{ user.stats.totalComments || 0 }}
           </span>
       </div>
     </div>
@@ -152,9 +163,10 @@ import {useBiographyEdit} from "@/pages/ProfilePage/composables/useBiography.js"
 import {useToast} from "@/composables/useToast.js";
 import {useProfileImages} from "@/pages/ProfilePage/composables/useImages.js";
 import {useShaders} from "@/pages/ProfilePage/composables/useShaders.js";
+import ViewIcon from "@/components/Icons/ViewIcon.vue";
 
 export default {
-  components: {AccountTab, ShaderTab},
+  components: {ViewIcon, AccountTab, ShaderTab},
   data() {
     return {
       tabs: ['Shaders', 'Activity'], // Account добавляется в mounted
@@ -201,7 +213,6 @@ export default {
       fetchUser,
       isLoadingUser,
     } = useUsers();
-    const {totalShaders} = useShaders();
 
     const {
       isEditing,
@@ -248,7 +259,6 @@ export default {
       userImageLoadHandler,
       deleteAvatar,
       handleClearBackground,
-      totalShaders
     }
   }
 
