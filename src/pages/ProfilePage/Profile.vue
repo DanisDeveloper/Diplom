@@ -1,6 +1,4 @@
 <template>
-  <toast ref="generalToast" :background="'#282C34'"></toast>
-  <toast ref="errorToast"></toast>
   <dialog-window v-model:show="this.showAvatarDeleteDialog">
     <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingAvatar"></loader>
     <div v-else>
@@ -19,13 +17,13 @@
       >
       <input
           style="display: none;"
-          v-if="this.isStoreUser"
+          v-if="isStoreUser"
           type="file"
           ref="backgroundInput"
           accept="image/*"
           @change="userImageLoadHandler($event, 'BACKGROUND')"
       >
-      <div v-if="this.isStoreUser" class="cover-btns">
+      <div v-if="isStoreUser" class="cover-btns">
         <button class="cover-btn left-btn" @click="triggerBackgroundInput">Change cover</button>
         <button class="cover-btn right-btn" @click="handleClearBackground">Clear</button>
       </div>
@@ -42,7 +40,7 @@
         />
         <input
             style="display: none;"
-            v-if="this.isStoreUser"
+            v-if="isStoreUser"
             type="file"
             ref="avatarInput"
             accept="image/*"
@@ -80,7 +78,7 @@
 
         <span class="icon">
             <code-icon v-tooltip="'Number of user\'s shaders'" :color="'#282C34'" class="user-info__icon"></code-icon> {{
-            this.user.shaders?.length || 0
+            totalShaders || 0
           }}
             <fork-icon v-tooltip="'Number of forks on user\'s shaders'" :color="'#282C34'"
                        class="user-info__icon"></fork-icon> {{ this.user.total_forks }}
@@ -105,7 +103,7 @@
       </button>
     </div>
 
-    <shader-tab v-if="this.activeTab==='Shaders'" :is-store-user="this.isStoreUser"/>
+    <shader-tab v-if="this.activeTab==='Shaders'" :is-store-user="isStoreUser"/>
 
     <div v-else-if="activeTab === 'Activity'">
       <table class="shader-table">
@@ -150,6 +148,9 @@ import formatDate from "@/utils/formatDate.js";
 import {formatDateTime} from "@/utils/formatDateTime.js";
 import ShaderTab from "@/pages/ProfilePage/tabs/ShaderTab.vue";
 import AccountTab from "@/pages/ProfilePage/tabs/AccountTab/AccountTab.vue";
+import {useProfileShaders} from "@/composables/useProfileShaders.js";
+import {useToast} from "@/composables/useToast.js";
+import {useProfileUsers} from "@/composables/useProfileUsers.js";
 
 export default {
   components: {AccountTab, ShaderTab},
@@ -200,9 +201,9 @@ export default {
           throw new Error(response.text() || "Server returned an error");
         }
         this.user.avatarUrl = null;
-        this.$refs.generalToast.show("Successfully cleared avatar");
+        this.notify("Successfully cleared avatar");
       }).catch(error => {
-        this.$refs.errorToast.show("Error clearing avatar");
+        this.notify("Error clearing avatar", true);
       }).finally(() => {
         this.isDeletingAvatar = false;
         this.showAvatarDeleteDialog = false;
@@ -222,7 +223,7 @@ export default {
     userImageLoadHandler(event, imageType) {
       const image = event.target.files[0];
       if (!image) {
-        this.$refs.errorToast.show("Error uploading image");
+        this.notify("Error uploading image", true);
       }
 
       const formData = new FormData();
@@ -236,7 +237,7 @@ export default {
         if (!response.ok) {
           throw new Error(response.text() || "Server returned an error");
         }
-        this.$refs.generalToast.show("Successfully uploaded image");
+        this.notify("Successfully uploaded image");
         return response.text();
       }).then(imageUrl => {
         switch (imageType) {
@@ -248,7 +249,7 @@ export default {
             break;
         }
       }).catch(error => {
-        this.$refs.errorToast.show("Error uploading image");
+        this.notify("Error uploading image", true);
       })
     },
     handleClearBackground() {
@@ -261,9 +262,9 @@ export default {
           throw new Error(response.text() || "Server returned an error");
         }
         this.user.backgroundUrl = null;
-        this.$refs.generalToast.show("Successfully cleared background");
+        this.notify("Successfully cleared background");
       }).catch(error => {
-        this.$refs.errorToast.show("Error clearing background");
+        this.notify("Error clearing background", true);
       }).finally(() => {
         this.isDeletingAvatar = false;
         this.showAvatarDeleteDialog = false;
@@ -291,7 +292,7 @@ export default {
         this.user.biography = this.biographyEdit;
         this.isEditing = false;
       } catch (error) {
-        this.$refs.errorToast.show("Error updating biography");
+        this.notify("Error updating biography", true);
       } finally {
         this.isPatchingBiography = false;
       }
@@ -318,16 +319,11 @@ export default {
         this.user.activities.push(...data);
       } catch (error) {
         console.log(error);
-        this.$refs.errorToast.show("Error loading more activities");
+        this.notify("Error loading more activities", true);
       } finally {
         this.isLoadingActivities = false;
       }
     }
-  },
-  computed: {
-    isStoreUser() {
-      return this.user.id === this.$store.state.auth.user.id && this.$store.state.auth.isAuth;
-    },
   },
   watch: {
     page(newPage) {
@@ -359,11 +355,21 @@ export default {
       this.$store.commit("ui/setError", error.status);
     }).finally(() => {
       this.$store.commit("ui/setLoading", false);
-      if (this.isStoreUser) {
+      if (isStoreUser) {
         this.tabs.push('Account');
       }
     })
     // TODO обработать 409, когда указан несуществующий пользователь
+  },
+  setup() {
+    const{isStoreUser} = useProfileUsers();
+    const {totalShaders} = useProfileShaders();
+    const {show} = useToast();
+
+    const notify = (message, isError = false) => {
+      show(message, {duration: 3000, background: isError ? '#f10000' : '#4caf50'});
+    };
+    return {totalShaders, notify, isStoreUser};
   }
 }
 </script>
@@ -678,10 +684,6 @@ export default {
   border: 1px solid lightgray;
   cursor: pointer;
 }
-
-
-
-
 
 
 .activity-load-btn {

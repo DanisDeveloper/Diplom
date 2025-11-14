@@ -88,7 +88,6 @@
 
 <script>
 import {checkAuth} from "@/utils/checkAuth.js";
-import Spinner from "@/components/Spinner.vue";
 import GitHubIcon from "@/components/Icons/GitHubIcon.vue";
 
 export default {
@@ -105,7 +104,6 @@ export default {
       isLoading: false,
       errorMessage: "",
       errorMessageKey: 0, // костыль чтобы обновлять сообщение с ошибкой
-      API_URL: import.meta.env.VITE_API_URL
     };
   },
   methods: {
@@ -142,7 +140,7 @@ export default {
           };
 
           this.isLoading = true;
-          const response = await fetch(this.API_URL + "/auth/register", {
+          const response = await fetch(this.$store.state.api.API_URL + "/auth/register", {
             method: "POST",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify(payload),
@@ -192,7 +190,7 @@ export default {
         };
         this.isLoading = true;
         console.log(payload)
-        const response = await fetch(this.API_URL + "/auth/login", {
+        const response = await fetch(this.$store.state.api.API_URL + "/auth/login", {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           body: JSON.stringify(payload),

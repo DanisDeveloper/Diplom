@@ -123,13 +123,13 @@ import {useToast} from "@/composables/useToast.js";
 
 export default {
   setup() {
-    const { show } = useToast();
+    const {show} = useToast();
 
-    const notify = (message, isError=false) => {
-      show(message, { duration: 3000, background: isError? '#f10000' :'#4caf50' });
+    const notify = (message, isError = false) => {
+      show(message, {duration: 3000, background: isError ? '#f10000' : '#4caf50'});
     };
 
-    return { notify };
+    return {notify};
   },
   components: {
     UnhideIcon,
@@ -182,10 +182,6 @@ export default {
       isForkingShader: false,
       isLoadingLike: false,
       isLoading: false,
-
-      API_URL: import.meta.env.VITE_API_URL,
-      PUBLIC_API_URL: import.meta.env.VITE_PUBLIC_API_URL,
-
     }
   },
   methods: {
@@ -267,7 +263,7 @@ export default {
     },
     handleLikeButtonClick() {
       this.isLoadingLike = true;
-      fetch(`${this.API_URL}/shaders/${this.shader.id}/like`, {
+      fetch(`${this.$store.state.api.API_URL}/shaders/${this.shader.id}/like`, {
         method: this.isLiked ? "DELETE" : "POST",
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
@@ -283,7 +279,7 @@ export default {
     },
     handleVisibilityButtonClick() {
       this.isChangingVisibility = true;
-      fetch(`${this.API_URL}/shaders/${this.shader.id}?visibility=${!this.shader.visibility}`, {
+      fetch(`${this.$store.state.api.API_URL}/shaders/${this.shader.id}?visibility=${!this.shader.visibility}`, {
         method: "PATCH",
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
@@ -301,7 +297,7 @@ export default {
     async saveNewShader(requestBody) {
       try {
         this.isSavingShader = true;
-        const response = await fetch(`${this.API_URL}/shaders`, {
+        const response = await fetch(`${this.$store.state.api.API_URL}/shaders`, {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
@@ -321,7 +317,7 @@ export default {
     async updateCurrentShader(requestBody) {
       try {
         this.isSavingShader = true;
-        const response = await fetch(`${this.API_URL}/shaders/${this.shader.id}`, {
+        const response = await fetch(`${this.$store.state.api.API_URL}/shaders/${this.shader.id}`, {
           method: "PUT",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
@@ -340,7 +336,7 @@ export default {
       try {
         this.isForkingShader = true;
 
-        const response = await fetch(`${this.API_URL}/shaders`, {
+        const response = await fetch(`${this.$store.state.api.API_URL}/shaders`, {
           method: "POST",
           headers: {"Content-Type": "application/json"},
           credentials: 'include',
@@ -369,7 +365,7 @@ export default {
     if (!this.$route.params.id) return;
     this.$store.commit("ui/setLoading", true);
     // Загрузка шейдера
-    fetch(`${this.API_URL}/shaders/${this.$route.params.id}`, {
+    fetch(`${this.$store.state.api.API_URL}/shaders/${this.$route.params.id}`, {
       method: "GET",
       headers: {"Content-Type": "application/json"},
       credentials: 'include',
@@ -390,7 +386,7 @@ export default {
     // загрузка лайка
     if (this.$store.state.auth.isAuth) {
       this.isLoadingLike = true
-      fetch(`${this.API_URL}/shaders/${this.$route.params.id}/like`, {
+      fetch(`${this.$store.state.api.API_URL}/shaders/${this.$route.params.id}/like`, {
         method: "GET",
         headers: {"Content-Type": "application/json"},
         credentials: 'include',
@@ -409,7 +405,7 @@ export default {
     }
 
     this.isLoadingComments = true // TODO реализовать анимацию загрузки комментариев
-    fetch(`${this.API_URL}/shaders/${this.$route.params.id}/comments`, {
+    fetch(`${this.$store.state.api.API_URL}/shaders/${this.$route.params.id}/comments`, {
       method: "GET",
       headers: {"Content-Type": "application/json"},
     }).then(response => {

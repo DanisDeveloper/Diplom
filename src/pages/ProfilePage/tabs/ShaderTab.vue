@@ -107,7 +107,7 @@ import {useToast} from "@/composables/useToast.js";
 // --------------------
 // Toast пример
 // --------------------
-const { show } = useToast();
+const {show} = useToast();
 const {isStoreUser} = useProfileUsers();
 
 const {

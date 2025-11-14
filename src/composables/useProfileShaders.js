@@ -1,4 +1,4 @@
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {useRoute} from "vue-router";
 import {useStore} from "vuex";
 
@@ -8,6 +8,7 @@ export function useProfileShaders(showToast) {
 
     const isLoadingShaders = ref(false);
     const shaders = ref([]);
+    const totalShaders = computed(() => shaders.value.length)
     const totalPages = ref(0);
     const currentPage = ref(1);
     const SHADERS_PER_PAGE = 8;
@@ -85,6 +86,7 @@ export function useProfileShaders(showToast) {
 
     return {
         shaders,
+        totalShaders,
         isLoadingShaders,
         totalPages,
         currentPage,
