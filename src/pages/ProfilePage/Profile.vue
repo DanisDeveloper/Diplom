@@ -1,6 +1,6 @@
 <template>
   <dialog-window v-model:show="showAvatarDeleteDialog">
-    <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="isDeletingAvatar"></loader>
+    <loader v-if="isDeletingAvatar" :size="'100px'" :thickness="'3px'" :color="'lightgrey'"/>
     <div v-else>
       <h2 style="text-align: center">Delete avatar?</h2>
       <div class="dialog-window__buttons">
@@ -9,30 +9,28 @@
       </div>
     </div>
   </dialog-window>
+
   <div class="user-wrapper">
     <div class="user-background">
-      <img
-          :src="`${this.$store.state.api.PUBLIC_API_URL}/images/${user.backgroundUrl}`"
-          alt=""
-      >
+      <img :src="`${store.state.api.PUBLIC_API_URL}/images/${user.backgroundUrl}`" alt=""/>
       <input
           ref="backgroundInput"
-          style="display:none;"
           v-if="isStoreUser"
+          style="display:none;"
           type="file"
           accept="image/*"
-          @change="userImageLoadHandler($event, 'BACKGROUND')"
+          @change="(e) => userImageLoadHandler(e, 'BACKGROUND')"
       />
       <div v-if="isStoreUser" class="cover-btns">
         <button class="cover-btn left-btn" @click="triggerBackgroundInput">Change cover</button>
         <button class="cover-btn right-btn" @click="handleClearBackground">Clear</button>
       </div>
-
     </div>
+
     <div class="user-info-wrapper">
-      <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
+      <div class="user-info__avatar" :class="{ editable: isStoreUser }">
         <img
-            :src="`${this.$store.state.api.PUBLIC_API_URL}/images/${user.avatarUrl || 'avatar.png'}`"
+            :src="`${store.state.api.PUBLIC_API_URL}/images/${user.avatarUrl || 'avatar.png'}`"
             alt="avatar"
             width="224"
             height="224"
@@ -40,64 +38,53 @@
         />
         <input
             ref="avatarInput"
-            style="display:none;"
             v-if="isStoreUser"
+            style="display:none;"
             type="file"
             accept="image/*"
-            @change="userImageLoadHandler($event, 'AVATAR')"
+            @change="(e) => userImageLoadHandler(e, 'AVATAR')"
         />
       </div>
+
       <div class="user-info">
         <span class="title">{{ user.name }}</span>
         <span class="biography">
-            <edit-icon
-                v-if="isStoreUser && !isEditing && !isPatchingBiography"
-                v-tooltip="'Edit biography'"
-                :color="'#282C34'"
-                class="user-info__icon editable"
-                @click="handleEditClick"/>
-            <check-icon
-                v-if="isEditing && !isPatchingBiography"
-                v-tooltip="'Save biography'"
-                :color="'#282C34'"
-                class="user-info__icon editable"
-                @click="handleOkClick"></check-icon>
-            <spinner
-                v-else v-if="isPatchingBiography"
-                class="user-info__icon"/>
-            <cancel-icon
-                v-if="isEditing"
-                v-tooltip="'Cancel changes'"
-                :color="'#282C34'"
-                class="user-info__icon"
-                :class="{ 'editable': !isPatchingBiography }"
-                @click="handleCancelClick"/>
-            <span v-if="!isEditing">{{ user.biography }}</span>
-            <input size="140" maxlength="140" v-else type="text" v-model="biographyEdit">
-          </span>
+          <edit-icon
+              v-if="isStoreUser && !isEditing && !isPatchingBiography"
+              v-tooltip="'Edit biography'"
+              :color="'#282C34'"
+              class="user-info__icon editable"
+              @click="handleEditClick"/>
+          <check-icon
+              v-if="isEditing && !isPatchingBiography"
+              v-tooltip="'Save biography'"
+              :color="'#282C34'"
+              class="user-info__icon editable"
+              @click="handleOkClick"/>
+          <spinner
+              v-else-if="isPatchingBiography"
+              class="user-info__icon"/>
+          <cancel-icon
+              v-if="isEditing"
+              v-tooltip="'Cancel changes'"
+              :color="'#282C34'"
+              class="user-info__icon"
+              :class="{ editable: !isPatchingBiography }"
+              @click="handleCancelClick"/>
+          <span v-if="!isEditing">{{ user.biography }}</span>
+          <input v-else size="140" maxlength="140" type="text" v-model="biographyEdit"/>
+        </span>
 
         <span class="icon">
-            <code-icon
-                v-tooltip="'Number of user\'s shaders'"
-                :color="'#282C34'"
-                class="user-info__icon"/>
+          <code-icon v-tooltip="'Number of user\'s shaders'" :color="'#282C34'" class="user-info__icon"/>
           {{ user.stats.totalShaders || 0 }}
-            <view-icon
-                v-tooltip="'Number of views on user\'s shaders'"
-                :color="'#282C34'"
-                class="user-info__icon"/>
+          <view-icon v-tooltip="'Number of views on user\'s shaders'" :color="'#282C34'" class="user-info__icon"/>
           {{ user.stats.totalViews || 0 }}
-            <like-icon
-                v-tooltip="'Number of likes on user\'s shaders'"
-                :color="'#282C34'"
-                class="user-info__icon"/>
+          <like-icon v-tooltip="'Number of likes on user\'s shaders'" :color="'#282C34'" class="user-info__icon"/>
           {{ user.stats.totalLikes || 0 }}
-            <comment-icon
-                v-tooltip="'Number of comments on user\'s shaders'"
-                :color="'#282C34'"
-                class="user-info__icon"/>
+          <comment-icon v-tooltip="'Number of comments on user\'s shaders'" :color="'#282C34'" class="user-info__icon"/>
           {{ user.stats.totalComments || 0 }}
-          </span>
+        </span>
       </div>
     </div>
   </div>
@@ -107,30 +94,30 @@
       <button
           v-for="tab in tabs"
           :key="tab"
-          :class="{ 'active': tab === activeTab }"
+          :class="{ active: tab === activeTab }"
           class="tab"
-          @click="handleTabClick(tab)">
+          @click="activeTab = tab"
+      >
         {{ tab }}
       </button>
     </div>
 
-    <shader-tab v-if="this.activeTab==='Shaders'" :is-store-user="isStoreUser"/>
-
+    <shader-tab v-if="activeTab === 'Shaders'" :is-store-user="isStoreUser"/>
     <div v-else-if="activeTab === 'Activity'">
       <table class="shader-table">
         <thead>
         <tr>
-          <th :class="{'bottom-left-border-radius': user.activities.length === 0}">Activity</th>
+          <th :class="{ 'bottom-left-border-radius': !user.activities.length }">Activity</th>
           <th>Shader</th>
-          <th :class="{'bottom-right-border-radius': user.activities.length === 0}">Date</th>
+          <th :class="{ 'bottom-right-border-radius': !user.activities.length }">Date</th>
         </tr>
         </thead>
         <tbody>
-        <tr class="shader-item" v-for="(activity,index) in user.activities" :key="index">
+        <tr v-for="(activity, index) in user.activities" :key="index" class="shader-item">
           <td class="shader-item__activity">
-            <like-icon class="icon-btn" v-if="activity.type === 'like'"></like-icon>
-            <comment-icon class="icon-btn" v-else-if="activity.type === 'comment'"></comment-icon>
-            <fork-icon class="icon-btn" v-else-if="activity.type=== 'fork'"></fork-icon>
+            <like-icon v-if="activity.type === 'like'" class="icon-btn"/>
+            <comment-icon v-else-if="activity.type === 'comment'" class="icon-btn"/>
+            <fork-icon v-else-if="activity.type === 'fork'" class="icon-btn"/>
           </td>
           <td>
             <router-link :to="`/new/${activity.shader_id}`" class="shader-link">
@@ -141,74 +128,44 @@
         </tr>
         </tbody>
       </table>
-      <button v-if="this.totalActivities > this.activity_page * this.ACTIVITIES_PER_PAGE" class="activity-load-btn"
-              @click="loadMoreActivities">
-        <spinner v-if="isLoadingActivities"></spinner>
+      <button
+          v-if="totalActivities > activity_page * ACTIVITIES_PER_PAGE"
+          class="activity-load-btn"
+          @click="loadMoreActivities"
+      >
+        <spinner v-if="isLoadingActivities"/>
         <span v-else>Upload more</span>
       </button>
     </div>
-    <account-tab v-else-if="activeTab === 'Account'"/>
 
+    <account-tab v-else-if="activeTab === 'Account'"/>
   </div>
 </template>
 
 <script>
+import {ref, onMounted} from "vue";
+import {useRoute} from "vue-router";
+import {useUsers} from "@/pages/ProfilePage/composables/useUsers.js";
+import {useBiographyEdit} from "@/pages/ProfilePage/composables/useBiography.js";
+import {useProfileImages} from "@/pages/ProfilePage/composables/useImages.js";
 import {formatDateTime} from "@/utils/formatDateTime.js";
 import ShaderTab from "@/pages/ProfilePage/tabs/ShaderTab.vue";
 import AccountTab from "@/pages/ProfilePage/tabs/AccountTab/AccountTab.vue";
-import {useUsers} from "@/pages/ProfilePage/composables/useUsers.js";
-import {onMounted} from "vue";
-import {useRoute} from "vue-router";
-import {useBiographyEdit} from "@/pages/ProfilePage/composables/useBiography.js";
-import {useProfileImages} from "@/pages/ProfilePage/composables/useImages.js";
-import ViewIcon from "@/components/Icons/ViewIcon.vue";
+import {useStore} from "vuex";
 
 export default {
-  components: {ViewIcon, AccountTab, ShaderTab},
-  data() {
-    return {
-      tabs: ['Shaders', 'Activity'], // Account добавляется в mounted
-      activeTab: 'Shaders',
-      isNotFound: false,
-      activity_page: 1,
-      ACTIVITIES_PER_PAGE: 20,
-      totalActivities: 0,
-      isLoadingActivities: false,
-    }
-  },
-  methods: {
-    formatDateTime,
-    handleTabClick(tab) {
-      this.activeTab = tab
-    },
-    async loadMoreActivities() {
-      try {
-        this.isLoadingActivities = true;
-        const response = await fetch(`${this.$store.state.api.API_URL}/profile/${this.$route.params.id}/activities?activity_page=${this.activity_page + 1}&limit=${this.ACTIVITIES_PER_PAGE}`, {
-          method: "GET",
-          headers: {"Content-Type": "application/json"},
-          credentials: 'include',
-        });
-        this.activity_page += 1;
-        const data = await response.json();
-        user.activities.push(...data);
-      } catch (error) {
-        console.log(error);
-        this.notify("Error loading more activities", true);
-      } finally {
-        this.isLoadingActivities = false;
-      }
-    }
-  },
+  components: {ShaderTab, AccountTab},
   setup() {
+    const store = useStore();
     const route = useRoute();
-    const {
-      user,
-      isStoreUser,
-      fetchUser,
-      isLoadingUser,
-    } = useUsers();
+    const tabs = ref(["Shaders", "Activity"]);
+    const activeTab = ref("Shaders");
+    const activity_page = ref(1);
+    const ACTIVITIES_PER_PAGE = 20;
+    const totalActivities = ref(0);
+    const isLoadingActivities = ref(false);
 
+    const {user, isStoreUser, fetchUser} = useUsers();
     const {
       isEditing,
       biographyEdit,
@@ -217,7 +174,6 @@ export default {
       handleCancelClick,
       handleOkClick
     } = useBiographyEdit(user);
-
     const {
       avatarInput,
       backgroundInput,
@@ -230,15 +186,39 @@ export default {
       handleClearBackground
     } = useProfileImages(user);
 
+
     onMounted(() => {
+      if (isStoreUser) tabs.value.push('Account')
       fetchUser(route.params.id);
     });
 
+    const loadMoreActivities = async () => {
+      try {
+        isLoadingActivities.value = true;
+        const response = await fetch(
+            `${store.state.api.PUBLIC_API_URL}/profile/${route.params.id}/activities?activity_page=${activity_page.value + 1}&limit=${ACTIVITIES_PER_PAGE}`,
+            {method: "GET", headers: {"Content-Type": "application/json"}, credentials: "include"}
+        );
+        activity_page.value += 1;
+        const data = await response.json();
+        user.activities.push(...data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        isLoadingActivities.value = false;
+      }
+    };
+
     return {
+      tabs,
+      activeTab,
+      activity_page,
+      ACTIVITIES_PER_PAGE,
+      totalActivities,
+      isLoadingActivities,
       user,
       isStoreUser,
       fetchUser,
-      isLoadingUser,
       isEditing,
       biographyEdit,
       isPatchingBiography,
@@ -254,11 +234,14 @@ export default {
       userImageLoadHandler,
       deleteAvatar,
       handleClearBackground,
-    }
-  }
-
-}
+      formatDateTime,
+      loadMoreActivities,
+      store
+    };
+  },
+};
 </script>
+
 
 <style scoped>
 
