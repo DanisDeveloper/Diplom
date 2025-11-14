@@ -11,15 +11,17 @@
       </div>
     </div>
     <footer-info></footer-info>
+    <toast/>
   </div>
 </template>
 
 <script>
 import FooterInfo from "@/components/AppFooter.vue";
 import NavBar from "@/components/NavBar.vue";
+import Toast from "@/components/Toast.vue";
 
 export default {
-  components: {NavBar, FooterInfo},
+  components: {Toast, NavBar, FooterInfo},
   computed:{
     loadingOrError(){
       return this.$store.state.ui.isLoadingPage || this.$store.state.ui.errorStatus
