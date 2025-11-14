@@ -1,8 +1,11 @@
 import {ref} from "vue";
 import {useStore} from "vuex";
+import {useToast} from "@/composables/useToast.js";
 
-export function useBiographyEdit(user, showToast) {
+export function useBiographyEdit(user) {
     const store = useStore();
+    const { show } = useToast();
+
     const isEditing = ref(false);
     const biographyEdit = ref("");
     const isPatchingBiography = ref(false);
@@ -39,7 +42,7 @@ export function useBiographyEdit(user, showToast) {
             user.value.biography = biographyEdit.value;
             isEditing.value = false;
         } catch (e) {
-            showToast("Error updating biography", {duration: 3000, background: '#f10000'});
+            show("Error updating biography", {duration: 3000, background: '#f10000'});
         } finally {
             isPatchingBiography.value = false;
         }

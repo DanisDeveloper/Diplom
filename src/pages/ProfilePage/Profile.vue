@@ -1,10 +1,10 @@
 <template>
-  <dialog-window v-model:show="this.showAvatarDeleteDialog">
-    <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="this.isDeletingAvatar"></loader>
+  <dialog-window v-model:show="showAvatarDeleteDialog">
+    <loader :size="'100px'" :thickness="'3px'" :color="'lightgrey'" v-if="isDeletingAvatar"></loader>
     <div v-else>
       <h2 style="text-align: center">Delete avatar?</h2>
       <div class="dialog-window__buttons">
-        <button class="dialog-btn action-btn" @click="this.showAvatarDeleteDialog = false">Cancel</button>
+        <button class="dialog-btn action-btn" @click="showAvatarDeleteDialog = false">Cancel</button>
         <button class="dialog-btn action-btn" @click="deleteAvatar">Delete</button>
       </div>
     </div>
@@ -16,13 +16,13 @@
           alt=""
       >
       <input
-          style="display: none;"
+          ref="backgroundInput"
+          style="display:none;"
           v-if="isStoreUser"
           type="file"
-          ref="backgroundInput"
           accept="image/*"
           @change="userImageLoadHandler($event, 'BACKGROUND')"
-      >
+      />
       <div v-if="isStoreUser" class="cover-btns">
         <button class="cover-btn left-btn" @click="triggerBackgroundInput">Change cover</button>
         <button class="cover-btn right-btn" @click="handleClearBackground">Clear</button>
@@ -39,13 +39,13 @@
             @click="triggerAvatarInput"
         />
         <input
-            style="display: none;"
+            ref="avatarInput"
+            style="display:none;"
             v-if="isStoreUser"
             type="file"
-            ref="avatarInput"
             accept="image/*"
             @change="userImageLoadHandler($event, 'AVATAR')"
-        >
+        />
       </div>
       <div class="user-info">
         <span class="title">{{ this.user.name }}</span>
@@ -153,6 +153,7 @@ import {onMounted} from "vue";
 import {useRoute} from "vue-router";
 import {useBiographyEdit} from "@/pages/ProfilePage/composables/useBiography.js";
 import {useToast} from "@/composables/useToast.js";
+import {useProfileImages} from "@/pages/ProfilePage/composables/useImages.js";
 
 export default {
   components: {AccountTab, ShaderTab},
@@ -168,8 +169,8 @@ export default {
       },
       tabs: ['Shaders', 'Activity'], // Account добавляется в mounted
       activeTab: 'Shaders',
-      showAvatarDeleteDialog: false,
-      isDeletingAvatar: false,
+      // showAvatarDeleteDialog: false,
+      // isDeletingAvatar: false,
       currentPage: 1,
       totalPages: 0,
       SHADERS_PER_PAGE: 8,
@@ -188,87 +189,6 @@ export default {
     formatDateTime,
     formatDate,
     truncate,
-
-
-    deleteAvatar() {
-      this.isDeletingAvatar = true;
-      fetch(`${this.API_URL}/users/image?type=AVATAR`, {
-        method: 'DELETE',
-        credentials: 'include'
-      }).then(response => {
-        if (!response.ok) {
-          throw new Error(response.text() || "Server returned an error");
-        }
-        this.user.avatarUrl = null;
-        this.notify("Successfully cleared avatar");
-      }).catch(error => {
-        this.notify("Error clearing avatar", true);
-      }).finally(() => {
-        this.isDeletingAvatar = false;
-        this.showAvatarDeleteDialog = false;
-      })
-    },
-
-    triggerAvatarInput() {
-      if (this.user.avatarUrl !== null) {
-        this.showAvatarDeleteDialog = true;
-      } else {
-        this.$refs.avatarInput.click();
-      }
-    },
-    triggerBackgroundInput() {
-      this.$refs.backgroundInput.click()
-    },
-    userImageLoadHandler(event, imageType) {
-      const image = event.target.files[0];
-      if (!image) {
-        this.notify("Error uploading image", true);
-      }
-
-      const formData = new FormData();
-      formData.append('image', image);
-
-      fetch(`${this.API_URL}/users/image?type=${imageType}`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-      }).then(response => {
-        if (!response.ok) {
-          throw new Error(response.text() || "Server returned an error");
-        }
-        this.notify("Successfully uploaded image");
-        return response.text();
-      }).then(imageUrl => {
-        switch (imageType) {
-          case "AVATAR":
-            this.user.avatarUrl = imageUrl;
-            break;
-          case "BACKGROUND":
-            this.user.backgroundUrl = imageUrl;
-            break;
-        }
-      }).catch(error => {
-        this.notify("Error uploading image", true);
-      })
-    },
-    handleClearBackground() {
-      this.isDeletingAvatar = true;
-      fetch(`${this.API_URL}/users/image?type=BACKGROUND`, {
-        method: 'DELETE',
-        credentials: 'include'
-      }).then(response => {
-        if (!response.ok) {
-          throw new Error(response.text() || "Server returned an error");
-        }
-        this.user.backgroundUrl = null;
-        this.notify("Successfully cleared background");
-      }).catch(error => {
-        this.notify("Error clearing background", true);
-      }).finally(() => {
-        this.isDeletingAvatar = false;
-        this.showAvatarDeleteDialog = false;
-      })
-    },
     handleTabClick(tab) {
       this.activeTab = tab
       this.passwordLog = ""
@@ -318,7 +238,19 @@ export default {
       handleEditClick,
       handleCancelClick,
       handleOkClick
-    } = useBiographyEdit(user, show);
+    } = useBiographyEdit(user);
+
+    const {
+      avatarInput,
+      backgroundInput,
+      showAvatarDeleteDialog,
+      isDeletingAvatar,
+      triggerAvatarInput,
+      triggerBackgroundInput,
+      userImageLoadHandler,
+      deleteAvatar,
+      handleClearBackground
+    } = useProfileImages(user);
 
     onMounted(() => {
       fetchUser(route.params.id);
@@ -334,7 +266,16 @@ export default {
       isPatchingBiography,
       handleEditClick,
       handleCancelClick,
-      handleOkClick
+      handleOkClick,
+      avatarInput,
+      backgroundInput,
+      showAvatarDeleteDialog,
+      isDeletingAvatar,
+      triggerAvatarInput,
+      triggerBackgroundInput,
+      userImageLoadHandler,
+      deleteAvatar,
+      handleClearBackground
     }
   }
 

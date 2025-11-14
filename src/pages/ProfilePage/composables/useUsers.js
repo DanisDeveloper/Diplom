@@ -2,8 +2,9 @@ import {ref, computed} from "vue";
 import {useStore} from "vuex";
 import {useRoute} from "vue-router";
 import Error from "@/components/Error.vue";
+import {useToast} from "@/composables/useToast.js";
 
-export function useUsers(showToast) {
+export function useUsers() {
     const store = useStore();
     const route = useRoute();
 

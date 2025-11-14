@@ -1,10 +1,12 @@
 import {computed, ref} from "vue";
 import {useRoute} from "vue-router";
 import {useStore} from "vuex";
+import {useToast} from "@/composables/useToast.js";
 
-export function useShaders(showToast) {
+export function useShaders() {
     const route = useRoute();
     const store = useStore();
+    const { show } = useToast();
 
     const isLoadingShaders = ref(false);
     const shaders = ref([]);
@@ -38,7 +40,7 @@ export function useShaders(showToast) {
             totalPages.value = parseInt(res.headers.get('X-Total-Pages')) || 0;
             shaders.value = await res.json();
         } catch (err) {
-            showToast('Error getting shaders', { duration: 3000, background: '#4caf50' });
+            show('Error getting shaders', { duration: 3000, background: '#4caf50' });
         } finally {
             isLoadingShaders.value = false;
         }
@@ -61,10 +63,10 @@ export function useShaders(showToast) {
 
             shaders.value = shaders.value.filter(s => s.id !== shaderIdForDelete.value);
             shaderIdForDelete.value = null;
-            showToast('Successfully deleted shader', { duration: 3000, background: '#4caf50' });
+            show('Successfully deleted shader', { duration: 3000, background: '#4caf50' });
             await fetchShaders();
         } catch (err) {
-            showToast('Error deleting shader', { duration: 3000, background: '#f10000' });
+            show('Error deleting shader', { duration: 3000, background: '#f10000' });
         } finally {
             isDeletingShader.value = false;
             showShaderDeleteDialog.value = false;
