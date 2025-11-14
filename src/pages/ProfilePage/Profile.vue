@@ -149,8 +149,8 @@ import {useUsers} from "@/pages/ProfilePage/composables/useUsers.js";
 import {useBiographyEdit} from "@/pages/ProfilePage/composables/useBiography.js";
 import {useProfileImages} from "@/pages/ProfilePage/composables/useImages.js";
 import {formatDateTime} from "@/utils/formatDateTime.js";
-import ShaderTab from "@/pages/ProfilePage/tabs/ShaderTab.vue";
-import AccountTab from "@/pages/ProfilePage/tabs/AccountTab/AccountTab.vue";
+import ShaderTab from "@/pages/ProfilePage/components/tabs/ShaderTab/ShaderTab.vue";
+import AccountTab from "@/pages/ProfilePage/components/tabs/AccountTab/AccountTab.vue";
 import {useStore} from "vuex";
 
 export default {

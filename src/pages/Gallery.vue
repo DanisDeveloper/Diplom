@@ -1,17 +1,13 @@
 <template>
-  <div v-show="!this.$store.state.ui.isLoadingPage" class="header">
-    <radio-buttons
-        v-model="this.sortOption"
-        :options="this.sortOptions"
-    />
-    <pagination v-model:page="this.currentPage" :pages="totalPages" class="pagination"/>
+  <div v-show="!$store.state.ui.isLoadingPage" class="header">
+    <radio-buttons v-model="sortOption" :options="sortOptions"/>
+    <pagination v-model:page="currentPage" :pages="totalPages" class="pagination"/>
   </div>
+
   <div class="shader-grid">
-    <div v-for="(shader, index) in shaders" class="shader-cell">
+    <div v-for="(shader, index) in shaders" :key="index" class="shader-cell">
       <shader-window
-          class="shader-window"
-          ref="shaders"
-          :key="index"
+          ref="shaderRefs"
           :code="shader.code"
           :initial-pause="true"
           @mouseenter="handleMouseEnter(index)"
@@ -25,33 +21,16 @@
         <div class="shader-window__text">
           <span>{{ truncate(shader.title) }}</span>
           <span>&nbsp;by&nbsp;</span>
-          <span
-              class="link"
-              @click="$router.push(`/profile/${shader.user.name}`)"
-          >
-              {{ truncate(shader.user.name) }}
-            </span>
+          <span class="link" @click="$router.push(`/profile/${shader.user.name}`)">
+            {{ truncate(shader.user.name) }}
+          </span>
         </div>
         <div class="shader-window-info__stats">
-          <view-icon v-tooltip="`${shader.views} Views`"
-                     class="like-icon"
-                     :width="20"
-                     :height="20"
-                     :color="'#282C34'"/>
+          <view-icon v-tooltip="`${shader.views} Views`" class="like-icon" :width="20" :height="20" :color="'#282C34'"/>
           {{ shader.views }}
-
-          <like-icon v-tooltip="`${shader.likes} Likes`"
-                     class="like-icon"
-                     :width="16"
-                     :height="16"
-                     :color="'#282C34'"/>
+          <like-icon v-tooltip="`${shader.likes} Likes`" class="like-icon" :width="16" :height="16" :color="'#282C34'"/>
           {{ shader.likes }}
-
-          <comment-icon v-tooltip="`${shader.comments} Comments`"
-                        class="comment-icon"
-                        :width="16"
-                        :height="16"
-                        :color="'#282C34'"/>
+          <comment-icon v-tooltip="`${shader.comments} Comments`" class="comment-icon" :width="16" :height="16" :color="'#282C34'"/>
           {{ shader.comments }}
         </div>
       </div>
@@ -59,81 +38,111 @@
   </div>
 </template>
 
-
 <script>
-import {truncate} from "@/utils/truncate.js";
-import Error from "@/components/Error.vue";
+import { ref, onMounted, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useStore } from "vuex";
+import { truncate } from "@/utils/truncate.js";
 
 export default {
-  data() {
-    return {
-      isLoading: false,
-      totalPages: 0,
-      currentPage: Number(this.$route.query.currentPage) || 1,
-      pageSize: 12,
-      shaders: [],
-      sortOption: this.$route.query.sort_option || 'NEWEST',
-      sortOptions: ['NEWEST', 'VIEWED', 'LIKED', 'COMMENTED'],
-      API_URL: import.meta.env.VITE_API_URL
-    }
-  },
-  methods: {
-    truncate,
-    handleMouseEnter(index) {
-      this.$refs.shaders[index].togglePause();
-    },
-    handleMouseLeave(index) {
-      this.$refs.shaders[index].togglePause()
-    }
-  },
-  watch: {
-    sortOption(newOption) {
-      this.$router.push({
-        path: `/gallery`,
-        query: {
-          query: this.$route.query.query || this.$store.state.search.query ,
-          currentPage: this.currentPage,
-          page_size: this.pageSize,
-          sort_option: newOption
+  setup() {
+    const store = useStore();
+    const route = useRoute();
+    const router = useRouter();
+
+    const shaders = ref([]);
+    const totalPages = ref(0);
+    const currentPage = ref(Number(route.query.currentPage) || 1);
+    const pageSize = ref(12);
+    const sortOption = ref(route.query.sort_option || "NEWEST");
+    const sortOptions = ref(["NEWEST", "VIEWED", "LIKED", "COMMENTED"]);
+    const isLoading = ref(false);
+    const shaderRefs = ref([]);
+
+    const fetchShaders = async () => {
+      try {
+        isLoading.value = true;
+        store.commit("ui/setLoading", true);
+
+        const query = route.query.query || store.state.search.query || "";
+        const endpoint = `${store.state.api.API_URL}/shaders/public?query=${query}&page=${currentPage.value - 1}&page_size=${pageSize.value}&sort_option=${sortOption.value}`;
+
+        const response = await fetch(endpoint, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || "Server returned an error");
         }
-      })
-    },
-    currentPage(newPage) {
-      this.$router.push({
-        path: `/gallery`,
-        query: {
-          query: this.$route.query.query || this.$store.state.search.query ,
-          currentPage: newPage,
-          pageSize: this.pageSize,
-          sort_option: this.sortOption
-        }
-      })
-    }
-  },
-  mounted() {
-    this.$store.commit("ui/setLoading", true);
-    const endpoint = `${this.API_URL}/shaders/public?query=${this.$route.query.query || this.$store.state.search.query}&page=${this.currentPage - 1}&page_size=${this.pageSize}&sort_option=${this.sortOption}`;
-    fetch(endpoint, {
-      method: "GET",
-      headers: {"Content-Type": "application/json"},
-      credentials: 'include',
-    }).then(response => {
-      if (!response.ok) {
-        throw new Error(response.text() || "Server returned an error");
+
+        totalPages.value = parseInt(response.headers.get("X-Total-Pages")) || 0;
+        shaders.value = await response.json();
+      } catch (error) {
+        console.error(error);
+        store.commit("ui/setError", error.status || 500);
+      } finally {
+        isLoading.value = false;
+        store.commit("ui/setLoading", false);
       }
-      console.log(response.headers.get("X-Total-Count"));
-      this.totalPages = parseInt(response.headers.get('X-Total-Pages'));
-      return response.json();
-    }).then(shaders => {
-      this.shaders = shaders;
-    }).catch(error => {
-      this.$store.commit("ui/setError", error.status);
-    }).finally(() => {
-      this.$store.commit("ui/setLoading", false);
-    })
-  }
-}
+    };
+
+    const handleMouseEnter = (index) => {
+      shaderRefs.value[index]?.togglePause();
+    };
+
+    const handleMouseLeave = (index) => {
+      shaderRefs.value[index]?.togglePause();
+    };
+
+    watch(sortOption, () => {
+      router.push({
+        path: "/gallery",
+        query: {
+          query: route.query.query || store.state.search.query,
+          currentPage: currentPage.value,
+          page_size: pageSize.value,
+          sort_option: sortOption.value,
+        },
+      });
+      fetchShaders();
+    });
+
+    watch(currentPage, () => {
+      router.push({
+        path: "/gallery",
+        query: {
+          query: route.query.query || store.state.search.query,
+          currentPage: currentPage.value,
+          page_size: pageSize.value,
+          sort_option: sortOption.value,
+        },
+      });
+      fetchShaders();
+    });
+
+    onMounted(fetchShaders);
+
+    return {
+      shaders,
+      totalPages,
+      currentPage,
+      pageSize,
+      sortOption,
+      sortOptions,
+      isLoading,
+      shaderRefs,
+      fetchShaders,
+      handleMouseEnter,
+      handleMouseLeave,
+      truncate,
+    };
+  },
+};
 </script>
+
 
 
 <style scoped>
