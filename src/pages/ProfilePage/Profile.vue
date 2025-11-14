@@ -12,7 +12,7 @@
   <div class="user-wrapper">
     <div class="user-background">
       <img
-          :src="`${this.PUBLIC_API_URL}/images/${this.user.backgroundUrl}`"
+          :src="`${this.PUBLIC_API_URL}/images/${user.backgroundUrl}`"
           alt=""
       >
       <input
@@ -32,7 +32,7 @@
     <div class="user-info-wrapper">
       <div class="user-info__avatar" :class="{ 'editable': isStoreUser }">
         <img
-            :src="`${this.PUBLIC_API_URL}/images/${this.user.avatarUrl || 'avatar.png'}`"
+            :src="`${this.PUBLIC_API_URL}/images/${user.avatarUrl || 'avatar.png'}`"
             alt="avatar"
             width="224"
             height="224"
@@ -48,7 +48,7 @@
         />
       </div>
       <div class="user-info">
-        <span class="title">{{ this.user.name }}</span>
+        <span class="title">{{ user.name }}</span>
         <span class="biography">
             <edit-icon
                 v-if="isStoreUser && !isEditing && !isPatchingBiography"
@@ -72,7 +72,7 @@
                 class="user-info__icon"
                 :class="{ 'editable': !isPatchingBiography }"
                 @click="handleCancelClick"/>
-            <span v-if="!isEditing">{{ this.user.biography }}</span>
+            <span v-if="!isEditing">{{ user.biography }}</span>
             <input size="140" maxlength="140" v-else type="text" v-model="biographyEdit">
           </span>
 
@@ -81,11 +81,11 @@
             totalShaders || 0
           }}
             <fork-icon v-tooltip="'Number of forks on user\'s shaders'" :color="'#282C34'"
-                       class="user-info__icon"></fork-icon> {{ this.user.total_forks }}
+                       class="user-info__icon"></fork-icon> {{ user.total_forks }}
             <like-icon v-tooltip="'Number of likes on user\'s shaders'" :color="'#282C34'"
-                       class="user-info__icon"></like-icon> {{ this.user.total_likes }}
+                       class="user-info__icon"></like-icon> {{ user.total_likes }}
             <comment-icon v-tooltip="'Number of comments on user\'s shaders'" :color="'#282C34'"
-                          class="user-info__icon"></comment-icon> {{ this.user.total_comments }}
+                          class="user-info__icon"></comment-icon> {{ user.total_comments }}
           </span>
       </div>
     </div>
@@ -109,9 +109,9 @@
       <table class="shader-table">
         <thead>
         <tr>
-          <th :class="{'bottom-left-border-radius': this.user.activities.length === 0}">Activity</th>
+          <th :class="{'bottom-left-border-radius': user.activities.length === 0}">Activity</th>
           <th>Shader</th>
-          <th :class="{'bottom-right-border-radius': this.user.activities.length === 0}">Date</th>
+          <th :class="{'bottom-right-border-radius': user.activities.length === 0}">Date</th>
         </tr>
         </thead>
         <tbody>
@@ -142,9 +142,6 @@
 </template>
 
 <script>
-import truncate from "@/utils/truncate.js";
-import Error from "@/components/Error.vue";
-import formatDate from "@/utils/formatDate.js";
 import {formatDateTime} from "@/utils/formatDateTime.js";
 import ShaderTab from "@/pages/ProfilePage/tabs/ShaderTab.vue";
 import AccountTab from "@/pages/ProfilePage/tabs/AccountTab/AccountTab.vue";
@@ -187,8 +184,6 @@ export default {
   },
   methods: {
     formatDateTime,
-    formatDate,
-    truncate,
     handleTabClick(tab) {
       this.activeTab = tab
       this.passwordLog = ""
@@ -203,7 +198,7 @@ export default {
         });
         this.activity_page += 1;
         const data = await response.json();
-        this.user.activities.push(...data);
+        user.activities.push(...data);
       } catch (error) {
         console.log(error);
         this.notify("Error loading more activities", true);

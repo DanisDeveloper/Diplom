@@ -31,7 +31,7 @@
 
 
 <script>
-import formatDate from "@/utils/formatDate.js";
+import {formatDate} from "@/utils/formatDate.js";
 import Error from "@/components/Error.vue";
 
 export default {

@@ -110,10 +110,10 @@
 <script>
 import ShaderEditor from "@/pages/NewPage/ShaderEditor.vue";
 import exampleShader from "@/shaders/example.js";
-import truncate from "@/utils/truncate.js";
+import {truncate} from "@/utils/truncate.js";
 import Error from "@/components/Error.vue";
 import ShaderWindowInfo from "@/pages/NewPage/ShaderWindowInfo.vue";
-import formatDate from "@/utils/formatDate.js";
+import {formatDate} from "@/utils/formatDate.js";
 import ShaderComment from "@/pages/NewPage/ShaderComment.vue";
 import ShaderMetadata from "@/pages/NewPage/ShaderMetadata.vue";
 import CommentsArea from "@/pages/NewPage/CommentsArea.vue";

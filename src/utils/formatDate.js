@@ -1,4 +1,4 @@
-export default function formatDate(date) {
+export function formatDate(date) {
     const _date = new Date(date);
 
     const day = String(_date.getDate()).padStart(2, '0');

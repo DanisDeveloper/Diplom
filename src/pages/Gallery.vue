@@ -61,7 +61,7 @@
 
 
 <script>
-import truncate from "@/utils/truncate.js";
+import {truncate} from "@/utils/truncate.js";
 import Error from "@/components/Error.vue";
 
 export default {

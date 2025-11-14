@@ -33,8 +33,8 @@
 </template>
 
 <script>
-import truncate from "@/utils/truncate.js";
-import formatDate from "@/utils/formatDate.js";
+import {truncate} from "@/utils/truncate.js";
+import {formatDate} from "@/utils/formatDate.js";
 
 export default {
   name: "shader-metadata",
