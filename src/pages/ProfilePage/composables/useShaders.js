@@ -1,27 +1,29 @@
-import {computed, ref, watch} from "vue";
+import {ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {useStore} from "vuex";
 import {useToast} from "@/composables/useToast.js";
 
+const {show} = useToast();
+
+const isLoadingShaders = ref(false);
+const shaders = ref([]);
+const totalShaders = ref(0);
+const totalPages = ref(0);
+const currentPage = ref(1);
+const SHADERS_PER_PAGE = 8;
+const sortOption = ref("NEWEST");
+
+const isClipboardCopied = ref(false);
+const clipboardShaderId = ref(null);
+
+const showShaderDeleteDialog = ref(false);
+const isDeletingShader = ref(false);
+const shaderIdForDelete = ref(null);
+
+
 export function useShaders() {
     const route = useRoute();
     const store = useStore();
-    const {show} = useToast();
-
-    const isLoadingShaders = ref(false);
-    const shaders = ref([]);
-    const totalShaders = computed(() => shaders.value.length)
-    const totalPages = ref(0);
-    const currentPage = ref(1);
-    const SHADERS_PER_PAGE = 8;
-    const sortOption = ref("NEWEST");
-
-    const isClipboardCopied = ref(false);
-    const clipboardShaderId = ref(null);
-
-    const showShaderDeleteDialog = ref(false);
-    const isDeletingShader = ref(false);
-    const shaderIdForDelete = ref(null);
 
     // ------------------
     // Fetch shaders
@@ -38,6 +40,7 @@ export function useShaders() {
             if (!res.ok) throw new Error(await res.text() || "Server error");
 
             totalPages.value = parseInt(res.headers.get('X-Total-Pages')) || 0;
+            totalShaders.value = parseInt(res.headers.get('X-Total-Count')) || 0;
             shaders.value = await res.json();
         } catch (err) {
             show('Error getting shaders', {duration: 3000, background: '#4caf50'});

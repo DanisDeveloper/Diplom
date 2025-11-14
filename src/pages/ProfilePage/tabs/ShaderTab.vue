@@ -12,7 +12,7 @@
       </div>
     </dialog-window>
 
-    <h1 v-if="shaders?.length === 0">User has no shaders</h1>
+    <h1 v-if="totalShaders === 0">User has no shaders</h1>
 
     <pagination
         v-model:page="currentPage"
@@ -103,10 +103,6 @@ import ShareIcon from "@/components/Icons/ShareIcon.vue";
 import CheckIcon from "@/components/Icons/CheckIcon.vue";
 import {useToast} from "@/composables/useToast.js";
 
-
-// --------------------
-// Toast пример
-// --------------------
 const {show} = useToast();
 const {isStoreUser} = useUsers();
 
@@ -122,7 +118,8 @@ const {
   deleteShader,
   shareShader,
   isClipboardCopied,
-  clipboardShaderId
+  clipboardShaderId,
+  totalShaders
 } = useShaders(show);
 
 const shaderRefs = ref([]);
